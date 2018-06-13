@@ -14,7 +14,17 @@
                         </div>
                     @endif
 
-                    You are logged in!
+                    <div>
+                        <a href="/dropbox">Dropbox Dasboard / Get Access token dropbox</a>
+                    </div>
+                    <br />
+                    <div>
+                        <a href="/user-dropbox">Dropbox User infor</a>
+                    </div>
+                    <div>
+                        <a href="/search-file-dropbox">Dropbox User infor</a>
+                    </div>
+                    
                 </div>
             </div>
         </div>
