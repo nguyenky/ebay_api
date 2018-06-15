@@ -38,5 +38,9 @@ Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
     Route::post('/search-file-dropbox','DropboxController@postSearch')->name('search');
 
     Route::get('download','DropboxController@download');
+
+    Route::get('test-api','DropboxController@testApi');
+
+    Route::get('edit-file','DropboxController@editFile');
 });
 

@@ -132,7 +132,7 @@ class DropboxController extends Controller
 
     public function download(Request $request){
         $input = $request->all();
-        // dd($input);
+        // dd('asdsd');
 
         if ($request->has('path')) {
             $path = $request->input('path');
@@ -151,10 +151,11 @@ class DropboxController extends Controller
             ]);
 
             $result = $response->getHeader('dropbox-api-result');
+            // dd($result);
             $file_info = json_decode($result[0], true);
-
+            // dd($file_info);
             $content = $response->getBody();
-
+            // dd($content);
             $filename = $file_info['name'];
             // dd($filename);
             $file_extension = substr($filename, strrpos($filename, '.'));
@@ -189,9 +190,136 @@ class DropboxController extends Controller
             //     ->header('Content-Transfer-Encoding', 'binary')
             //     ->header('Connection', 'Keep-Alive')
             //     ->header('Content-Length', $file_size);
-            return redirect('search');
+            // return redirect('search');
         } else {
             return redirect('search');
         }
+    }
+
+    // public function testApi(){
+
+    //     $data = json_encode(
+    //         [
+    //             'path'=>'/DROPSHIP/PRODUCT INFORMATION FILE - SHOPIFY',
+    //             "recursive"=>false,
+    //             "include_media_info"=>false,
+    //             "include_deleted"=>false,
+    //             "include_has_explicit_shared_members"=>false,
+    //             "include_mounted_folders"=>true
+    //         ]
+    //     );
+    //     // dd(\Auth::user()->remember_token);
+    //     $response = $this->api_client->request(
+    //         'POST', '/2/files/list_folder',
+    //         [
+    //             'headers' => [
+    //                 'Authorization' => 'Bearer ' . \Auth::user()->remember_token,
+    //                 'Content-Type' => 'application/json'
+    //             ],
+    //             'body' => $data
+    //     ]);
+    //     // dd('asd');
+    //     $search_results = json_decode($response->getBody(), true);
+    //     dd($search_results);
+
+    // }
+
+    public function editFile(){
+        $pathPublic = public_path().'/files/lenguyenky.csv';
+
+        // $list = array
+        //     (
+        //     "Peter,Griffin,Oslo,Norway",
+        //     "Glenn,Quagmire,Oslo,Norway",
+        //     );
+
+        //     $file = fopen("contacts.csv","w");
+
+        //     foreach ($list as $line)
+        //     {
+        //     fputcsv($file,explode(',',$line));
+        //     }
+        //     dd(fgetcsv($file));
+        //     fclose($file);
+        // dd($pathPublic);
+        // $path = 'lenguyenky.csv';
+        // $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        // $lineCount = count($lines);
+        // for ($i = 1; $i < $lineCount; $i++){                    
+        //     $cols = str_getcsv(trim($lines[$i]), ",");
+        //     dd($cols);                    // if 2 columns cannot be extracted, try semicolon                    
+        //     if (count($cols) < 22){                        
+        //         $cols = str_getcsv(trim($lines[$i]), ";");                        // skip lines with insufficient columns                        
+        //         if (count($cols) < 22) {                            
+        //             error_log("Line $i only has " . count($cols) . ' columns');                            
+        //             continue;                        
+        //         }                    
+        //     }
+        // }
+        
+        // dd($lines);
+        // $path = 'lenguyenky.csv';
+        // $csv = explode("\n", file_get_contents($path));
+        // foreach ($csv as $key => $line)
+        //     {
+        //         $csv[$key] = str_getcsv($line);
+        //     }
+        
+        // dd($csv);
+        // $file = fopen($path,"r");
+        // dd(array_map('str_getcsv',fgetcsv($file)));
+        // fclose($csv);
+        // dd('ád');
+
+        $path = 'files/lenguyenky.csv';
+        $csva = file_get_contents($path);
+        $no_blanks = str_replace("\r\n\r\n", "\r\n", $csva);
+        file_put_contents($path, $no_blanks);
+
+       
+        $csv = explode(PHP_EOL, file_get_contents($path));
+        foreach ($csv as $key => $line)
+            {
+                $csv[$key] = str_getcsv($line);
+            }
+        dd($csv);
+
+
+
+
+        $csv =[];
+        if(\File::exists($pathPublic)){
+
+            if (($handle1 = fopen($path, "r")) !== FALSE) {
+                // dd(fgetcsv($handle1));
+                if (($handle2 = fopen($path, "r")) !== FALSE) {
+                    // dd(fgetcsv($handle2));
+                    // $data = fgetcsv($handle2);
+                    // dd($data);
+                    while (($data = fgetcsv($handle1,1000)) !== FALSE) {
+                        // dd('ád');
+                       // Alter your data
+                    //    $data[0] = '...';
+                    dd($data);
+                    // $csv[]=$data;
+                    // dd
+            
+                       // Write back to CSV format
+                       fputcsv($handle2, $data);
+                    }
+                    dd('get false');
+                    fclose($handle2);
+                }else{
+                    dd('false handle 2');
+                }
+                fclose($handle1);
+            }else{
+                dd('false handle 1');
+            }
+            
+        }else{
+            dd('no');
+        }
+
     }
 }
