@@ -6,12 +6,15 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Dropbox;
 use Purl\Url;
+use App\Product;
+
 class DropboxController extends Controller
 {
 
     private $api_client;
     private $content_client;
     private $access_token;
+
     public function __construct(Dropbox $dropbox)
     {
         $this->api_client = $dropbox->api();
@@ -79,7 +82,7 @@ class DropboxController extends Controller
         ]);
 
         $user = json_decode($response->getBody(), true);
-        dd($user);
+        // dd($user);
         $page_data = [
             'user' => $user
         ];
@@ -193,5 +196,84 @@ class DropboxController extends Controller
         } else {
             return redirect('search');
         }
+    }
+
+    public function uploadFileEbay(){
+    
+        $csvfile = 'files/lenguyenky.csv';
+
+        // $csva = file_get_contents($path);
+        // $no_blanks = str_replace("\r\n\r\n", "\r\n", $csva);
+        // file_put_contents($path, $no_blanks);
+
+       
+        // $csv = explode(PHP_EOL, file_get_contents($path));
+        // foreach ($csv as $key => $line)
+        //     {
+        //         $csv[$key] = str_getcsv($line);
+        //     }
+        // dd($csv);  
+
+        $csv = Array();
+        $rowcount = 0;
+        if (($handle = fopen($csvfile, "r")) !== FALSE) {
+            $max_line_length = defined('MAX_LINE_LENGTH') ? MAX_LINE_LENGTH : 10000;
+            $header = fgetcsv($handle, $max_line_length);
+            $header_colcount = count($header);
+            //dd($header_colcount);
+            while (($row = fgetcsv($handle, $max_line_length)) !== FALSE) {
+                $row_colcount = count($row);
+                if ($row_colcount == $header_colcount) {
+                    $entry = array_combine($header, $row);
+                   // dd($entry);
+                    $csv[] = $entry;
+                }
+                else {
+                    return null;
+                }
+                $rowcount++;
+            }
+            //echo "Totally $rowcount rows found\n";
+            fclose($handle);
+        }
+        else {
+            error_log("csvreader: Could not read CSV \"$csvfile\"");
+            return null;
+        }
+        // dd($csv);
+        $data = Array();
+        foreach ($csv as $key => $value) {
+            $data['SKU'] = $value['SKU'];
+            $data['Name'] = $value['Name'];
+            $data['Description'] = $value['Description'];
+            $data['Category'] = $value['Category'];
+            $data['Size'] = $value['Size'];
+            $data['Color'] = $value['Color'];
+            $data['Cost'] = $value['Cost'];
+            $data['Sell'] = $value['Sell'];
+            $data['RRP'] = $value['RRP'];
+            $data['QTY'] = $value['QTY'];
+            $data['Image1'] = $value['Image1'];
+            $data['Image2'] = $value['Image2'];
+            $data['Image3'] = $value['Image3'];
+            $data['Image4'] = $value['Image4'];
+            $data['Image5'] = $value['Image5'];
+            $data['Length'] = $value['Length'];
+            $data['Width'] = $value['Width'];
+            $data['Height'] = $value['Height'];
+            $data['UnitWeight'] = $value['UnitWeight'];
+            $data['Origin'] = $value['Origin'];
+            $data['Construction'] = $value['Construction'];
+            $data['Material'] = $value['Material'];
+            $data['Pileheight'] = $value['Pileheight'];   
+            $product = Product::create($data);
+
+            return redirect('products/all');
+        }              
+    }
+
+    public function getAllProduct(){
+        $products = Product::all();
+        dd($products);
     }
 }
