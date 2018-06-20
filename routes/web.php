@@ -23,6 +23,8 @@ Route::group(['middleware'=>'auth'],function(){
 
 });
 
+
+
 Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
 
     Route::get('/dropbox', 'DropboxController@index');
@@ -38,5 +40,9 @@ Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
     Route::post('/search-file-dropbox','DropboxController@postSearch')->name('search');
 
     Route::get('download','DropboxController@download');
+
+    Route::get('upload-file-to-ebay', 'DropboxController@uploadFileEbay');
+
+    Route::get('products/all', 'DropboxController@getAllProduct');
 });
 
