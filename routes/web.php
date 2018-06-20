@@ -46,3 +46,6 @@ Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
     Route::get('products/all', 'DropboxController@getAllProduct');
 });
 
+Route::group(['namespace'=>'Dropbox'],function(){
+    Route::get('add-item','DropboxController@createItemsEbay');
+});

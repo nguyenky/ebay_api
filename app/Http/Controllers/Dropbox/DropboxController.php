@@ -14,6 +14,8 @@ class DropboxController extends Controller
     private $api_client;
     private $content_client;
     private $access_token;
+    private $access_token_ebay = 'Bearer v^1.1#i^1#r^0#f^0#p^3#I^3#t^H4sIAAAAAAAAAOVXa2gURxzP5aVpmtRqaUwb8Ngo1sjezdze3T5izl4e1quPxFxio1ZkH7OX1b3d686syYqlMVCpKDQfCm2hqB+KglQiFAqtKKWt0kIpFGwp2PhJwVqh9kWRinT28vCSouYhJdD7cjcz/+fv//v/bwYMlFc0HFx/8K+qwILi4wNgoDgQgJWgorxsdXVJ8TNlRaBAIHB8YPlA6WDJ9TVYzpo5qRPhnG1hFOzPmhaW8ptNjOtYki1jA0uWnEVYIqqUTm7aKEVCQMo5NrFV22SCqdYmBimqHgURQYvFY4DnRbprjdvsspsYWdD1uKKKIkTRmBBT6DnGLkpZmMgWaWIiAAosiLMR0AV4CXJSlA8BCLczwa3IwYZtUZEQYBL5cKW8rlMQ64NDlTFGDqFGmEQquS7dnky1tm3uWhMusJUYwyFNZOLiyasWW0PBrbLpoge7wXlpKe2qKsKYCSdGPUw2KiXHg5lF+HmoZQXGBKBpUagLEEYfDZTrbCcrkwfH4e8YGqvnRSVkEYN4D0OUoqHsRioZW22mJlKtQf9riyubhm4gp4lpa05u6063dTLBdEeHY+81NKT5mUIuCnkuKkaYBEGYQoicXSayMq6HrD3emLdRk2NYT3HXYlua4SOHg5tt0oxo6GgqQKAAICrUbrU7SZ34YRXKieNAgsh2v7KjpXRJr+UXF2UpGsH88uFlGOfFPSY8KmaIAkSizok85LQ45NVCZvi9Plt2JPwCJTs6wn4sSJE9Nis7exDJmbKKWJXC62aRY2gSF9MjnKAjVouLOhsVdZ1VYlqchTpCACGFDgDhf0cSQhxDcQmaIMrUg3ymTUxatXOowzYN1WOmiuSnzxgt+nET00tITgqH+/r6Qn1cyHYy4QgAMNyzaWNa7UVZmZmQNR4uzBp5zqqIamFDIl6ORtNP+UedWxkmwTlah+wQr9n16DqNTJN+jXN4UoSJqbv3SRX7qc6vJH19TA3IOSPkUzyk2tmwLdOW9rd25SMOTkcorLge9a8hJ+QgWbMt05u+XsalFB7Vnp4SptUIjXYjTWPMo9/r0/U62cAMdAxrL+Wy7XgzTHOy8gx0ZFW1XYvMxt2Y6gw0dNfUDdP023U2DgvUZxKmJZseMVQ8G5cFI5nCi41ML5mpHbpH5zjVV2Uim3ZmQn1OzZ7M5VLa/Gr29LrOtK2TPhbrDs7/SDf3sHxEVRUNIcTqKhJkAGJzyrsV7f0P8i4dLB6c2TSPoxiHOJ5FUAFsVI5qrKhEEAthjEccxwn0f3pOebeYBqV9lzffJvx6GxOkzS01etuaX0n5vB2nrRzjIasLGr15qYLIChF6/YoqCppuyuH73lf+dV8NT341JoryHzgYOAcGAx/ThyfgAQtXg1XlJd2lJY8z2CAohGVLU+z+kCHrITqfLPooclBoD/JysuEUlwd2PHtj7Z2C9+rxnWDpxIu1ogRWFjxfQd29kzL4RE0VFECcQkevvlF+O6i/d1oKny596pdWu7/ykLfib+mmrr9+4Z3FNaIFqiaEAoGyotLBQFHvxe5bL238dBHflsqFT9YereT0s8fgmc/ONNq1wyUvL97ffufyJfG54S/fWNq49trZI3Unl7wV2Hd1WHj+9KFvF1zZ8fm+VwOa/dOBN+L9i34+/+7VAwtv/CE2XnvzGPvCoT8/emwF+8UHy3lov9/V0bWrWm38bTiR3PDa3b7MAfOVkVU/PHnh4OJzt1aqDbX8rzvdihPZu4Pmd7fxEL7SfPRW3cjumiPVaFk1anivwVg51PL924cj26DD9Wwpti6dV3c7JxbGhn4c6qkrrqna32xv6s1cSlwnSw7X19Z/1Vhb9PWH/IbbXcMnB1oPj6w58uLQJ6vsb07VDyfv/n7zdOepUG6k++Kyy6Nl/AdTP3IeSRAAAA==';
+
 
     public function __construct(Dropbox $dropbox)
     {
@@ -240,50 +242,95 @@ class DropboxController extends Controller
             error_log("csvreader: Could not read CSV \"$csvfile\"");
             return null;
         }
-        // dd($csv);
+        // dd(count($csv));
         $data = Array();
-        foreach ($csv as $key => $value) {
-            $data['SKU'] = $value['SKU'];
-            $data['Name'] = $value['Name'];
-            $data['Description'] = $value['Description'];
-            $data['Category'] = $value['Category'];
-            $data['Size'] = $value['Size'];
-            $data['Color'] = $value['Color'];
-            $data['Cost'] = $value['Cost'];
-            $data['Sell'] = $value['Sell'];
-            $data['RRP'] = $value['RRP'];
-            $data['QTY'] = $value['QTY'];
-            $data['Image1'] = $value['Image1'];
-            $data['Image2'] = $value['Image2'];
-            $data['Image3'] = $value['Image3'];
-            $data['Image4'] = $value['Image4'];
-            $data['Image5'] = $value['Image5'];
-            $data['Length'] = $value['Length'];
-            $data['Width'] = $value['Width'];
-            $data['Height'] = $value['Height'];
-            $data['UnitWeight'] = $value['UnitWeight'];
-            $data['Origin'] = $value['Origin'];
-            $data['Construction'] = $value['Construction'];
-            $data['Material'] = $value['Material'];
-            $data['Pileheight'] = $value['Pileheight'];   
-            $product = Product::create($data);
 
-            return redirect('products/all');
-        }              
+        foreach ($csv as $key => $value) {
+
+            $this->createItemsEbay($value);
+            // $data['SKU'] = $value['SKU'];
+            // $data['Name'] = $value['Name'];
+            // $data['Description'] = $value['Description'];
+            // $data['Category'] = $value['Category'];
+            // $data['Size'] = $value['Size'];
+            // $data['Color'] = $value['Color'];
+            // $data['Cost'] = $value['Cost (Ex.GST) '];
+            // $data['Sell'] = $value['Sell'];
+            // $data['RRP'] = $value['RRP'];
+            // $data['QTY'] = $value['QTY'];
+            // $data['Image1'] = $value['Image1'];
+            // $data['Image2'] = $value['Image2'];
+            // $data['Image3'] = $value['Image3'];
+            // $data['Image4'] = $value['Image4'];
+            // $data['Image5'] = $value['Image5'];
+            // $data['Length'] = $value['Length'];
+            // $data['Width'] = $value['Width'];
+            // $data['Height'] = $value['Height'];
+            // $data['UnitWeight'] = $value['UnitWeight'];
+            // $data['Origin'] = $value['Origin'];
+            // $data['Construction'] = $value['Construction'];
+            // $data['Material'] = $value['Material'];
+            // $data['Pileheight'] = $value['Pileheight'];   
+            // $product = Product::create($data);
+        }  
+        // return redirect('products/all');  
+        $products = Product::all();
+        dd($products);          
     }
 
     public function getAllProduct(){
         $products = Product::all();
-        dd($products);
+        dd($products->toArray());
     }
     /// ----- Download dropbox ----
 
-    
-    
+
+
     ///------
 
-    public function createItemsEbay(){
+    public function createItemsEbay($product){
+        $data = [];
+        $data = [
+            'availability'  => [
+                'shipToLocationAvailability'    => [
+                    'quantity'  => $product['QTY'],
+                ]
+            ],
+            'condition'     => 'NEW',
+            'product'       => [
+                'title'     => $product['Name'],
+                'imageUrls' =>[
+                    "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1000.jpg",
+                    "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1001.jpg",
+                    "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1002.jpg"
+                ],
+                'aspects'   => [
+                    'Brand' => ['GoPro'],
+                    'Type'  => ['Helmet/Action'],
+                    'Storage Type' => ['Removable'],
+                    'Recording Definition' => ['High Definition'],
+                    'Media Format'=>['Flash Drive (SSD)'],
+                    'Optical Zoom'=> ['10x']
+                ],
+                'category' => 'SDSAD'
+            ]
+        ];
+        $json = json_encode($data);
 
+        $client = new \GuzzleHttp\Client();
+        $header = [
+            'Authorization'=>$accessToken,
+            'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
+            'Content-Language'=>'en-US',
+            'Content-Type'=>'application/json'
+        ];
+        $res = $client->request('PUT', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/GP-Cam-09',[
+                            'headers'=> $header,
+                            'body'  => $json
+                        ]);
+
+        // dd($res);
+        dd($json);
         return true;
     }
 }
