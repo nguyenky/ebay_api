@@ -276,4 +276,14 @@ class DropboxController extends Controller
         $products = Product::all();
         dd($products);
     }
+    /// ----- Download dropbox ----
+
+    
+    
+    ///------
+
+    public function createItemsEbay(){
+
+        return true;
+    }
 }
