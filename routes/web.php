@@ -44,6 +44,11 @@ Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
     Route::get('upload-file-to-ebay', 'DropboxController@uploadFileEbay');
 
     Route::get('products/all', 'DropboxController@getAllProduct');
+
+    // ----------------
+
+
+    Route::get('begin', 'DropboxController@beginProcess');
 });
 
 Route::group(['namespace'=>'Dropbox'],function(){

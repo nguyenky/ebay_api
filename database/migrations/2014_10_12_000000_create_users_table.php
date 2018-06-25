@@ -18,6 +18,10 @@ class CreateUsersTable extends Migration
             $table->string('name');
             $table->string('email');
             $table->string('password');
+            $table->text('accesstoken_dropbox')->nullable();
+            $table->text('grant_code')->nullable();
+            $table->text('refresh_token_ebay')->nullable();
+            $table->text('accesstoken_ebay')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

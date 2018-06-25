@@ -15,7 +15,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','grant_code','accesstoken_ebay'
+        'name', 'email', 'password','grant_code','accesstoken_dropbox','refresh_token_ebay','accesstoken_ebay'
     ];
 
     /**
