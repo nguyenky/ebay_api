@@ -19,6 +19,12 @@ class DropboxController extends Controller
     private $base64;
     private $refreshCode = 'v^1.1#i^1#r^1#f^0#p^3#I^3#t^Ul4xMF8xMDo4NDAyNEI4MDkzNjk3QzZDMEE1QURGMjVDOTJGNTZBQ18yXzEjRV4xMjg0';
 
+    // ----- Dropbox ---------
+
+    private $path   = '/picture';
+    private $mode   = 'filename';
+    private $query  = 'UNITEX-DATAFEED-ALL.csv';
+
 
     public function __construct(Dropbox $dropbox)
     {
@@ -26,7 +32,7 @@ class DropboxController extends Controller
         $this->content_client = $dropbox->content();
         $this->access_token = session('access_token');
     }
-
+    // 1
     public function index(){
         $url = new Url('https://www.dropbox.com/1/oauth2/authorize');
 
@@ -37,9 +43,6 @@ class DropboxController extends Controller
         ]);
 
         return redirect($url->getUrl());
-    }
-    public function postIndex(){
-
     }
 
     public function loginDropbox(Request $request){
@@ -62,7 +65,7 @@ class DropboxController extends Controller
 
             $response_body = json_decode($response->getBody(), true);
             $access_token = $response_body['access_token'];
-            // dd($access_token);
+            dd($access_token);
             $this->updateToken($access_token);
 
             session(['access_token' => $access_token]);
@@ -74,20 +77,20 @@ class DropboxController extends Controller
     }
     public function updateToken($accessToken){
         $user = \App\User::find(\Auth::user()->id);
-        $user->remember_token = $accessToken;
+        $user->accesstoken_dropbox = $accessToken;
         $user->save();
         // dd($user);
     }
     public function userDropboxInfor(){
-        // dd(\Auth::user()->remember_token);
+        // dd(\Auth::user()->accesstoken_dropbox);
         $response = $this->api_client->request('POST', '/2/users/get_current_account', [
             'headers' => [
-                'Authorization' => 'Bearer ' . \Auth::user()->remember_token,
+                'Authorization' => 'Bearer ' . \Auth::user()->accesstoken_dropbox,
             ]
         ]);
 
         $user = json_decode($response->getBody(), true);
-        // dd($user);
+        dd($user);
         $page_data = [
             'user' => $user
         ];
@@ -98,6 +101,8 @@ class DropboxController extends Controller
     public function getSearch(){
         return view('dropbox.search');
     }
+
+
     public function postSearch(Request $request){
         // dd($request->all());
         $input = $request->all();
@@ -118,7 +123,7 @@ class DropboxController extends Controller
                 'POST', '/2/files/search',
                 [
                     'headers' => [
-                        'Authorization' => 'Bearer ' . \Auth::user()->remember_token,
+                        'Authorization' => 'Bearer ' . \Auth::user()->accesstoken_dropbox,
                         'Content-Type' => 'application/json'
                     ],
                     'body' => $data
@@ -150,7 +155,7 @@ class DropboxController extends Controller
                 '/2/files/download',
                 [
                     'headers' => [
-                        'Authorization' => 'Bearer ' .\Auth::user()->remember_token,
+                        'Authorization' => 'Bearer ' .\Auth::user()->accesstoken_dropbox,
                         'Dropbox-API-Arg' => $data
                     ]
             ]);
@@ -203,7 +208,7 @@ class DropboxController extends Controller
                 '/2/files/download',
                 [
                     'headers' => [
-                        'Authorization' => 'Bearer ' .\Auth::user()->remember_token,
+                        'Authorization' => 'Bearer ' .\Auth::user()->accesstoken_dropbox,
                         'Dropbox-API-Arg' => $data
                     ]
             ]);
@@ -308,7 +313,7 @@ class DropboxController extends Controller
                 'POST', '/2/files/search',
                 [
                     'headers' => [
-                        'Authorization' => 'Bearer ' . \Auth::user()->remember_token,
+                        'Authorization' => 'Bearer ' . \Auth::user()->accesstoken_dropbox,
                         'Content-Type' => 'application/json'
                     ],
                     'body' => $value
@@ -412,6 +417,7 @@ class DropboxController extends Controller
         $this->step3GetAccessTokenEbay();
 
     }
+    ///----------------------------
     public function step3RefreshToken(){
         $client = new \GuzzleHttp\Client();
         $appID = env('EBAY_APPID');
@@ -497,5 +503,128 @@ class DropboxController extends Controller
         // dd($search_results);
         dd($json);
         return true;
+
+
+    }
+
+    /// begin process 
+
+    public function beginProcess(){
+        $matches    = $this->step1DropboxSearchFileCsv();
+        $filename   = $this->step2DropboxDownFileCsv($matches);
+        $csv        = $this->step3DropboxConvertFileCsv('files/'.$filename);
+        dd($csv);
+
+    }
+    public function step1DropboxSearchFileCsv(){
+        $data = json_encode(
+                [
+                    'path' => $this->path,
+                    'mode' => $this->mode,
+                    'query' => $this->query,
+                ]
+            );
+            // dd($data);
+        $response = $this->api_client->request(
+            'POST', '/2/files/search',
+            [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . \Auth::user()->accesstoken_dropbox,
+                    'Content-Type' => 'application/json'
+                ],
+                'body' => $data
+        ]);
+
+        $search_results = json_decode($response->getBody(), true);
+        // if($search_results['matches'][''])
+        $matches = $search_results['matches'];
+
+        return $matches;
+    }
+    public function step2DropboxDownFileCsv($matches){
+        // if(count($matches)){
+        //     dd($matches[0]['metadata']);
+        // }else{
+        //     dd('error');
+        // }
+        // dd($matches[0]['metadata']['path_lower']);
+
+        $data = json_encode([
+                'path' => $matches[0]['metadata']['path_lower']
+            ]);
+        $response = $this->content_client->request(
+            'POST',
+            '/2/files/download',
+            [
+                'headers' => [
+                    'Authorization' => 'Bearer ' .\Auth::user()->accesstoken_dropbox,
+                    'Dropbox-API-Arg' => $data
+                ]
+        ]);
+
+        $result = $response->getHeader('dropbox-api-result');
+        $file_info = json_decode($result[0], true);
+
+        $content = $response->getBody();
+        $filename = $file_info['name'];
+        // dd($filename);
+        $file_extension = substr($filename, strrpos($filename, '.'));
+        // dd($file_extension);
+        // $file ='lenguyenky'.$file_extension;
+
+        $file_size = $file_info['size'];
+
+        $pathPublic = public_path().'/files/';
+
+        if(\File::exists($pathPublic.$filename)){
+
+            unlink($pathPublic.$filename);
+      
+        }
+
+        if(!\File::exists($pathPublic)) {
+
+            \File::makeDirectory($pathPublic, $mode = 0777, true, true);
+
+        }
+        try {
+            \File::put(public_path() . '/files/' . $filename, $content);
+        } catch (\Exception $e){
+            dd($e);
+        }
+        return $filename;
+        
+        // dd($content);
+    }
+    public function step3DropboxConvertFileCsv($attribute){
+        $csv = Array();
+        $rowcount = 0;
+        if (($handle = fopen($attribute, "r")) !== FALSE) {
+            $max_line_length = defined('MAX_LINE_LENGTH') ? MAX_LINE_LENGTH : 10000;
+            $header = fgetcsv($handle, $max_line_length);
+            $header_colcount = count($header);
+            while (($row = fgetcsv($handle, $max_line_length)) !== FALSE) {
+                $row_colcount = count($row);
+                if ($row_colcount == $header_colcount) {
+                    $entry = array_combine($header, $row);
+                    $csv[] = $entry;
+                }
+                else {
+                    return null;
+                }
+                $rowcount++;
+            }
+            //echo "Totally $rowcount rows found\n";
+            fclose($handle);
+        }
+        else {
+            error_log("csvreader: Could not read CSV \"$csvfile\"");
+            return null;
+        }
+
+        return $csv;
+    }
+    public function step4EbayRefreshToken(){
+        
     }
 }
