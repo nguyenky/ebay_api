@@ -17,7 +17,7 @@ class CreateProductsTable extends Migration
             $table->increments('id');
             $table->string('SKU')->nullable();
             $table->string('Name')->nullable();
-            $table->text('Description')->nullable();
+            $table->longText('Description')->nullable();
             $table->string('Category')->nullable();
             $table->string('Size')->nullable();
             $table->string('Color')->nullable();
@@ -38,7 +38,6 @@ class CreateProductsTable extends Migration
             $table->string('Construction')->nullable();
             $table->string('Material')->nullable();
             $table->string('Pileheight')->nullable();
-            $table->timestamps();
         });
     }
 
