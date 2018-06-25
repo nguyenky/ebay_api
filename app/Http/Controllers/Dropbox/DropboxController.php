@@ -14,7 +14,10 @@ class DropboxController extends Controller
     private $api_client;
     private $content_client;
     private $access_token;
-    private $access_token_ebay = 'Bearer v^1.1#i^1#r^0#f^0#p^3#I^3#t^H4sIAAAAAAAAAOVXa2gURxzP5aVpmtRqaUwb8Ngo1sjezdze3T5izl4e1quPxFxio1ZkH7OX1b3d686syYqlMVCpKDQfCm2hqB+KglQiFAqtKKWt0kIpFGwp2PhJwVqh9kWRinT28vCSouYhJdD7cjcz/+fv//v/bwYMlFc0HFx/8K+qwILi4wNgoDgQgJWgorxsdXVJ8TNlRaBAIHB8YPlA6WDJ9TVYzpo5qRPhnG1hFOzPmhaW8ptNjOtYki1jA0uWnEVYIqqUTm7aKEVCQMo5NrFV22SCqdYmBimqHgURQYvFY4DnRbprjdvsspsYWdD1uKKKIkTRmBBT6DnGLkpZmMgWaWIiAAosiLMR0AV4CXJSlA8BCLczwa3IwYZtUZEQYBL5cKW8rlMQ64NDlTFGDqFGmEQquS7dnky1tm3uWhMusJUYwyFNZOLiyasWW0PBrbLpoge7wXlpKe2qKsKYCSdGPUw2KiXHg5lF+HmoZQXGBKBpUagLEEYfDZTrbCcrkwfH4e8YGqvnRSVkEYN4D0OUoqHsRioZW22mJlKtQf9riyubhm4gp4lpa05u6063dTLBdEeHY+81NKT5mUIuCnkuKkaYBEGYQoicXSayMq6HrD3emLdRk2NYT3HXYlua4SOHg5tt0oxo6GgqQKAAICrUbrU7SZ34YRXKieNAgsh2v7KjpXRJr+UXF2UpGsH88uFlGOfFPSY8KmaIAkSizok85LQ45NVCZvi9Plt2JPwCJTs6wn4sSJE9Nis7exDJmbKKWJXC62aRY2gSF9MjnKAjVouLOhsVdZ1VYlqchTpCACGFDgDhf0cSQhxDcQmaIMrUg3ymTUxatXOowzYN1WOmiuSnzxgt+nET00tITgqH+/r6Qn1cyHYy4QgAMNyzaWNa7UVZmZmQNR4uzBp5zqqIamFDIl6ORtNP+UedWxkmwTlah+wQr9n16DqNTJN+jXN4UoSJqbv3SRX7qc6vJH19TA3IOSPkUzyk2tmwLdOW9rd25SMOTkcorLge9a8hJ+QgWbMt05u+XsalFB7Vnp4SptUIjXYjTWPMo9/r0/U62cAMdAxrL+Wy7XgzTHOy8gx0ZFW1XYvMxt2Y6gw0dNfUDdP023U2DgvUZxKmJZseMVQ8G5cFI5nCi41ML5mpHbpH5zjVV2Uim3ZmQn1OzZ7M5VLa/Gr29LrOtK2TPhbrDs7/SDf3sHxEVRUNIcTqKhJkAGJzyrsV7f0P8i4dLB6c2TSPoxiHOJ5FUAFsVI5qrKhEEAthjEccxwn0f3pOebeYBqV9lzffJvx6GxOkzS01etuaX0n5vB2nrRzjIasLGr15qYLIChF6/YoqCppuyuH73lf+dV8NT341JoryHzgYOAcGAx/ThyfgAQtXg1XlJd2lJY8z2CAohGVLU+z+kCHrITqfLPooclBoD/JysuEUlwd2PHtj7Z2C9+rxnWDpxIu1ogRWFjxfQd29kzL4RE0VFECcQkevvlF+O6i/d1oKny596pdWu7/ykLfib+mmrr9+4Z3FNaIFqiaEAoGyotLBQFHvxe5bL238dBHflsqFT9YereT0s8fgmc/ONNq1wyUvL97ffufyJfG54S/fWNq49trZI3Unl7wV2Hd1WHj+9KFvF1zZ8fm+VwOa/dOBN+L9i34+/+7VAwtv/CE2XnvzGPvCoT8/emwF+8UHy3lov9/V0bWrWm38bTiR3PDa3b7MAfOVkVU/PHnh4OJzt1aqDbX8rzvdihPZu4Pmd7fxEL7SfPRW3cjumiPVaFk1anivwVg51PL924cj26DD9Wwpti6dV3c7JxbGhn4c6qkrrqna32xv6s1cSlwnSw7X19Z/1Vhb9PWH/IbbXcMnB1oPj6w58uLQJ6vsb07VDyfv/n7zdOepUG6k++Kyy6Nl/AdTP3IeSRAAAA==';
+    private $access_token_ebay;
+    private $grantCode='v^1.1#i^1#r^1#I^3#f^0#p^3#t^Ul41XzQ6RDUyODI4N0I3QTQzMzIzOUZDNTNDNzdFOTc4MzFBMzVfMF8xI0VeMTI4NA==';
+    private $base64;
+    private $refreshCode = 'v^1.1#i^1#r^1#f^0#p^3#I^3#t^Ul4xMF8xMDo4NDAyNEI4MDkzNjk3QzZDMEE1QURGMjVDOTJGNTZBQ18yXzEjRV4xMjg0';
 
 
     public function __construct(Dropbox $dropbox)
@@ -288,17 +291,99 @@ class DropboxController extends Controller
 
     ///------
 
-    public function createItemsEbay($product){
+
+    public function start(){
+        // $client = new \GuzzleHttp\Client();
+        // $res = $client->request('GET', 'https://auth.sandbox.ebay.com/oauth2/authorize?client_id=SFRSoftw-sfrsoftw-SBX-72ccbdeee-fce8a005&response_type=code&redirect_uri=SFR_Software-SFRSoftw-sfrsof-watlbqpzg&scope=https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/buy.order.readonly https://api.ebay.com/oauth/api_scope/buy.guest.order https://api.ebay.com/oauth/api_scope/sell.marketing.readonly https://api.ebay.com/oauth/api_scope/sell.marketing https://api.ebay.com/oauth/api_scope/sell.inventory.readonly https://api.ebay.com/oauth/api_scope/sell.inventory https://api.ebay.com/oauth/api_scope/sell.account.readonly https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly https://api.ebay.com/oauth/api_scope/sell.fulfillment https://api.ebay.com/oauth/api_scope/sell.analytics.readonly https://api.ebay.com/oauth/api_scope/sell.marketplace.insights.readonly https://api.ebay.com/oauth/api_scope/commerce.catalog.readonly');
+        // dd(file_get_contents($res->getBody()));
+        // $this->step1GetGrantCode();
+
+    }
+    public function step1GetGrantCode(Request $request){
+        $input = $request->all();
+        if($input['code']){
+            $this->grantCode = $input['code'];
+            $this->step2GetAccessTokenEbay();
+        }
+
+    }
+    public function step2GetAccessTokenEbay(){
+        $client = new \GuzzleHttp\Client();
+        $appID = env('EBAY_APPID');
+        $clientID = env('CERT_ID');
+
+        $code = $appID .':'.$clientID;
+
+        $this->base64 = 'Basic '.base64_encode($code);
+
+        $header = [
+            'Content-Type'=>'application/x-www-form-urlencoded',
+            'Authorization'=> $this->base64,
+        ];
+        $body = [
+            'grant_type'=>'authorization_code',
+            'code'=>$this->grantCode,
+            'redirect_uri'=>env('RUNAME'),
+        ];
+        dd($body);
+
+        $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
+                            'headers'=> $header,
+                            'data'  => $body
+                        ]);
+        dd($res->getBody());
+        // dd($this->base64);
+        $this->step3GetAccessTokenEbay();
+
+    }
+    public function step3RefreshToken(){
+        $client = new \GuzzleHttp\Client();
+        $appID = env('EBAY_APPID');
+        $clientID = env('CERT_ID');
+
+        $code = $appID .':'.$clientID;
+
+        $this->base64 = 'Basic '.base64_encode($code);
+
+        $header = [
+            'Content-Type'=>'application/x-www-form-urlencoded',
+            'Authorization'=> $this->base64,
+        ];
+        $body = [
+            'grant_type'=>'refresh_token',
+            'refresh_token'=>$this->refreshCode,
+            'scope'=>'https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.inventory',
+        ];
+        $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
+                            'headers'=> $header,
+                            'form_params'  => $body
+                        ]);
+        // dd($res);
+        $search_results = json_decode($res->getBody(), true);
+        // dd($search_results);
+        $this->access_token_ebay = $search_results['access_token'];
+        $this->createItemsEbay();
+        dd($search_results);
+    }
+    // public function step4Create(){
+
+    // }
+
+    public function createItemsEbay(){
+        $client = new \GuzzleHttp\Client();
+
         $data = [];
         $data = [
             'availability'  => [
                 'shipToLocationAvailability'    => [
-                    'quantity'  => $product['QTY'],
+                    // 'quantity'  => $product['QTY'],
+                    'quantity'  => 12,
                 ]
             ],
             'condition'     => 'NEW',
             'product'       => [
-                'title'     => $product['Name'],
+                // 'title'     => $product['Name'],
+                'title'     => 'uchiha',
                 'imageUrls' =>[
                     "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1000.jpg",
                     "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1001.jpg",
@@ -312,24 +397,28 @@ class DropboxController extends Controller
                     'Media Format'=>['Flash Drive (SSD)'],
                     'Optical Zoom'=> ['10x']
                 ],
-                'category' => 'SDSAD'
+                'category' => 'SDSAD',
+                // 'description'=> $product['Description']
+                'description'=> 'ádsad'
             ]
         ];
         $json = json_encode($data);
 
-        $client = new \GuzzleHttp\Client();
+        
+        // dd($this->access_token_ebay);
         $header = [
-            'Authorization'=>$accessToken,
+            'Authorization'=>'Bearer '.$this->access_token_ebay,
             'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
             'Content-Language'=>'en-US',
             'Content-Type'=>'application/json'
         ];
+        // dd($header);
         $res = $client->request('PUT', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/GP-Cam-09',[
                             'headers'=> $header,
                             'body'  => $json
                         ]);
-
-        // dd($res);
+        $search_results = json_decode($res->getBody(), true);
+        // dd($search_results);
         dd($json);
         return true;
     }
