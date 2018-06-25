@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Dropbox;
 use Purl\Url;
 use App\Product;
+use App\User;
+use Auth;
 
 class DropboxController extends Controller
 {
@@ -15,9 +17,9 @@ class DropboxController extends Controller
     private $content_client;
     private $access_token;
     private $access_token_ebay;
-    private $grantCode='v^1.1#i^1#r^1#I^3#f^0#p^3#t^Ul41XzQ6RDUyODI4N0I3QTQzMzIzOUZDNTNDNzdFOTc4MzFBMzVfMF8xI0VeMTI4NA==';
+    private $grantCode;
     private $base64;
-    private $refreshCode = 'v^1.1#i^1#r^1#f^0#p^3#I^3#t^Ul4xMF8xMDo4NDAyNEI4MDkzNjk3QzZDMEE1QURGMjVDOTJGNTZBQ18yXzEjRV4xMjg0';
+    // private $refreshCode = 'v^1.1#i^1#r^1#f^0#p^3#I^3#t^Ul4xMF8xMDo4NDAyNEI4MDkzNjk3QzZDMEE1QURGMjVDOTJGNTZBQ18yXzEjRV4xMjg0';
 
     // ----- Dropbox ---------
 
@@ -46,7 +48,7 @@ class DropboxController extends Controller
     }
 
     public function loginDropbox(Request $request){
-
+        // dd('asdsd');
         if ($request->has('code')) {
 
             $data = [
@@ -65,7 +67,7 @@ class DropboxController extends Controller
 
             $response_body = json_decode($response->getBody(), true);
             $access_token = $response_body['access_token'];
-            dd($access_token);
+            // dd($access_token);
             $this->updateToken($access_token);
 
             session(['access_token' => $access_token]);
@@ -489,23 +491,83 @@ class DropboxController extends Controller
         
         // dd($this->access_token_ebay);
         $header = [
-            'Authorization'=>'Bearer '.$this->access_token_ebay,
+            'Authorization'=>'Bearer '.Auth::user()->accesstoken_ebay,
             'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
             'Content-Language'=>'en-US',
             'Content-Type'=>'application/json'
         ];
         // dd($header);
-        $res = $client->request('PUT', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/GP-Cam-09',[
+        $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/GP-Cam-12',[
                             'headers'=> $header,
-                            'body'  => $json
+                            // 'body'  => $json
                         ]);
         $search_results = json_decode($res->getBody(), true);
-        // dd($search_results);
+        dd($search_results);
         dd($json);
         return true;
 
 
     }
+
+    public function getAllItems(){
+        $client = new \GuzzleHttp\Client();
+        $header = [
+            'Authorization'=>'Bearer '.Auth::user()->accesstoken_ebay,
+            'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
+            'Content-Language'=>'en-US',
+            'Content-Type'=>'application/json'
+        ];
+        $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item',[
+                            'headers'=> $header,
+                            // 'body'  => $json
+                        ]);
+        $search_results = json_decode($res->getBody(), true);
+        dd($search_results);
+        return true;
+    }
+    // ---- update token ---working
+    public function updateGrantCode(Request $request){
+        $input = $request->all();
+        $user = User::find(Auth::user()->id);
+        $user->grant_code = $input['code'];
+        $this->grantCode = $input['code'];
+        $token = $this->getAccessToken();
+        $user->accesstoken_ebay = $token['access_token'];
+        $user->refresh_token_ebay = $token['refresh_token'];
+        $user->save();
+        return 'ok';
+    }
+
+    public function getAccessToken(){
+        // dd(Auth::user()->toArray());
+        $client = new \GuzzleHttp\Client();
+        $appID = env('EBAY_APPID');
+        $clientID = env('CERT_ID');
+
+        $code = $appID .':'.$clientID;
+
+        $this->base64 = 'Basic '.base64_encode($code);
+
+        $header = [
+            'Content-Type'=>'application/x-www-form-urlencoded',
+            'Authorization'=> $this->base64,
+        ];
+        $body = [
+            'grant_type'=>'authorization_code',
+            // 'code'=>Auth::user()->grant_code,
+            'code'=>$this->grantCode,
+            'redirect_uri'=>env('RUNAME'),
+        ];
+        // dd($body);
+
+        $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
+                            'headers'=> $header,
+                            'form_params'  => $body
+                        ]);
+        $search_results = json_decode($res->getBody(), true);
+        return $search_results;
+    }
+    //--- end update token ----
 
     /// begin process 
 
@@ -513,6 +575,14 @@ class DropboxController extends Controller
         $matches    = $this->step1DropboxSearchFileCsv();
         $filename   = $this->step2DropboxDownFileCsv($matches);
         $csv        = $this->step3DropboxConvertFileCsv('files/'.$filename);
+        $getAccessToken = $this->step4EbayRefreshToken($csv);
+
+        $user = User::find(Auth::user()->id);
+        $user->accesstoken_ebay = $getAccessToken['access_token'];
+        $user->save();
+
+        $products = $this->step5EbayCreadtItems($csv);
+
         dd($csv);
 
     }
@@ -625,6 +695,189 @@ class DropboxController extends Controller
         return $csv;
     }
     public function step4EbayRefreshToken(){
+        // dd(Auth::user());
+
+        $client = new \GuzzleHttp\Client();
+        $appID = env('EBAY_APPID');
+        $clientID = env('CERT_ID');
+
+        $code = $appID .':'.$clientID;
+
+        $this->base64 = 'Basic '.base64_encode($code);
+
+        $header = [
+            'Content-Type'=>'application/x-www-form-urlencoded',
+            'Authorization'=> $this->base64,
+        ];
+        $body = [
+            'grant_type'=>'refresh_token',
+            'refresh_token'=>Auth::user()->refresh_token_ebay,
+            'scope'=>'https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.inventory',
+        ];
+        $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
+                            'headers'=> $header,
+                            'form_params'  => $body
+                        ]);
+        // dd($res);
+        $search_results = json_decode($res->getBody(), true);
+        $this->access_token_ebay = $search_results['access_token'];
+        // dd($search_results);
+        return $search_results;
+        // $this->access_token_ebay = $search_results['access_token'];
+        // $this->createItemsEbay();
+        // dd($search_results);
+    }
+    public function step5EbayCreadtItems($attributes){
+        // $data = Array();
+        // $namefile = Array();
+        foreach ($attributes as $key => $attribute) {
+            $namefile = Array();
+            $data = Array();
+            $data[] = $attribute['Image1'];
+            $data[] = $attribute['Image2'];
+            $data[] = $attribute['Image3'];
+            $data[] = $attribute['Image4'];
+            $data[] = $attribute['Image5'];
+            // dd($data);
+
+            foreach ($data as $key => $item) {
+                // dd($item);
+                $value = json_encode(
+                    [
+                        'path' => '/DROPSHIP/IMAGES/2018 COLLECTIONS',
+                        'mode' => 'filename',
+                        'query' => $item
+                    ]
+                );
+                $response = $this->api_client->request(
+                'POST', '/2/files/search',
+                [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . \Auth::user()->accesstoken_dropbox,
+                        'Content-Type' => 'application/json'
+                    ],
+                    'body' => $value
+                ]);
+                $search_results = json_decode($response->getBody(), true);
+                $matches = $search_results['matches'];
+                foreach ($matches as $key => $value) {
+                    $this->step5_1downloadImage($value['metadata']['path_lower']);
+                    $namefile[] = $value['metadata']['name'];
+                    break;
+                }
+                
+                 //------ Delete image -------
+                    // unlink(public_path('/files/'.$value['metadata']['name']));
+            }
+
+            // dd($namefile);
+            $product = $this->step5_2CreateItem($attribute,$namefile);
+           dd($product);
+
+        }
+    }
+
+    public function step5_1downloadImage($attribute){
+        //dd($attribute);
+        $data = json_encode([
+                'path' => $attribute
+            ]);
+
+            $response = $this->content_client->request(
+                'POST',
+                '/2/files/download',
+                [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' .\Auth::user()->accesstoken_dropbox,
+                        'Dropbox-API-Arg' => $data
+                    ]
+            ]);
+
+            $result = $response->getHeader('dropbox-api-result');
+            $file_info = json_decode($result[0], true);
+
+            $content = $response->getBody();
+
+            $filename = $file_info['name'];
+            // dd($filename);
+            $file_extension = substr($filename, strrpos($filename, '.'));
+            // dd($file_extension);
+            $file = $filename;
+
+            $file_size = $file_info['size'];
+
+            $pathPublic = public_path().'/files/';
+
+            if(\File::exists($pathPublic.$file)){
+
+                unlink($pathPublic.$file);
+          
+            }
+
+            if(!\File::exists($pathPublic)) {
+
+                \File::makeDirectory($pathPublic, $mode = 0777, true, true);
+
+            }
+            try {
+                \File::put(public_path() . '/files/' . $file, $content);
+            } catch (\Exception $e){
+                dd($e);
+            }
+    }
+    public function step5_2CreateItem($attribute,$namefile){
+        $client = new \GuzzleHttp\Client();
+
+        $data = [];
+        $data = [
+            'availability'  => [
+                'shipToLocationAvailability'    => [
+                    'quantity'  => $attribute['QTY'],
+                    // 'quantity'  => 12,
+                ]
+            ],
+            'condition'     => 'NEW',
+            'product'       => [
+                'title'     => $attribute['Name'],
+                // 'title'     => 'uchiha',
+                'imageUrls' =>[
+                    "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1000.jpg",
+                    "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1001.jpg",
+                    "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1002.jpg"
+                ],
+                'aspects'   => [
+                    'Brand' => ['GoPro'],
+                    'Type'  => ['Helmet/Action'],
+                    'Storage Type' => ['Removable'],
+                    'Recording Definition' => ['High Definition'],
+                    'Media Format'=>['Flash Drive (SSD)'],
+                    'Optical Zoom'=> ['10x']
+                ],
+                'category' => 'SDSAD',
+                // 'description'=> $product['Description']
+                'description'=> 'ádsad'
+            ]
+        ];
+        $json = json_encode($data);
+
         
+        // dd($this->access_token_ebay);
+        $header = [
+            'Authorization'=>'Bearer '.$this->access_token_ebay,
+            'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
+            'Content-Language'=>'en-US',
+            'Content-Type'=>'application/json'
+        ];
+        // dd($json);
+        $res = $client->request('PUT', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/GP-Cam-11',[
+                            'headers'=> $header,
+                            'body'  => $json
+                        ]);
+        $search_results = json_decode($res->getBody(), true);
+        dd($search_results);
+        return $search_results;
+        // dd($search_results);
+        // dd($json);
+        // return true;
     }
 }

@@ -27,7 +27,7 @@ Route::group(['middleware'=>'auth'],function(){
 
 Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
 
-    Route::get('/dropbox', 'DropboxController@index');
+    Route::get('/dropbox', 'DropboxController@index')->name('dropbox');
 
     Route::post('/dropbox', 'DropboxController@postIndex');
 
@@ -44,20 +44,24 @@ Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
     Route::get('upload-file-to-ebay', 'DropboxController@uploadFileEbay');
 
     Route::get('products/all', 'DropboxController@getAllProduct');
-
+    
     // ----------------
+    Route::get('grant','DropboxController@updateGrantCode')->name('grant');
 
+    Route::get('begin', 'DropboxController@beginProcess')->name('begin');
 
-    Route::get('begin', 'DropboxController@beginProcess');
+    Route::get('test','DropboxController@createItemsEbay');
+
+    Route::get('get-all','DropboxController@getAllItems')->name('getall');
 });
 
 Route::group(['namespace'=>'Dropbox'],function(){
 
     Route::get('add-item','DropboxController@createItemsEbay');
     Route::get('grant-code','DropboxController@createItemsEbay');
-    Route::get('test',function(){
-        dd(env('EBAY_APPID'));
-    });
+    // Route::get('test',function(){
+    //     dd(env('EBAY_APPID'));
+    // });
 
     Route::get('start','DropboxController@start');
     Route::get('step2','DropboxController@step2GetAccessTokenEbay');
