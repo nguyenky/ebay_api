@@ -46,3 +46,18 @@ Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
     Route::get('products/all', 'DropboxController@getAllProduct');
 });
 
+Route::group(['namespace'=>'Dropbox'],function(){
+
+    Route::get('add-item','DropboxController@createItemsEbay');
+    Route::get('grant-code','DropboxController@createItemsEbay');
+    Route::get('test',function(){
+        dd(env('EBAY_APPID'));
+    });
+
+    Route::get('start','DropboxController@start');
+    Route::get('step2','DropboxController@step2GetAccessTokenEbay');
+    Route::get('step3','DropboxController@step3RefreshToken');
+
+});
+
+
