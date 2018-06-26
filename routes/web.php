@@ -53,6 +53,8 @@ Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
     Route::get('test','DropboxController@createItemsEbay');
 
     Route::get('get-all','DropboxController@getAllItems')->name('getall');
+
+    Route::get('upload','DropboxController@upload');
 });
 
 Route::group(['namespace'=>'Dropbox'],function(){
