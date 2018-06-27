@@ -100,280 +100,6 @@ class DropboxController extends Controller
         return view('admin.user', $page_data);
     }
 
-    public function getSearch(){
-        return view('dropbox.search');
-    }
-
-
-    public function postSearch(Request $request){
-        // dd($request->all());
-        $input = $request->all();
-        $page_data = [];
-        if ($request->has('path') && $request->has('query')) {
-            $path = $request->input('path');
-            $query = $request->input('query');
-
-            $data = json_encode(
-                [
-                    'path' => $path,
-                    'mode' => 'filename',
-                    'query' => $query
-                ]
-            );
-            // dd($data);
-            $response = $this->api_client->request(
-                'POST', '/2/files/search',
-                [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . \Auth::user()->accesstoken_dropbox,
-                        'Content-Type' => 'application/json'
-                    ],
-                    'body' => $data
-            ]);
-
-            $search_results = json_decode($response->getBody(), true);
-            $matches = $search_results['matches'];
-
-            $page_data = [
-                'path' => $path,
-                'query' => $query,
-                'matches' => $matches
-            ];
-            // dd($page_data);
-        }
-        return view('dropbox.datasearch',[
-            'data'=>$page_data,
-        ]);
-    }
-
-    public function downloadImage($attribute){
-        //dd($attribute);
-        $data = json_encode([
-                'path' => $attribute
-            ]);
-
-            $response = $this->content_client->request(
-                'POST',
-                '/2/files/download',
-                [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' .\Auth::user()->accesstoken_dropbox,
-                        'Dropbox-API-Arg' => $data
-                    ]
-            ]);
-
-            $result = $response->getHeader('dropbox-api-result');
-            $file_info = json_decode($result[0], true);
-
-            $content = $response->getBody();
-
-            $filename = $file_info['name'];
-            // dd($filename);
-            $file_extension = substr($filename, strrpos($filename, '.'));
-            // dd($file_extension);
-            $file = $filename;
-
-            $file_size = $file_info['size'];
-
-            $pathPublic = public_path().'/files/';
-
-            if(\File::exists($pathPublic.$file)){
-
-                unlink($pathPublic.$file);
-          
-            }
-
-            if(!\File::exists($pathPublic)) {
-
-                \File::makeDirectory($pathPublic, $mode = 0777, true, true);
-
-            }
-            try {
-                \File::put(public_path() . '/files/' . $file, $content);
-            } catch (\Exception $e){
-                dd($e);
-            }
-    }
-
-    public function download(Request $request){
-        // dd($attribute);
-        $input = $request->all();
-        // dd($input);
-        if ($request->has('path')) {
-            $path = $request->input('path');
-            $data = json_encode([
-                'path' => $path
-            ]);
-
-            $response = $this->content_client->request(
-                'POST',
-                '/2/files/download',
-                [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' .\Auth::user()->accesstoken_dropbox,
-                        'Dropbox-API-Arg' => $data
-                    ]
-            ]);
-
-            $result = $response->getHeader('dropbox-api-result');
-            $file_info = json_decode($result[0], true);
-
-            $content = $response->getBody();
-
-            $filename = $file_info['name'];
-            // dd($filename);
-            $file_extension = substr($filename, strrpos($filename, '.'));
-            // dd($file_extension);
-            $file ='lenguyenky'.$file_extension;
-
-            $file_size = $file_info['size'];
-
-            $pathPublic = public_path().'/files/';
-
-            if(\File::exists($pathPublic.$file)){
-
-                unlink($pathPublic.$file);
-          
-            }
-
-            if(!\File::exists($pathPublic)) {
-
-                \File::makeDirectory($pathPublic, $mode = 0777, true, true);
-
-            }
-            try {
-                \File::put(public_path() . '/files/' . $file, $content);
-            } catch (\Exception $e){
-                dd($e);
-            }
-            
-            // dd($content);
-            // return response($content)
-            //     ->header('Content-Description', 'File Transfer')
-            //     ->header('Content-Disposition', "attachment; filename={$file}")
-            //     ->header('Content-Transfer-Encoding', 'binary')
-            //     ->header('Connection', 'Keep-Alive')
-            //     ->header('Content-Length', $file_size);
-            return redirect('search');
-        } else {
-            return redirect('search');
-        }
-    }
-
-    public function parent_file_csv($attribute) {
-        $csv = Array();
-        $rowcount = 0;
-        if (($handle = fopen($attribute, "r")) !== FALSE) {
-            $max_line_length = defined('MAX_LINE_LENGTH') ? MAX_LINE_LENGTH : 10000;
-            $header = fgetcsv($handle, $max_line_length);
-            $header_colcount = count($header);
-            while (($row = fgetcsv($handle, $max_line_length)) !== FALSE) {
-                $row_colcount = count($row);
-                if ($row_colcount == $header_colcount) {
-                    $entry = array_combine($header, $row);
-                    $csv[] = $entry;
-                }
-                else {
-                    return null;
-                }
-                $rowcount++;
-            }
-            //echo "Totally $rowcount rows found\n";
-            fclose($handle);
-        }
-        else {
-            error_log("csvreader: Could not read CSV \"$csvfile\"");
-            return null;
-        }
-        return $csv;
-    }
-
-    public function uploadFileEbay(){
-    
-        $csvfile = 'files/lenguyenky.csv';
-
-        $csv = $this->parent_file_csv($csvfile);
-
-        $data = Array();
-        $namefile = Array();
-        foreach ($csv as $key => $value) {
-            $data[] = $value['Image1'];
-            $data[] = $value['Image2'];
-            $data[] = $value['Image3'];
-            $data[] = $value['Image4'];
-            $data[] = $value['Image5'];
-            foreach ($data as $key => $item) {
-                // dd($item);
-                $value = json_encode(
-                    [
-                        'path' => '/DROPSHIP/IMAGES/2018 COLLECTIONS',
-                        'mode' => 'filename',
-                        'query' => $item
-                    ]
-                );
-                $response = $this->api_client->request(
-                'POST', '/2/files/search',
-                [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . \Auth::user()->accesstoken_dropbox,
-                        'Content-Type' => 'application/json'
-                    ],
-                    'body' => $value
-                ]);
-                $search_results = json_decode($response->getBody(), true);
-                $matches = $search_results['matches'];
-                foreach ($matches as $key => $value) {
-                    $this->downloadImage($value['metadata']['path_lower']);
-                    $namefile[] = $value['metadata']['name'];
-                    break;
-                }
-                
-                 //------ Delete image -------
-                    // unlink(public_path('/files/'.$value['metadata']['name']));
-            }
-            dd($namefile);
-            die;            
-        // foreach ($csv as $key => $value) {
-
-        //     $this->createItemsEbay($value);
-            // $data['SKU'] = $value['SKU'];
-            // $data['Name'] = $value['Name'];
-            // $data['Description'] = $value['Description'];
-            // $data['Category'] = $value['Category'];
-            // $data['Size'] = $value['Size'];
-            // $data['Color'] = $value['Color'];
-            // $data['Cost'] = $value['Cost (Ex.GST) '];
-            // $data['Sell'] = $value['Sell'];
-            // $data['RRP'] = $value['RRP'];
-            // $data['QTY'] = $value['QTY'];
-            // $data[$key] = $value['Image1'];
-            // $data['Image1'] = $value['Image1'];
-            // $data['Image2'] = $value['Image2'];
-            // $data['Image3'] = $value['Image3'];
-            // $data['Image4'] = $value['Image4'];
-            // $data['Image5'] = $value['Image5'];
-            // $data['Length'] = $value['Length'];
-            // $data['Width'] = $value['Width'];
-            // $data['Height'] = $value['Height'];
-            // $data['UnitWeight'] = $value['UnitWeight'];
-            // $data['Origin'] = $value['Origin'];
-            // $data['Construction'] = $value['Construction'];
-            // $data['Material'] = $value['Material'];
-            // $data['Pileheight'] = $value['Pileheight'];   
-            // $product = Product::create($data);
-        }  
-    }
-
-    public function getAllProduct(){
-        $products = Product::all();
-        dd($products->toArray());
-    }
-    /// ----- Download dropbox ----
-
-
-
-    ///------
-
 
     public function start(){
         // $client = new \GuzzleHttp\Client();
@@ -408,7 +134,7 @@ class DropboxController extends Controller
             'code'=>$this->grantCode,
             'redirect_uri'=>env('RUNAME'),
         ];
-        dd($body);
+        // dd($body);
 
         $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
                             'headers'=> $header,
@@ -446,84 +172,98 @@ class DropboxController extends Controller
         $search_results = json_decode($res->getBody(), true);
         // dd($search_results);
         $this->access_token_ebay = $search_results['access_token'];
-        $this->createItemsEbay();
-        dd($search_results);
+        // $this->createItemsEbay();
+        // dd($search_results);
     }
     // public function step4Create(){
 
     // }
 
-    public function createItemsEbay(){
-        $client = new \GuzzleHttp\Client();
+    public function createItemsEbay($attribute,$filename){
 
-        $data = [];
-        $data = [
-            'availability'  => [
-                'shipToLocationAvailability'    => [
-                    // 'quantity'  => $product['QTY'],
-                    'quantity'  => 12,
+        try {
+            \Log::info('Job [Ebay] START at '. now());
+
+            $client = new \GuzzleHttp\Client();
+
+            $data = [];
+            $data = [
+                'availability'  => [
+                    'shipToLocationAvailability'    => [
+                        'quantity'  => $attribute['QTY'],
+                        // 'quantity'  => 12,
+                    ]
+                ],
+                'condition'     => 'NEW',
+                'product'       => [
+                    'title'     => $attribute['Name'],
+                    // 'title'     => 'uchiha',
+                    'imageUrls' =>[
+                        "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1000.jpg",
+                        "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1001.jpg",
+                        "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1002.jpg"
+                    ],
+                    'aspects'   => [
+                        'size' => [$attribute['Size']],
+                        'color' => [$attribute['Color']],
+                        'length' => [$attribute['Length']],
+                        'width' => [$attribute['Width']],
+                        'height' => [$attribute['Height']],
+                        'unitweight' => [$attribute['UnitWeight']],
+                        'construction' => [$attribute['Construction']],
+                        'material' => [$attribute['Material']],
+                        'pileheight' => [$attribute['Pileheight']]
+                    ],
+                    'category' => $attribute['Category'],
+                    'description'=> $attribute['Description'],
+                    'cost' => $attribute['Cost (Ex.GST) '],
+                    'sell' => $attribute['Sell'],
+                    'rrp' => $attribute['RRP'],
+                    'origin' => $attribute['Origin'],
                 ]
-            ],
-            'condition'     => 'NEW',
-            'product'       => [
-                // 'title'     => $product['Name'],
-                'title'     => 'uchiha',
-                'imageUrls' =>[
-                    "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1000.jpg",
-                    "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1001.jpg",
-                    "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1002.jpg"
-                ],
-                'aspects'   => [
-                    'Brand' => ['GoPro'],
-                    'Type'  => ['Helmet/Action'],
-                    'Storage Type' => ['Removable'],
-                    'Recording Definition' => ['High Definition'],
-                    'Media Format'=>['Flash Drive (SSD)'],
-                    'Optical Zoom'=> ['10x']
-                ],
-                'category' => 'SDSAD',
-                // 'description'=> $product['Description']
-                'description'=> 'ádsad'
-            ]
-        ];
-        $json = json_encode($data);
-
-        
-        // dd($this->access_token_ebay);
-        $header = [
-            'Authorization'=>'Bearer '.Auth::user()->accesstoken_ebay,
+            ];
+            $json = json_encode($data);
+            $header = [
+            'Authorization'=>'Bearer '.$this->access_token_ebay,
             'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
             'Content-Language'=>'en-US',
             'Content-Type'=>'application/json'
         ];
-        // dd($header);
-        $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/GP-Cam-12',[
+            $res = $client->request('PUT', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
                             'headers'=> $header,
-                            // 'body'  => $json
+                            'body'  => $json
                         ]);
         $search_results = json_decode($res->getBody(), true);
-        dd($search_results);
-        dd($json);
-        return true;
-
-
+        }
+        catch(\Exception $e) {
+            \Log::info('Job [Ebay] FAIL at '. now());
+            dd($e);
+        }      
+        // dd($this->access_token_ebay);
     }
 
     public function getAllItems(){
-        $client = new \GuzzleHttp\Client();
-        $header = [
-            'Authorization'=>'Bearer '.Auth::user()->accesstoken_ebay,
-            'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
-            'Content-Language'=>'en-US',
-            'Content-Type'=>'application/json'
-        ];
-        $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item',[
+        try {
+            $client = new \GuzzleHttp\Client();
+            $header = [
+                'Authorization'=>'Bearer '.Auth::user()->accesstoken_ebay,
+                'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
+                'Content-Language'=>'en-US',
+                'Content-Type'=>'application/json'
+            ];
+            $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/401-OATMEAL-280X190',[
                             'headers'=> $header,
                             // 'body'  => $json
                         ]);
-        $search_results = json_decode($res->getBody(), true);
-        dd($search_results);
-        return true;
+            $search_results = json_decode($res->getBody(), true);
+            dd($search_results);
+            // return true;
+        }
+         catch(\Exception $e) {
+            \Log::info('Job [Ebay] FAIL at '. now());
+            dd($e->getCode());
+        }
+       
     }
     // ---- update token ---working
     public function updateGrantCode(Request $request){
@@ -572,96 +312,120 @@ class DropboxController extends Controller
     /// begin process 
 
     public function beginProcess(){
+        set_time_limit(30);
         $matches    = $this->step1DropboxSearchFileCsv();
         $filename   = $this->step2DropboxDownFileCsv($matches);
         $csv        = $this->step3DropboxConvertFileCsv('files/'.$filename);
         $getAccessToken = $this->step4EbayRefreshToken($csv);
-
         $user = User::find(Auth::user()->id);
         $user->accesstoken_ebay = $getAccessToken['access_token'];
         $user->save();
 
         $products = $this->step5EbayCreadtItems($csv);
+         // dd($csv);
 
-        dd($csv);
-
+       
     }
     public function step1DropboxSearchFileCsv(){
-        $data = json_encode(
+
+     try {       
+
+            \Log::info('Job [Ebay] START at '. now());
+
+            $data = json_encode(
+                    [
+                        'path' => $this->path,
+                        'mode' => $this->mode,
+                        'query' => $this->query,
+                    ]
+                );
+
+            $response = $this->api_client->request(
+                'POST', '/2/files/search',
                 [
-                    'path' => $this->path,
-                    'mode' => $this->mode,
-                    'query' => $this->query,
-                ]
-            );
-            // dd($data);
-        $response = $this->api_client->request(
-            'POST', '/2/files/search',
-            [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . \Auth::user()->accesstoken_dropbox,
-                    'Content-Type' => 'application/json'
-                ],
-                'body' => $data
-        ]);
-
-        $search_results = json_decode($response->getBody(), true);
-        // if($search_results['matches'][''])
-        $matches = $search_results['matches'];
-
-        return $matches;
-    }
-    public function step2DropboxDownFileCsv($matches){
-        // if(count($matches)){
-        //     dd($matches[0]['metadata']);
-        // }else{
-        //     dd('error');
-        // }
-        // dd($matches[0]['metadata']['path_lower']);
-
-        $data = json_encode([
-                'path' => $matches[0]['metadata']['path_lower']
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . \Auth::user()->accesstoken_dropbox,
+                        'Content-Type' => 'application/json'
+                    ],
+                    'body' => $data
             ]);
-        $response = $this->content_client->request(
-            'POST',
-            '/2/files/download',
-            [
-                'headers' => [
-                    'Authorization' => 'Bearer ' .\Auth::user()->accesstoken_dropbox,
-                    'Dropbox-API-Arg' => $data
-                ]
-        ]);
 
-        $result = $response->getHeader('dropbox-api-result');
-        $file_info = json_decode($result[0], true);
+            $search_results = json_decode($response->getBody(), true);
 
-        $content = $response->getBody();
-        $filename = $file_info['name'];
-        // dd($filename);
-        $file_extension = substr($filename, strrpos($filename, '.'));
-        // dd($file_extension);
-        // $file ='lenguyenky'.$file_extension;
+            $matches = $search_results['matches'];
+            
+            \Log::info('Job [Ebay] END at '. now());
 
-        $file_size = $file_info['size'];
-
-        $pathPublic = public_path().'/files/';
-
-        if(\File::exists($pathPublic.$filename)){
-
-            unlink($pathPublic.$filename);
-      
+           
         }
-
-        if(!\File::exists($pathPublic)) {
-
-            \File::makeDirectory($pathPublic, $mode = 0777, true, true);
-
-        }
-        try {
-            \File::put(public_path() . '/files/' . $filename, $content);
-        } catch (\Exception $e){
+        catch(\Exception $e) {
+            \Log::info('Job [Ebay] FAIL at '. $e);
             dd($e);
         }
+             return $matches;
+    }
+
+    public function step2DropboxDownFileCsv($matches){
+        try {
+
+            \Log::info('Job [Ebay] START at '. now());
+
+            if($matches == null) {
+                return;
+            }
+            else {
+                $data = json_encode([
+                        'path' => $matches[0]['metadata']['path_lower']
+                    ]);
+                $response = $this->content_client->request(
+                    'POST',
+                    '/2/files/download',
+                    [
+                        'headers' => [
+                            'Authorization' => 'Bearer ' .\Auth::user()->accesstoken_dropbox,
+                            'Dropbox-API-Arg' => $data
+                        ]
+                ]);
+
+                $result = $response->getHeader('dropbox-api-result');
+                $file_info = json_decode($result[0], true);
+
+                $content = $response->getBody();
+                $filename = $file_info['name'];
+                // dd($filename);
+                $file_extension = substr($filename, strrpos($filename, '.'));
+                // dd($file_extension);
+                // $file ='lenguyenky'.$file_extension;
+
+                $file_size = $file_info['size'];
+
+                $pathPublic = public_path().'/files/';
+
+                if(\File::exists($pathPublic.$filename)){
+
+                    unlink($pathPublic.$filename);
+              
+                }
+
+                if(!\File::exists($pathPublic)) {
+
+                    \File::makeDirectory($pathPublic, $mode = 0777, true, true);
+
+                }
+                try {
+                    \File::put(public_path() . '/files/' . $filename, $content);
+                } catch (\Exception $e){
+                    dd($e);
+                }
+
+            }  
+            \Log::info('Job [Ebay] END at '. now());
+        } 
+        catch (\Exception $e){
+            \Log::info('Job [Ebay] FAIL at '. $e);
+            dd($e);
+        }
+            
         return $filename;
         
         // dd($content);
@@ -696,41 +460,45 @@ class DropboxController extends Controller
     }
     public function step4EbayRefreshToken(){
         // dd(Auth::user());
+        try {
 
-        $client = new \GuzzleHttp\Client();
-        $appID = env('EBAY_APPID');
-        $clientID = env('CERT_ID');
+            $client = new \GuzzleHttp\Client();
+            $appID = env('EBAY_APPID');
+            $clientID = env('CERT_ID');
 
-        $code = $appID .':'.$clientID;
+            $code = $appID .':'.$clientID;
 
-        $this->base64 = 'Basic '.base64_encode($code);
+            $this->base64 = 'Basic '.base64_encode($code);
 
-        $header = [
-            'Content-Type'=>'application/x-www-form-urlencoded',
-            'Authorization'=> $this->base64,
-        ];
-        $body = [
-            'grant_type'=>'refresh_token',
-            'refresh_token'=>Auth::user()->refresh_token_ebay,
-            'scope'=>'https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.inventory',
-        ];
-        $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
-                            'headers'=> $header,
-                            'form_params'  => $body
-                        ]);
-        // dd($res);
-        $search_results = json_decode($res->getBody(), true);
-        $this->access_token_ebay = $search_results['access_token'];
-        // dd($search_results);
+            $header = [
+                'Content-Type'=>'application/x-www-form-urlencoded',
+                'Authorization'=> $this->base64,
+            ];
+            $body = [
+                'grant_type'=>'refresh_token',
+                'refresh_token'=>Auth::user()->refresh_token_ebay,
+                'scope'=>'https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.inventory',
+            ];
+            $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
+                                'headers'=> $header,
+                                'form_params'  => $body
+                            ]);
+
+            $search_results = json_decode($res->getBody(), true);
+            $this->access_token_ebay = $search_results['access_token'];
+        }
+         catch (\Exception $e){
+            \Log::info('Job [Ebay] FAIL at '. $e);
+            dd($e);
+        }
         return $search_results;
-        // $this->access_token_ebay = $search_results['access_token'];
-        // $this->createItemsEbay();
-        // dd($search_results);
     }
+
     public function step5EbayCreadtItems($attributes){
-        // $data = Array();
-        // $namefile = Array();
-        foreach ($attributes as $key => $attribute) {
+
+        try {
+            foreach ($attributes as $key => $attribute) {
+                // echo $key.'<br>';
             $namefile = Array();
             $data = Array();
             $data[] = $attribute['Image1'];
@@ -766,19 +534,32 @@ class DropboxController extends Controller
                     break;
                 }
                 
-                 //------ Delete image -------
-                    // unlink(public_path('/files/'.$value['metadata']['name']));
             }
 
-            // dd($namefile);
+            // // dd($namefile);
             $product = $this->step5_2CreateItem($attribute,$namefile);
-           dd($product);
+            // dd($product);
+            // //------------- Delete Image -------------
+            foreach ($namefile as $key => $item) {
+                 unlink(public_path('/files/'.$item));
+            }
+            // ------------- End Delete Image -----------
+
+            }
+
+            return "Update finish";
 
         }
+        catch (\Exception $e){
+            \Log::info('Job [Ebay] FAIL at '. $e);
+            dd($e);
+        }
+
+        
     }
 
     public function step5_1downloadImage($attribute){
-        //dd($attribute);
+ 
         $data = json_encode([
                 'path' => $attribute
             ]);
@@ -825,59 +606,59 @@ class DropboxController extends Controller
                 dd($e);
             }
     }
-    public function step5_2CreateItem($attribute,$namefile){
-        $client = new \GuzzleHttp\Client();
 
-        $data = [];
-        $data = [
-            'availability'  => [
-                'shipToLocationAvailability'    => [
-                    'quantity'  => $attribute['QTY'],
-                    // 'quantity'  => 12,
-                ]
-            ],
-            'condition'     => 'NEW',
-            'product'       => [
-                'title'     => $attribute['Name'],
-                // 'title'     => 'uchiha',
-                'imageUrls' =>[
-                    "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1000.jpg",
-                    "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1001.jpg",
-                    "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1002.jpg"
-                ],
-                'aspects'   => [
-                    'Brand' => ['GoPro'],
-                    'Type'  => ['Helmet/Action'],
-                    'Storage Type' => ['Removable'],
-                    'Recording Definition' => ['High Definition'],
-                    'Media Format'=>['Flash Drive (SSD)'],
-                    'Optical Zoom'=> ['10x']
-                ],
-                'category' => 'SDSAD',
-                // 'description'=> $product['Description']
-                'description'=> 'ádsad'
-            ]
-        ];
-        $json = json_encode($data);
-
-        
-        // dd($this->access_token_ebay);
-        $header = [
-            'Authorization'=>'Bearer '.$this->access_token_ebay,
-            'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
-            'Content-Language'=>'en-US',
-            'Content-Type'=>'application/json'
-        ];
-        // dd($json);
-        $res = $client->request('PUT', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/GP-Cam-11',[
+    public function getItems($attribute){
+        try {
+            // dd($attribute);
+            $client = new \GuzzleHttp\Client();
+            $header = [
+                'Authorization'=>'Bearer '.Auth::user()->accesstoken_ebay,
+                'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
+                'Content-Language'=>'en-US',
+                'Content-Type'=>'application/json'
+            ];
+            $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$attribute,[
                             'headers'=> $header,
-                            'body'  => $json
                         ]);
-        $search_results = json_decode($res->getBody(), true);
-        dd($search_results);
-        return $search_results;
-        // dd($search_results);
-        // dd($json);
-        // return true;
+            $search_results = json_decode($res->getBody(), true);
+            return $search_results;
+        }
+         catch(\Exception $e) {
+            \Log::info('Job [Ebay] FAIL at '. now());
+            dd($e->getCode());
+        }
+       
+    }
+
+    public function step5_2CreateItem($attribute,$namefile){
+
+        try {
+            \Log::info('Job [Ebay] START at '. now());
+
+            $search_results = $this->getItems($attribute['SKU']);
+
+            $product = $search_results['product'];
+         
+            if($product['title'] == $attribute['Name'] && $product['description'] == $attribute['Description']){
+                    if($product['aspects']['pileheight'][0] == $attribute['Pileheight'] && $product['aspects']['height'][0] == $attribute['Height'] && $product['aspects']['color'][0] == $attribute['Color'] && $product['aspects']['width'][0] == $attribute['Width'] &&$product['aspects']['length'][0] == $attribute['Length'] && $product['aspects']['unitweight'][0] == $attribute['UnitWeight'] && $product['aspects']['construction'][0] == $attribute['Construction'] && $product['aspects']['material'][0] == $attribute['Material'] && $product['aspects']['size'][0] == $attribute['Size']){
+                            return
+                    } else {
+                        $this->createItemsEbay($attribute,$namefile);
+                    }
+
+            } else {
+               $this->createItemsEbay($attribute,$namefile);
+            }
+                // return $product;
+            \Log::info('Job [Ebay] END at '. now());
+        }
+        catch (\Exception $e){
+            \Log::info('Job [Ebay] FAIL at '. $e);
+            if($e->getCode() == 404){
+                $this->createItemsEbay($attribute,$namefile);
+                $this->step5_2CreateItem($attribute,$namefile);
+            }
+        }
+
     }
 }
