@@ -9,6 +9,8 @@ use Purl\Url;
 use App\Product;
 use App\User;
 use Auth;
+use App\Jobs\UploadProductToEbay;
+
 
 class DropboxController extends Controller
 {
@@ -312,23 +314,43 @@ class DropboxController extends Controller
     /// begin process 
 
     public function beginProcess(){
-        set_time_limit(30);
-        $matches    = $this->step1DropboxSearchFileCsv();
-        $filename   = $this->step2DropboxDownFileCsv($matches);
-        $csv        = $this->step3DropboxConvertFileCsv('files/'.$filename);
-        $getAccessToken = $this->step4EbayRefreshToken($csv);
+        
+        $matches = $this->step1DropboxSearchFileCsv();
+        $filename = $this->step2DropboxDownFileCsv($matches);
+        $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
+
+        $getAccessToken = $this->step4EbayRefreshToken();
+
         $user = User::find(Auth::user()->id);
         $user->accesstoken_ebay = $getAccessToken['access_token'];
         $user->save();
-
-        $products = $this->step5EbayCreadtItems($csv);
-         // dd($csv);
-
+        // dispatch(new UploadProductToEbay(auth()->user()));
+        foreach ($csv as $key => $value) {
+           
+            dispatch(new UploadProductToEbay(json_encode($value),auth()->user()));
+        }
+        
+        return redirect('home');
        
     }
+    
+    // public function testebay(){
+    //     $matches = $this->step1DropboxSearchFileCsv();
+    //     $filename = $this->step2DropboxDownFileCsv($matches);
+    //     $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
+
+    //     $getAccessToken = $this->step4EbayRefreshToken();
+
+    //     $user = User::find(Auth::user()->id);
+    //     $user->accesstoken_ebay = $getAccessToken['access_token'];
+    //     $user->save();
+
+    //     $this->step5EbayCreadtItems($csv);
+    // }
+
     public function step1DropboxSearchFileCsv(){
 
-     try {       
+    try {       
 
             \Log::info('Job [Ebay] START at '. now());
 
@@ -356,7 +378,6 @@ class DropboxController extends Controller
             
             \Log::info('Job [Ebay] END at '. now());
 
-           
         }
         catch(\Exception $e) {
             \Log::info('Job [Ebay] FAIL at '. $e);
@@ -607,7 +628,7 @@ class DropboxController extends Controller
             }
     }
 
-    public function getItems($attribute){
+    public function getItems($attribute,$namefile){
         try {
             // dd($attribute);
             $client = new \GuzzleHttp\Client();
@@ -617,7 +638,7 @@ class DropboxController extends Controller
                 'Content-Language'=>'en-US',
                 'Content-Type'=>'application/json'
             ];
-            $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$attribute,[
+            $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
                             'headers'=> $header,
                         ]);
             $search_results = json_decode($res->getBody(), true);
@@ -625,7 +646,8 @@ class DropboxController extends Controller
         }
          catch(\Exception $e) {
             \Log::info('Job [Ebay] FAIL at '. now());
-            dd($e->getCode());
+            $this->createItemsEbay($attribute,$namefile);
+            $this->step5_2CreateItem($attribute,$namefile);
         }
        
     }
@@ -635,13 +657,13 @@ class DropboxController extends Controller
         try {
             \Log::info('Job [Ebay] START at '. now());
 
-            $search_results = $this->getItems($attribute['SKU']);
+            $search_results = $this->getItems($attribute,$namefile);
 
             $product = $search_results['product'];
          
             if($product['title'] == $attribute['Name'] && $product['description'] == $attribute['Description']){
                     if($product['aspects']['pileheight'][0] == $attribute['Pileheight'] && $product['aspects']['height'][0] == $attribute['Height'] && $product['aspects']['color'][0] == $attribute['Color'] && $product['aspects']['width'][0] == $attribute['Width'] &&$product['aspects']['length'][0] == $attribute['Length'] && $product['aspects']['unitweight'][0] == $attribute['UnitWeight'] && $product['aspects']['construction'][0] == $attribute['Construction'] && $product['aspects']['material'][0] == $attribute['Material'] && $product['aspects']['size'][0] == $attribute['Size']){
-                            return
+                            return;
                     } else {
                         $this->createItemsEbay($attribute,$namefile);
                     }
