@@ -11,6 +11,7 @@ use App\Dropbox;
 use Purl\Url;
 use App\User;
 use Auth;
+use App\Jobs\TestJob;
 
 
 class UploadProductToEbay implements ShouldQueue
@@ -21,8 +22,6 @@ class UploadProductToEbay implements ShouldQueue
     protected  $mode   = 'filename';
     protected  $query  = 'UNITEX-DATAFEED-ALL.csv';
     protected  $friend;
-    protected  $api_client;
-    protected  $content_client;
     protected  $access_token_ebay;
     protected  $filecsv;
 
@@ -33,17 +32,17 @@ class UploadProductToEbay implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($filename,User $userId)
-    {
-        $this->filecsv = json_decode($filename,true);
-        // dd($this->filecsv);
-        $this->friend = $userId;  
-    }
-
-    // public function __construct(User $userId)
+    // public function __construct($filename,User $userId)
     // {
+    //     $this->filecsv = json_decode($filename,true);
     //     $this->friend = $userId;  
     // }
+
+    public function __construct($user)
+    {
+        $this->friend = $user;  
+       
+    }
 
 
     /**
@@ -53,12 +52,16 @@ class UploadProductToEbay implements ShouldQueue
      */
     public function handle()
     {   
-        // $this->user;
-        // $csv = $this->step3DropboxConvertFileCsv('files/'.$this->query);
-        // foreach ($csv as $key => $value) {
-        //    $this->step5EbayCreadtItems($value);
-        // }
-        $this->step5EbayCreadtItems($this->filecsv);
+        $matches = $this->step1DropboxSearchFileCsv();
+        $filename = $this->step2DropboxDownFileCsv($matches);
+        $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
+    
+        $getAccessToken = $this->step4EbayRefreshToken();
+
+        $user = User::find($this->friend->id);
+        $user->accesstoken_ebay = $getAccessToken['access_token'];
+        $user->save();
+        $this->step5EbayCreadtItems($csv);
     }
 
     public function step1DropboxSearchFileCsv(){
@@ -79,7 +82,7 @@ class UploadProductToEbay implements ShouldQueue
                 'POST', '/2/files/search',
                 [
                     'headers' => [
-                        'Authorization' => 'Bearer ' . $this->user->accesstoken_dropbox(),
+                        'Authorization' => 'Bearer ' . $this->friend->accesstoken_dropbox,
                         'Content-Type' => 'application/json'
                     ],
                     'body' => $data
@@ -117,7 +120,7 @@ class UploadProductToEbay implements ShouldQueue
                     '/2/files/download',
                     [
                         'headers' => [
-                            'Authorization' => 'Bearer ' .$this->user->accesstoken_dropbox(),
+                            'Authorization' => 'Bearer ' .$this->friend->accesstoken_dropbox,
                             'Dropbox-API-Arg' => $data
                         ]
                 ]);
@@ -207,7 +210,7 @@ class UploadProductToEbay implements ShouldQueue
             ];
             $body = [
                 'grant_type'=>'refresh_token',
-                'refresh_token'=>Auth::user()->refresh_token_ebay,
+                'refresh_token'=>$this->friend->refresh_token_ebay,
                 'scope'=>'https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.inventory',
             ];
             $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
@@ -226,23 +229,18 @@ class UploadProductToEbay implements ShouldQueue
     }
 
     public function step5EbayCreadtItems($attributes){
-
         try {
-            // dd($this->friend->accesstoken_dropbox);
-            \Log::info('Job [Ebay] step5 Ebay Create item ');
-            // foreach ($attributes as $key => $attribute) {
+            \Log::info('Job [Ebay] START step5 Ebay Create item ');
+            foreach ($attributes as $key => $attribute) {
             $namefile = Array();
             $data = Array();
-            $data[] = $attributes['Image1'];
-            $data[] = $attributes['Image2'];
-            $data[] = $attributes['Image3'];
-            $data[] = $attributes['Image4'];
-            $data[] = $attributes['Image5'];
-            // // dd($data);
-             // \Log::info('Log  '.$attribute);
-            // dd($this->user);
+            $data[] = $attribute['Image1'];
+            $data[] = $attribute['Image2'];
+            $data[] = $attribute['Image3'];
+            $data[] = $attribute['Image4'];
+            $data[] = $attribute['Image5'];
             foreach ($data as $key => $item) {
-                // dd($item);
+
                 $value = json_encode(
                     [
                         'path' => '/DROPSHIP/IMAGES/2018 COLLECTIONS',
@@ -269,18 +267,17 @@ class UploadProductToEbay implements ShouldQueue
                 
             }
 
-            // // dd($namefile);
-            $product = $this->step5_2CreateItem($attributes,$namefile);
-            // dd($product);
+            $product = $this->step5_2CreateItem($attribute,$namefile);
+
             // //------------- Delete Image -------------
             foreach ($namefile as $key => $item) {
                  unlink(public_path('files/'.$item));
             }
             // ------------- End Delete Image -----------
 
-            // }
-
-            return "Update finish";
+            }
+            \Log::info('Job [Ebay] END step5 Ebay Create item ');
+            // return "Update finish";
 
         }
         catch (\Exception $e){
@@ -313,9 +310,9 @@ class UploadProductToEbay implements ShouldQueue
             $content = $response->getBody();
 
             $filename = $file_info['name'];
-            // dd($filename);
+
             $file_extension = substr($filename, strrpos($filename, '.'));
-            // dd($file_extension);
+
             $file = $filename;
 
             $file_size = $file_info['size'];
@@ -342,7 +339,7 @@ class UploadProductToEbay implements ShouldQueue
 
     public function getItems($attribute,$namefile){
         try {
-            // dd($attribute);
+
 
             \Log::info('Job [Ebay] START GET ITEM '. now());
             $client = new \GuzzleHttp\Client();
@@ -375,7 +372,7 @@ class UploadProductToEbay implements ShouldQueue
             \Log::info('Job [Ebay] START step5_2 Create Item '. now());
 
             $search_results = $this->getItems($attribute,$namefile);
-            // dd($search_results);
+
             $product = $search_results['product'];
          
             if($product['title'] == $attribute['Name'] && $product['description'] == $attribute['Description']){
@@ -453,12 +450,13 @@ class UploadProductToEbay implements ShouldQueue
                             'body'  => $json
                         ]);
         $search_results = json_decode($res->getBody(), true);
+        \Log::info('Job [Ebay] END create item ebay at '. now());
         }
         catch(\Exception $e) {
             \Log::info('Job [Ebay] FAIL create item ebay at '. now());
             dd($e);
         }      
-        // dd($this->access_token_ebay);
+
     }
 
 }

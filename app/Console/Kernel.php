@@ -5,6 +5,7 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
+
 class Kernel extends ConsoleKernel
 {
     /**
@@ -13,7 +14,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        Commands\UpdateProductToEbayOne::class,
     ];
 
     /**
@@ -24,8 +25,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        $schedule->command('command:ebay-product')
+                 ->everyMinute();
+
+            // $schedule->call(function(){
+            //      \Log::info('Job [Ebay] 123 ');
+            // })->everyMinute();
+        // $schedule->job(new UploadProductToEbay(auth()->user()))
+        //          ->daily();
     }
 
     /**
@@ -39,4 +46,6 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
+    // php artisan queue:listen --timeout=0 --queue=uploads
+    // php artisan schedule:run >> /dev/null/2>&1
 }
