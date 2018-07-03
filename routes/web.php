@@ -23,7 +23,11 @@ Route::group(['middleware'=>'auth'],function(){
 
 });
 
+Route::get('testjob',function(){
 
+     dispatch(new \App\Jobs\TestJob);
+    
+});
 
 Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
 
@@ -50,7 +54,7 @@ Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
 
     Route::get('begin', 'DropboxController@beginProcess')->name('begin');
 
-    Route::get('test','DropboxController@createItemsEbay');
+    Route::get('test','DropboxController@testebay');
 
     Route::get('get-all','DropboxController@getAllItems')->name('getall');
 

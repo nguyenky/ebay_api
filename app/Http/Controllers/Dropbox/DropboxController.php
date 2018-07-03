@@ -9,6 +9,8 @@ use Purl\Url;
 use App\Product;
 use App\User;
 use Auth;
+use App\Jobs\UploadProductToEbay;
+
 
 class DropboxController extends Controller
 {
@@ -239,7 +241,7 @@ class DropboxController extends Controller
             \Log::info('Job [Ebay] FAIL at '. now());
             dd($e);
         }      
-        // dd($this->access_token_ebay);
+      
     }
 
     public function getAllItems(){
@@ -279,7 +281,7 @@ class DropboxController extends Controller
     }
 
     public function getAccessToken(){
-        // dd(Auth::user()->toArray());
+
         $client = new \GuzzleHttp\Client();
         $appID = env('EBAY_APPID');
         $clientID = env('CERT_ID');
@@ -298,7 +300,7 @@ class DropboxController extends Controller
             'code'=>$this->grantCode,
             'redirect_uri'=>env('RUNAME'),
         ];
-        // dd($body);
+   
 
         $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
                             'headers'=> $header,
@@ -312,23 +314,42 @@ class DropboxController extends Controller
     /// begin process 
 
     public function beginProcess(){
-        set_time_limit(30);
-        $matches    = $this->step1DropboxSearchFileCsv();
-        $filename   = $this->step2DropboxDownFileCsv($matches);
-        $csv        = $this->step3DropboxConvertFileCsv('files/'.$filename);
-        $getAccessToken = $this->step4EbayRefreshToken($csv);
-        $user = User::find(Auth::user()->id);
-        $user->accesstoken_ebay = $getAccessToken['access_token'];
-        $user->save();
+        set_time_limit(0);
+        // $matches = $this->step1DropboxSearchFileCsv();
+        // $filename = $this->step2DropboxDownFileCsv($matches);
+        // $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
 
-        $products = $this->step5EbayCreadtItems($csv);
-         // dd($csv);
+        // $getAccessToken = $this->step4EbayRefreshToken();
 
+        // $user = User::find(Auth::user()->id);
+        // $user->accesstoken_ebay = $getAccessToken['access_token'];
+        // $user->save();
+        // // dispatch(new UploadProductToEbay(auth()->user()));
+        // foreach ($csv as $key => $value) {  
+            dispatch(new UploadProductToEbay(auth()->user()))->onQueue('uploads');
+        // }
+        
+        return redirect('home');
        
     }
+    
+    // public function testebay(){
+    //     $matches = $this->step1DropboxSearchFileCsv();
+    //     $filename = $this->step2DropboxDownFileCsv($matches);
+    //     $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
+
+    //     $getAccessToken = $this->step4EbayRefreshToken();
+
+    //     $user = User::find(Auth::user()->id);
+    //     $user->accesstoken_ebay = $getAccessToken['access_token'];
+    //     $user->save();
+
+    //     $this->step5EbayCreadtItems($csv);
+    // }
+
     public function step1DropboxSearchFileCsv(){
 
-     try {       
+    try {       
 
             \Log::info('Job [Ebay] START at '. now());
 
@@ -356,7 +377,6 @@ class DropboxController extends Controller
             
             \Log::info('Job [Ebay] END at '. now());
 
-           
         }
         catch(\Exception $e) {
             \Log::info('Job [Ebay] FAIL at '. $e);
@@ -392,9 +412,9 @@ class DropboxController extends Controller
 
                 $content = $response->getBody();
                 $filename = $file_info['name'];
-                // dd($filename);
+               
                 $file_extension = substr($filename, strrpos($filename, '.'));
-                // dd($file_extension);
+               
                 // $file ='lenguyenky'.$file_extension;
 
                 $file_size = $file_info['size'];
@@ -428,7 +448,7 @@ class DropboxController extends Controller
             
         return $filename;
         
-        // dd($content);
+       
     }
     public function step3DropboxConvertFileCsv($attribute){
         $csv = Array();
@@ -459,7 +479,7 @@ class DropboxController extends Controller
         return $csv;
     }
     public function step4EbayRefreshToken(){
-        // dd(Auth::user());
+        
         try {
 
             $client = new \GuzzleHttp\Client();
@@ -506,10 +526,10 @@ class DropboxController extends Controller
             $data[] = $attribute['Image3'];
             $data[] = $attribute['Image4'];
             $data[] = $attribute['Image5'];
-            // dd($data);
+         
 
             foreach ($data as $key => $item) {
-                // dd($item);
+            
                 $value = json_encode(
                     [
                         'path' => '/DROPSHIP/IMAGES/2018 COLLECTIONS',
@@ -536,9 +556,9 @@ class DropboxController extends Controller
                 
             }
 
-            // // dd($namefile);
+       
             $product = $this->step5_2CreateItem($attribute,$namefile);
-            // dd($product);
+          
             // //------------- Delete Image -------------
             foreach ($namefile as $key => $item) {
                  unlink(public_path('/files/'.$item));
@@ -580,9 +600,9 @@ class DropboxController extends Controller
             $content = $response->getBody();
 
             $filename = $file_info['name'];
-            // dd($filename);
+          
             $file_extension = substr($filename, strrpos($filename, '.'));
-            // dd($file_extension);
+           
             $file = $filename;
 
             $file_size = $file_info['size'];
@@ -607,9 +627,9 @@ class DropboxController extends Controller
             }
     }
 
-    public function getItems($attribute){
+    public function getItems($attribute,$namefile){
         try {
-            // dd($attribute);
+           
             $client = new \GuzzleHttp\Client();
             $header = [
                 'Authorization'=>'Bearer '.Auth::user()->accesstoken_ebay,
@@ -617,7 +637,7 @@ class DropboxController extends Controller
                 'Content-Language'=>'en-US',
                 'Content-Type'=>'application/json'
             ];
-            $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$attribute,[
+            $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
                             'headers'=> $header,
                         ]);
             $search_results = json_decode($res->getBody(), true);
@@ -625,7 +645,8 @@ class DropboxController extends Controller
         }
          catch(\Exception $e) {
             \Log::info('Job [Ebay] FAIL at '. now());
-            dd($e->getCode());
+            $this->createItemsEbay($attribute,$namefile);
+            $this->step5_2CreateItem($attribute,$namefile);
         }
        
     }
@@ -635,13 +656,13 @@ class DropboxController extends Controller
         try {
             \Log::info('Job [Ebay] START at '. now());
 
-            $search_results = $this->getItems($attribute['SKU']);
+            $search_results = $this->getItems($attribute,$namefile);
 
             $product = $search_results['product'];
          
             if($product['title'] == $attribute['Name'] && $product['description'] == $attribute['Description']){
                     if($product['aspects']['pileheight'][0] == $attribute['Pileheight'] && $product['aspects']['height'][0] == $attribute['Height'] && $product['aspects']['color'][0] == $attribute['Color'] && $product['aspects']['width'][0] == $attribute['Width'] &&$product['aspects']['length'][0] == $attribute['Length'] && $product['aspects']['unitweight'][0] == $attribute['UnitWeight'] && $product['aspects']['construction'][0] == $attribute['Construction'] && $product['aspects']['material'][0] == $attribute['Material'] && $product['aspects']['size'][0] == $attribute['Size']){
-                            return
+                            return;
                     } else {
                         $this->createItemsEbay($attribute,$namefile);
                     }
@@ -673,7 +694,7 @@ class DropboxController extends Controller
         //the token representing the eBay user to assign the call with
         $userToken = 'AgAAAA**AQAAAA**aAAAAA**D/0xWw**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6wFk4agD5OGqA6dj6x9nY+seQ**4J8EAA**AAMAAA**r/iy+VnJKThrUxY8Ojucb44A7xgLjqriJM2KT9VHhadZqMCHitZl6Wgga/KGO8NufOabDg6h1bV5DUnB4CVGLyfEoxSnOlnLySN4V+8A4hEQb+VawHhf3M0TDmvhTIFrFfGzZuru3jyhYJjPbLxKV4/zzZq0OxY+XKO021EwPstqW0LiVZmIr47wbT3i158i6aAQeikQ7OfqhXf689/tbTebfhCDHocLR24F+pX/MXWv9AfMkfKLT2+QJZPhdwPiob5Uk8omlhTVpu9WhbhY2dSkPjU5FXAf4gKDfRRX80DSnTITZFlMAVX49ztz7IfGo+IUXNLDtsPuDvyntH3MHzup4W6+02WS0Vj8KNnhkrjUoFMswZLYMsSLoNXnReLWmmp4HKc7wSLtCv1y6G6R7v30VHsBWGdGBJPV1f/37ZoVGhpToAaabz9r59hiYHU7F63iQPfoA+jOiktYg/2Z6TIjtBvOkP7IjERzBAmx5o4Rhr3LprPFndmRnslg4R9PeKelNTpLBR7AE6NN4nlUaUW3UBN2y3rA6LRrB98yX6/acouWuKvYfo6Ujy5GdMoF+2CTg6SxgjFeWL57+hkCzWrfKQtnX2UGtYYEL9hvR/MmrlrR7Wk2umtw7JQdVeWTLaU+TaeVjKWM+shHu0xzRrQ7PutcJuamM9j76l4BCNklgINEG1oO7ClmqHErzaHdUNw8bbqyjD4JJVFD+eCdrZDb/7M1scUBVXgdYkIvl9vYB1KI7eV+3bpe/Ll/vsVn';
 
-        // dd($userToken);
+
 
         $siteID  = 0;                            // siteID needed in request - US=0, UK=3, DE=77...
         $verb    = 'UploadSiteHostedPictures';   // the call being made:

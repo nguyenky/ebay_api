@@ -64,6 +64,13 @@ return [
             'retry_after' => 90,
             'block_for' => null,
         ],
+        
+        'redis2' => [
+        'driver' => 'redis',
+        'connection' => 'default',
+        'queue'  => 'uploads',
+        'expire' => null,
+    ],
 
     ],
 

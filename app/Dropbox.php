@@ -5,7 +5,7 @@ use GuzzleHttp\Client;
 
 class Dropbox 
 {
-    public function api()
+    public static function api()
     {
         $client = new Client([
             'base_uri' => 'https://api.dropboxapi.com',
@@ -13,7 +13,7 @@ class Dropbox
         return $client;
     }
 
-    public function content()
+    public static function content()
     {
         $client = new Client([
             'base_uri' => 'https://content.dropboxapi.com'
