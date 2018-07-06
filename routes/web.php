@@ -64,6 +64,8 @@ Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
 
     Route::get('upload','DropboxController@upload');
 
+    Route::get('refresh-app','DropboxController@refreshApp')->name('refresh');
+
 
 });
 

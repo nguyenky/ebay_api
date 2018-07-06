@@ -330,6 +330,7 @@ class DropboxController extends Controller
         // $token = \App\Token::all()->first();
         $token->accesstoken_ebay = $getAccessToken['access_token'];
         $token->save();
+        // dd('1213');
         $this->step5EbayCreadtItems($csv,$token->accesstoken_dropbox);
 
 
@@ -342,6 +343,20 @@ class DropboxController extends Controller
         
         return redirect('home');
        
+    }
+    public function refreshApp(){
+        set_time_limit(0);
+        $token = \App\Token::all()->first();
+        $matches = $this->step1DropboxSearchFileCsv($token->accesstoken_dropbox);
+        $filename = $this->step2DropboxDownFileCsv($matches,$token->accesstoken_dropbox);
+        $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
+        $getAccessToken = $this->step4EbayRefreshToken($token->refresh_token_ebay);
+
+        // $token = \App\Token::all()->first();
+        $token->accesstoken_ebay = $getAccessToken['access_token'];
+        $token->save();
+
+        return redirect('/home');
     }
     
 
