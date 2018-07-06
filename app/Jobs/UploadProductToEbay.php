@@ -9,7 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Dropbox;
 use Purl\Url;
-use App\User;
+use App\Token;
 use Auth;
 use App\Jobs\TestJob;
 
@@ -38,9 +38,9 @@ class UploadProductToEbay implements ShouldQueue
     //     $this->friend = $userId;  
     // }
 
-    public function __construct($user)
+    public function __construct($token)
     {
-        $this->friend = $user;  
+        $this->friend = $token;  
        
     }
 
@@ -58,9 +58,9 @@ class UploadProductToEbay implements ShouldQueue
     
         $getAccessToken = $this->step4EbayRefreshToken();
 
-        $user = User::find($this->friend->id);
-        $user->accesstoken_ebay = $getAccessToken['access_token'];
-        $user->save();
+        $token = Token::find($this->friend->id);
+        $token->accesstoken_ebay = $getAccessToken['access_token'];
+        $token->save();
         $this->step5EbayCreadtItems($csv);
     }
 
