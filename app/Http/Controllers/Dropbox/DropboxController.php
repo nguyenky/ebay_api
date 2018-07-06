@@ -50,7 +50,8 @@ class DropboxController extends Controller
     }
 
     public function loginDropbox(Request $request){
-        // dd('asdsd');
+
+        
         if ($request->has('code')) {
 
             $data = [
@@ -80,21 +81,25 @@ class DropboxController extends Controller
         return redirect('/');
     }
     public function updateToken($accessToken){
-        $user = \App\User::find(\Auth::user()->id);
-        $user->accesstoken_dropbox = $accessToken;
-        $user->save();
-        // dd($user);
+        $data = [];
+        $token = \App\Token::all()->first();
+        if($token == null) {
+            $data['accesstoken_dropbox'] =  $accessToken;
+            \App\Token::create($data);
+        } else {
+            $token->accesstoken_dropbox =  $accessToken;
+            $token->save();
+        }
     }
     public function userDropboxInfor(){
-        // dd(\Auth::user()->accesstoken_dropbox);
+        $token = \App\Token::all()->first();
         $response = $this->api_client->request('POST', '/2/users/get_current_account', [
             'headers' => [
-                'Authorization' => 'Bearer ' . \Auth::user()->accesstoken_dropbox,
+                'Authorization' => 'Bearer ' . $token->accesstoken_dropbox,
             ]
         ]);
 
         $user = json_decode($response->getBody(), true);
-        dd($user);
         $page_data = [
             'user' => $user
         ];
@@ -315,42 +320,35 @@ class DropboxController extends Controller
 
     public function beginProcess(){
         set_time_limit(0);
-        // $matches = $this->step1DropboxSearchFileCsv();
-        // $filename = $this->step2DropboxDownFileCsv($matches);
-        // $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
+        $token = \App\Token::all()->first();
+        $matches = $this->step1DropboxSearchFileCsv($token->accesstoken_dropbox);
+        $filename = $this->step2DropboxDownFileCsv($matches,$token->accesstoken_dropbox);
+        $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
 
-        // $getAccessToken = $this->step4EbayRefreshToken();
+        $getAccessToken = $this->step4EbayRefreshToken($token->refresh_token_ebay);
 
-        // $user = User::find(Auth::user()->id);
-        // $user->accesstoken_ebay = $getAccessToken['access_token'];
-        // $user->save();
-        // // dispatch(new UploadProductToEbay(auth()->user()));
-        // foreach ($csv as $key => $value) {  
-            dispatch(new UploadProductToEbay(auth()->user()))->onQueue('uploads');
+        // $token = \App\Token::all()->first();
+        $token->accesstoken_ebay = $getAccessToken['access_token'];
+        $token->save();
+
+        $this->step5EbayCreadtItems($csv,$token->accesstoken_dropbox);
+
+
+
+
+        //------------------------ Run Job ----------------------
+            // $token = \App\Token::all()->first();
+            // dispatch(new UploadProductToEbay($token))->onQueue('uploads');
         // }
         
         return redirect('home');
        
     }
     
-    // public function testebay(){
-    //     $matches = $this->step1DropboxSearchFileCsv();
-    //     $filename = $this->step2DropboxDownFileCsv($matches);
-    //     $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
 
-    //     $getAccessToken = $this->step4EbayRefreshToken();
-
-    //     $user = User::find(Auth::user()->id);
-    //     $user->accesstoken_ebay = $getAccessToken['access_token'];
-    //     $user->save();
-
-    //     $this->step5EbayCreadtItems($csv);
-    // }
-
-    public function step1DropboxSearchFileCsv(){
+    public function step1DropboxSearchFileCsv($attribute){
 
     try {       
-
             \Log::info('Job [Ebay] START at '. now());
 
             $data = json_encode(
@@ -365,7 +363,7 @@ class DropboxController extends Controller
                 'POST', '/2/files/search',
                 [
                     'headers' => [
-                        'Authorization' => 'Bearer ' . \Auth::user()->accesstoken_dropbox,
+                        'Authorization' => 'Bearer ' . $attribute,
                         'Content-Type' => 'application/json'
                     ],
                     'body' => $data
@@ -385,10 +383,11 @@ class DropboxController extends Controller
              return $matches;
     }
 
-    public function step2DropboxDownFileCsv($matches){
+    public function step2DropboxDownFileCsv($matches,$attribute){
+        \Log::info('Job [Ebay] START at '. now());
         try {
 
-            \Log::info('Job [Ebay] START at '. now());
+            
 
             if($matches == null) {
                 return;
@@ -402,7 +401,7 @@ class DropboxController extends Controller
                     '/2/files/download',
                     [
                         'headers' => [
-                            'Authorization' => 'Bearer ' .\Auth::user()->accesstoken_dropbox,
+                            'Authorization' => 'Bearer ' .$attribute,
                             'Dropbox-API-Arg' => $data
                         ]
                 ]);
@@ -478,7 +477,7 @@ class DropboxController extends Controller
 
         return $csv;
     }
-    public function step4EbayRefreshToken(){
+    public function step4EbayRefreshToken($attribute){
         
         try {
 
@@ -496,7 +495,7 @@ class DropboxController extends Controller
             ];
             $body = [
                 'grant_type'=>'refresh_token',
-                'refresh_token'=>Auth::user()->refresh_token_ebay,
+                'refresh_token'=>$attribute,
                 'scope'=>'https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.inventory',
             ];
             $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
@@ -514,7 +513,7 @@ class DropboxController extends Controller
         return $search_results;
     }
 
-    public function step5EbayCreadtItems($attributes){
+    public function step5EbayCreadtItems($attributes,$token_dropbox){
 
         try {
             foreach ($attributes as $key => $attribute) {
@@ -541,7 +540,7 @@ class DropboxController extends Controller
                 'POST', '/2/files/search',
                 [
                     'headers' => [
-                        'Authorization' => 'Bearer ' . \Auth::user()->accesstoken_dropbox,
+                        'Authorization' => 'Bearer ' . $token_dropbox,
                         'Content-Type' => 'application/json'
                     ],
                     'body' => $value
@@ -549,7 +548,7 @@ class DropboxController extends Controller
                 $search_results = json_decode($response->getBody(), true);
                 $matches = $search_results['matches'];
                 foreach ($matches as $key => $value) {
-                    $this->step5_1downloadImage($value['metadata']['path_lower']);
+                    $this->step5_1downloadImage($value['metadata']['path_lower'],$token_dropbox);
                     $namefile[] = $value['metadata']['name'];
                     break;
                 }
@@ -578,7 +577,7 @@ class DropboxController extends Controller
         
     }
 
-    public function step5_1downloadImage($attribute){
+    public function step5_1downloadImage($attribute,$token_dropbox){
  
         $data = json_encode([
                 'path' => $attribute
@@ -589,7 +588,7 @@ class DropboxController extends Controller
                 '/2/files/download',
                 [
                     'headers' => [
-                        'Authorization' => 'Bearer ' .\Auth::user()->accesstoken_dropbox,
+                        'Authorization' => 'Bearer ' .$token_dropbox,
                         'Dropbox-API-Arg' => $data
                     ]
             ]);
@@ -627,12 +626,12 @@ class DropboxController extends Controller
             }
     }
 
-    public function getItems($attribute,$namefile){
+    public function getItems($attribute,$namefile,$token_ebay){
         try {
            
             $client = new \GuzzleHttp\Client();
             $header = [
-                'Authorization'=>'Bearer '.Auth::user()->accesstoken_ebay,
+                'Authorization'=>'Bearer '.$token_ebay,
                 'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
                 'Content-Language'=>'en-US',
                 'Content-Type'=>'application/json'
@@ -645,8 +644,10 @@ class DropboxController extends Controller
         }
          catch(\Exception $e) {
             \Log::info('Job [Ebay] FAIL at '. now());
-            $this->createItemsEbay($attribute,$namefile);
-            $this->step5_2CreateItem($attribute,$namefile);
+             if($e->getCode() == 404){
+                $this->createItemsEbay($attribute,$namefile);
+                $this->step5_2CreateItem($attribute,$namefile);
+            }
         }
        
     }
@@ -655,14 +656,14 @@ class DropboxController extends Controller
 
         try {
             \Log::info('Job [Ebay] START at '. now());
-
-            $search_results = $this->getItems($attribute,$namefile);
+            $token = \App\Token::all()->first();
+            $search_results = $this->getItems($attribute,$namefile,$token->accesstoken_ebay);
 
             $product = $search_results['product'];
          
             if($product['title'] == $attribute['Name'] && $product['description'] == $attribute['Description']){
                     if($product['aspects']['pileheight'][0] == $attribute['Pileheight'] && $product['aspects']['height'][0] == $attribute['Height'] && $product['aspects']['color'][0] == $attribute['Color'] && $product['aspects']['width'][0] == $attribute['Width'] &&$product['aspects']['length'][0] == $attribute['Length'] && $product['aspects']['unitweight'][0] == $attribute['UnitWeight'] && $product['aspects']['construction'][0] == $attribute['Construction'] && $product['aspects']['material'][0] == $attribute['Material'] && $product['aspects']['size'][0] == $attribute['Size']){
-                            return;
+                           
                     } else {
                         $this->createItemsEbay($attribute,$namefile);
                     }
@@ -675,10 +676,7 @@ class DropboxController extends Controller
         }
         catch (\Exception $e){
             \Log::info('Job [Ebay] FAIL at '. $e);
-            if($e->getCode() == 404){
-                $this->createItemsEbay($attribute,$namefile);
-                $this->step5_2CreateItem($attribute,$namefile);
-            }
+            dd($e);
         }
 
     }
