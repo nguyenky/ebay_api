@@ -384,9 +384,10 @@ class DropboxController extends Controller
     }
 
     public function step2DropboxDownFileCsv($matches,$attribute){
+        \Log::info('Job [Ebay] START at '. now());
         try {
 
-            \Log::info('Job [Ebay] START at '. now());
+            
 
             if($matches == null) {
                 return;

@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\User;
+use App\Token;
 use App\Jobs\UploadProductToEbay;
 
 class UpdateProductToEbayOne extends Command
@@ -34,8 +35,8 @@ class UpdateProductToEbayOne extends Command
     public function __construct()
     {
         parent::__construct();
-        $user = User::find(1);
-        $this->friend = $user;
+        $token = Token::find(1);
+        $this->friend = $token;
     }
 
     /**
