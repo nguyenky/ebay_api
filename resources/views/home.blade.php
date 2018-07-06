@@ -29,7 +29,8 @@
                     </div>
                     <br />
                     <div>
-                        <a href="{{route('getall')}}"> Get All Items !!</a>
+                        <!-- <a href="{{route('getall')}}"> Get All Items !!</a> -->
+                        <a href="{{route('getItem')}}"> Get Custom Item !!</a>
                     </div>
                     <br />
                     <div>

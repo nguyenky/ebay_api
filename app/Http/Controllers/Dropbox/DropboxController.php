@@ -8,6 +8,7 @@ use App\Dropbox;
 use Purl\Url;
 use App\Product;
 use App\User;
+use App\Token;
 use Auth;
 use App\Jobs\UploadProductToEbay;
 
@@ -324,12 +325,13 @@ class DropboxController extends Controller
         $matches = $this->step1DropboxSearchFileCsv($token->accesstoken_dropbox);
         $filename = $this->step2DropboxDownFileCsv($matches,$token->accesstoken_dropbox);
         $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
-
+        // dd('123');
         $getAccessToken = $this->step4EbayRefreshToken($token->refresh_token_ebay);
 
         // $token = \App\Token::all()->first();
         $token->accesstoken_ebay = $getAccessToken['access_token'];
         $token->save();
+        dd('1232');
 
         $this->step5EbayCreadtItems($csv,$token->accesstoken_dropbox);
 
@@ -770,6 +772,42 @@ class DropboxController extends Controller
         $ack        = $respXmlObj->Ack;
         $picNameOut = $respXmlObj->SiteHostedPictureDetails->PictureName;
         $picURL     = $respXmlObj->SiteHostedPictureDetails->FullURL;
+    }
+
+    function getItem(){
+        $csv = $this->step3DropboxConvertFileCsv('files/UNITEX-DATAFEED-ALL.csv');
+        // dd($csv);
+
+        return view('getItem',['items'=>$csv]);
+    }
+    function getDetail($id){
+        try {
+           
+            $client = new \GuzzleHttp\Client();
+            $token = Token::find(1);
+            $header = [
+                'Authorization'=>'Bearer '.$token->accesstoken_ebay,
+                'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
+                'Content-Language'=>'en-US',
+                'Content-Type'=>'application/json'
+            ];
+            // dd($header);
+            $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$id,[
+                            'headers'=> $header,
+                        ]);
+            $search_results = json_decode($res->getBody(), true);
+            dd($search_results);
+        }
+        catch(\Exception $e) {
+            \Log::info('Job [Ebay] FAIL at '. now());
+             if($e->getCode() == 404){
+                // $this->createItemsEbay($attribute,$namefile);
+                // $this->step5_2CreateItem($attribute,$namefile);
+                dd('SKU not found !!!');
+            }
+        }
+        // return $search_results;
+        // return view('detail-item',['item'=>'asdsd']);
     }
 }
 

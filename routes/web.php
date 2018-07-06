@@ -58,7 +58,13 @@ Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
 
     Route::get('get-all','DropboxController@getAllItems')->name('getall');
 
+    Route::get('get-item','DropboxController@getItem')->name('getItem');
+
+    Route::get('get-detail-{id}','DropboxController@getDetail')->name('getDetail');
+
     Route::get('upload','DropboxController@upload');
+
+
 });
 
 Route::group(['namespace'=>'Dropbox'],function(){
