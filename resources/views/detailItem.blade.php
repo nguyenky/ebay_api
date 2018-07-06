@@ -35,7 +35,7 @@
                     <br />
                     <div>
                         <h2>Detail</h2>
-                        {{$item}}
+                        {{print_r($item)}}
                     </div>
 
                     

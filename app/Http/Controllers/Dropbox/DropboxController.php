@@ -325,14 +325,11 @@ class DropboxController extends Controller
         $matches = $this->step1DropboxSearchFileCsv($token->accesstoken_dropbox);
         $filename = $this->step2DropboxDownFileCsv($matches,$token->accesstoken_dropbox);
         $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
-        // dd('123');
         $getAccessToken = $this->step4EbayRefreshToken($token->refresh_token_ebay);
 
         // $token = \App\Token::all()->first();
         $token->accesstoken_ebay = $getAccessToken['access_token'];
         $token->save();
-        dd('1232');
-
         $this->step5EbayCreadtItems($csv,$token->accesstoken_dropbox);
 
 
@@ -796,14 +793,18 @@ class DropboxController extends Controller
                             'headers'=> $header,
                         ]);
             $search_results = json_decode($res->getBody(), true);
-            dd($search_results);
+            // dd($search_results['product']);
+            return view('detailItem',['item'=>$search_results['product']]);
+            // return view('detailItem',['item'=>'dsds']);
         }
         catch(\Exception $e) {
             \Log::info('Job [Ebay] FAIL at '. now());
              if($e->getCode() == 404){
                 // $this->createItemsEbay($attribute,$namefile);
                 // $this->step5_2CreateItem($attribute,$namefile);
-                dd('SKU not found !!!');
+                // dd('SKU not found !!!');
+                // $search_results['product']
+                return view('detailItem',['item'=>'SKU not found !!!']);
             }
         }
         // return $search_results;
