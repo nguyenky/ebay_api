@@ -37,8 +37,11 @@
                     </div>
                     <br />
                     <div>
-                        @foreach($items as $item)
-                            <a href="{{route('getDetail',['id'=>$item['SKU']])}}">{{$item['SKU']}}</a> || 
+                        @foreach($items as $key => $item)
+                            <div class="col-ms-6 col-md-4">
+                                <span style="color: #3b7ec4;">{{$key}} : </span>
+                                <a href="{{route('getDetail',['id'=>$item['SKU']])}}">{{$item['SKU']}}</a>
+                            </div>
                         @endforeach
                     </div>
                     
