@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('command:ebay-product')
-                 ->daily();
+                 ->everyMinute();
 
             // $schedule->call(function(){
             //      \Log::info('Job [Ebay] 123 ');

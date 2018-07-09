@@ -52,6 +52,7 @@ class UploadProductToEbay implements ShouldQueue
      */
     public function handle()
     {   
+        \Log::info('-------- START PROCESS -------------');
         $matches = $this->step1DropboxSearchFileCsv();
         $filename = $this->step2DropboxDownFileCsv($matches);
         $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
@@ -62,14 +63,13 @@ class UploadProductToEbay implements ShouldQueue
         $token->accesstoken_ebay = $getAccessToken['access_token'];
         $token->save();
         $this->step5EbayCreadtItems($csv);
+        \Log::info('-------- END PROCESS -------------');
     }
 
     public function step1DropboxSearchFileCsv(){
-    
+
+    \Log::info('Job [Ebay] START ----Search File----- '. now());
     try {       
-
-            \Log::info('Job [Ebay] START Search File '. now());
-
             $data = json_encode(
                     [
                         'path' => $this->path,
@@ -91,23 +91,24 @@ class UploadProductToEbay implements ShouldQueue
             $search_results = json_decode($response->getBody(), true);
 
             $matches = $search_results['matches'];
+            \Log::info('Job [Ebay] SUCCESS ----Search File---- at '. now());
             
-            \Log::info('Job [Ebay] END Search File at '. now());
+            
 
            
         }
         catch(\Exception $e) {
-            \Log::info('Job [Ebay] FAIL at '. $e);
+            \Log::info('Job [Ebay] FAIL ----Search File---- at '. $e);
             dd($e);
         }
+        \Log::info('Job [Ebay] END ----Search File---- at '. now());
              return $matches;
     }
 
     public function step2DropboxDownFileCsv($matches){
+        \Log::info('Job [Ebay] START ----Down File---- at '. now());
         try {
            
-            \Log::info('Job [Ebay] START Down File at '. now());
-
             if($matches == null) {
                 return;
             }
@@ -154,12 +155,13 @@ class UploadProductToEbay implements ShouldQueue
                 }
 
             }  
-            \Log::info('Job [Ebay] END Down File at '. now());
+            \Log::info('Job [Ebay] SUCCESS ----Down File---- at '. now());
         } 
         catch (\Exception $e){
-            \Log::info('Job [Ebay] FAIL at '. $e);
+            \Log::info('Job [Ebay] FAIL ----Down File---- at '. $e);
             dd($e);
         }
+        \Log::info('Job [Ebay] END ----Down File---- at '. now());
         return $filename;
     }
 
@@ -194,6 +196,7 @@ class UploadProductToEbay implements ShouldQueue
     }
 
     public function step4EbayRefreshToken(){
+        \Log::info('Job [Ebay] START ----Refresh Token---- at '. now());
         try {
 
             $client = new \GuzzleHttp\Client();
@@ -220,75 +223,78 @@ class UploadProductToEbay implements ShouldQueue
 
             $search_results = json_decode($res->getBody(), true);
             $this->access_token_ebay = $search_results['access_token'];
+            \Log::info('Job [Ebay] SUCCESS ----Refresh Token---- at '. now());
         }
          catch (\Exception $e){
-            \Log::info('Job [Ebay] FAIL Refresh Token at '. $e);
+            \Log::info('Job [Ebay] FAIL ----Refresh Token---- at '. $e);
             dd($e);
         }
+        \Log::info('Job [Ebay] END ----Refresh Token---- at '. now());
         return $search_results;
     }
 
     public function step5EbayCreadtItems($attributes){
+        \Log::info('Job [Ebay] START foreach file CSV');
         try {
-            \Log::info('Job [Ebay] START step5 Ebay Create item ');
             foreach ($attributes as $key => $attribute) {
-            $namefile = Array();
-            $data = Array();
-            $data[] = $attribute['Image1'];
-            $data[] = $attribute['Image2'];
-            $data[] = $attribute['Image3'];
-            $data[] = $attribute['Image4'];
-            $data[] = $attribute['Image5'];
-            foreach ($data as $key => $item) {
+                $this->step4EbayRefreshToken();
+                \Log::info('--------START Product : '.$key.'--------');
+                $namefile = Array();
+                $data = Array();
+                $data[] = $attribute['Image1'];
+                $data[] = $attribute['Image2'];
+                $data[] = $attribute['Image3'];
+                $data[] = $attribute['Image4'];
+                $data[] = $attribute['Image5'];
+                foreach ($data as $key => $item) {
 
-                $value = json_encode(
+                    $value = json_encode(
+                        [
+                            'path' => '/DROPSHIP/IMAGES/2018 COLLECTIONS',
+                            'mode' => 'filename',
+                            'query' => $item
+                        ]
+                    );
+                    $response = Dropbox::api()->request(
+                    'POST', '/2/files/search',
                     [
-                        'path' => '/DROPSHIP/IMAGES/2018 COLLECTIONS',
-                        'mode' => 'filename',
-                        'query' => $item
-                    ]
-                );
-                $response = Dropbox::api()->request(
-                'POST', '/2/files/search',
-                [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . $this->friend->accesstoken_dropbox,
-                        'Content-Type' => 'application/json'
-                    ],
-                    'body' => $value
-                ]);
-                $search_results = json_decode($response->getBody(), true);
-                $matches = $search_results['matches'];
-                foreach ($matches as $key => $value) {
-                    $this->step5_1downloadImage($value['metadata']['path_lower']);
-                    $namefile[] = $value['metadata']['name'];
-                    break;
+                        'headers' => [
+                            'Authorization' => 'Bearer ' . $this->friend->accesstoken_dropbox,
+                            'Content-Type' => 'application/json'
+                        ],
+                        'body' => $value
+                    ]);
+                    $search_results = json_decode($response->getBody(), true);
+                    $matches = $search_results['matches'];
+                    foreach ($matches as $key => $value) {
+                        $this->step5_1downloadImage($value['metadata']['path_lower']);
+                        $namefile[] = $value['metadata']['name'];
+                        break;
+                    }
+                    
                 }
-                
-            }
 
-            $product = $this->step5_2CreateItem($attribute,$namefile);
+                $product = $this->step5_2CreateItem($attribute,$namefile);
 
-            // //------------- Delete Image -------------
-            foreach ($namefile as $key => $item) {
-                 unlink(public_path('files/'.$item));
+                // //------------- Delete Image -------------
+                foreach ($namefile as $key => $item) {
+                     unlink(public_path('files/'.$item));
+                }
+                // ------------- End Delete Image -----------
+                \Log::info('--------END Product : '.$key.'--------');
             }
-            // ------------- End Delete Image -----------
-
-            }
-            \Log::info('Job [Ebay] END step5 Ebay Create item ');
             // return "Update finish";
+            \Log::info('Job [Ebay] END foreach file CSV ');
 
         }
         catch (\Exception $e){
-            \Log::info('Job [Ebay] FAIL Create Item at '. $e);
+            \Log::info('Job [Ebay] FAIL START foreach file CSV '. $e);
             dd($e);
         }
-
         
     }
 
-        public function step5_1downloadImage($attribute){
+    public function step5_1downloadImage($attribute){
  
         $data = json_encode([
                 'path' => $attribute
@@ -338,10 +344,8 @@ class UploadProductToEbay implements ShouldQueue
     }
 
     public function getItems($attribute,$namefile){
+        \Log::info('Job [Ebay] START -----GET Product---- '. now());
         try {
-
-
-            \Log::info('Job [Ebay] START GET ITEM '. now());
             $client = new \GuzzleHttp\Client();
             $header = [
                 'Authorization'=>'Bearer '.$this->friend->accesstoken_ebay,
@@ -353,11 +357,11 @@ class UploadProductToEbay implements ShouldQueue
                             'headers'=> $header,
                         ]);
             $search_results = json_decode($res->getBody(), true);
-            \Log::info('Job [Ebay] END GET ITEM '. now());
+            \Log::info('Job [Ebay] ----Product already !!---- '. now());
             return $search_results;
         }
          catch(\Exception $e) {
-            \Log::info('Job [Ebay] FAIL GET ITEM '. now());
+            \Log::info('Job [Ebay] ---- Not found - > Create product !! --- '. now());
              if($e->getCode() == 404){
                 $this->createItemsEbay($attribute,$namefile);
                 $this->step5_2CreateItem($attribute,$namefile);
@@ -367,15 +371,16 @@ class UploadProductToEbay implements ShouldQueue
     }
 
     public function step5_2CreateItem($attribute,$namefile){
+        \Log::info('Job [Ebay] START ---Check product----- at '. now());
 
         try {
-            \Log::info('Job [Ebay] START step5_2 Create Item '. now());
 
             $search_results = $this->getItems($attribute,$namefile);
 
             $product = $search_results['product'];
          
-            if($product['title'] == $attribute['Name'] && $product['description'] == $attribute['Description']){
+            // if($product['title'] == $attribute['Name'] && $product['description'] == $attribute['Description']){
+            if($product['title'] == $attribute['Name']){
                     if($product['aspects']['pileheight'][0] == $attribute['Pileheight'] && $product['aspects']['height'][0] == $attribute['Height'] && $product['aspects']['color'][0] == $attribute['Color'] && $product['aspects']['width'][0] == $attribute['Width'] &&$product['aspects']['length'][0] == $attribute['Length'] && $product['aspects']['unitweight'][0] == $attribute['UnitWeight'] && $product['aspects']['construction'][0] == $attribute['Construction'] && $product['aspects']['material'][0] == $attribute['Material'] && $product['aspects']['size'][0] == $attribute['Size']){
                             
                     } else {
@@ -386,19 +391,20 @@ class UploadProductToEbay implements ShouldQueue
                $this->createItemsEbay($attribute,$namefile);
             }
                 // return $product;
-            \Log::info('Job [Ebay] END step5_2 Create Item '. now());
+            \Log::info('Job [Ebay] SUCCESS ---Check product----- at'. now());
         }
         catch (\Exception $e){
-            \Log::info('Job [Ebay] step5_2 Create Item '. $e);
+            \Log::info('Job [Ebay] FAIL ---Check product----- at '. $e);
            
         }
+        \Log::info('Job [Ebay] END ---Check product----- at '. now());
 
+        return null;
     }
 
     public function createItemsEbay($attribute,$filename){
-
+        \Log::info('Job [Ebay] START ----Create item---- at '. now());
         try {
-            \Log::info('Job [Ebay] START create item ebay at '. now());
 
             $client = new \GuzzleHttp\Client();
 
@@ -431,7 +437,8 @@ class UploadProductToEbay implements ShouldQueue
                         'pileheight' => [$attribute['Pileheight']]
                     ],
                     'category' => $attribute['Category'],
-                    'description'=> $attribute['Description'],
+                    'description'=> 'Description',
+                    // 'description'=> $attribute['Description'],
                     'cost' => $attribute['Cost (Ex.GST) '],
                     'sell' => $attribute['Sell'],
                     'rrp' => $attribute['RRP'],
@@ -450,12 +457,13 @@ class UploadProductToEbay implements ShouldQueue
                             'body'  => $json
                         ]);
         $search_results = json_decode($res->getBody(), true);
-        \Log::info('Job [Ebay] END create item ebay at '. now());
+        \Log::info('Job [Ebay] SUCCESS ----Create item---- at '. now());
         }
         catch(\Exception $e) {
-            \Log::info('Job [Ebay] FAIL create item ebay at '. now());
+            \Log::info('Job [Ebay] FAIL ----Create item---- at '. now());
             dd($e);
-        }      
+        }
+        \Log::info('Job [Ebay] END ----Create item---- at '. now());      
 
     }
 
