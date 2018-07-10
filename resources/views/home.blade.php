@@ -23,10 +23,10 @@
                     <!-- <div>
                         <a href="{{url($url)}}">Get grant code Ebay</a>
                     </div>
-                    <br />
+                    <br /> -->
                     <div>
                         <a href="{{route('begin')}}"> Begin process !!</a>
-                    </div> -->
+                    </div>
                     <div>
                         <a href="{{route('refresh')}}"> Refresh Token !!</a>
                     </div>
