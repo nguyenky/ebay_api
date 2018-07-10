@@ -11,6 +11,7 @@ use App\User;
 use App\Token;
 use Auth;
 use App\Jobs\UploadProductToEbay;
+use App\Jobs\CreateItemEBay;
 
 
 class DropboxController extends Controller
@@ -71,7 +72,6 @@ class DropboxController extends Controller
 
             $response_body = json_decode($response->getBody(), true);
             $access_token = $response_body['access_token'];
-            // dd($access_token);
             $this->updateToken($access_token);
 
             session(['access_token' => $access_token]);
@@ -149,7 +149,6 @@ class DropboxController extends Controller
                             'data'  => $body
                         ]);
         dd($res->getBody());
-        // dd($this->base64);
         $this->step3GetAccessTokenEbay();
 
     }
@@ -176,12 +175,12 @@ class DropboxController extends Controller
                             'headers'=> $header,
                             'form_params'  => $body
                         ]);
-        // dd($res);
+
         $search_results = json_decode($res->getBody(), true);
-        // dd($search_results);
+
         $this->access_token_ebay = $search_results['access_token'];
         // $this->createItemsEbay();
-        // dd($search_results);
+
     }
     // public function step4Create(){
 
@@ -230,7 +229,7 @@ class DropboxController extends Controller
                     'origin' => $attribute['Origin'],
                 ]
             ];
-            // dd($data);
+
             $json = json_encode($data);
             $header = [
                 'Authorization'=>'Bearer '.$this->access_token_ebay,
@@ -238,13 +237,13 @@ class DropboxController extends Controller
                 'Content-Language'=>'en-US',
                 'Content-Type'=>'application/json'
             ];
-            // dd($json);
+    
             $res = $client->request('PUT', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
                             'headers'=> $header,
                             'body'  => $json
                         ]);
         $search_results = json_decode($res->getBody(), true);
-        // dd($search_results);
+
         }
         catch(\Exception $e) {
             \Log::info('Job [Ebay] FAIL at '. now());
@@ -328,14 +327,23 @@ class DropboxController extends Controller
         $matches = $this->step1DropboxSearchFileCsv($token->accesstoken_dropbox);
         $filename = $this->step2DropboxDownFileCsv($matches,$token->accesstoken_dropbox);
         $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
-        // dd('asdsd');
-        $getAccessToken = $this->step4EbayRefreshToken($token->refresh_token_ebay);
+
+
+        dispatch(new RefreshTokenEbay($token->refresh_token_ebay));
+
+        $this->access_token_ebay = $token->accesstoken_ebay;
+        // $getAccessToken = $this->step4EbayRefreshToken($token->refresh_token_ebay);
 
         // $token = \App\Token::all()->first();
-        $token->accesstoken_ebay = $getAccessToken['access_token'];
-        $token->save();
-        // dd('1213');
-        $this->step5EbayCreadtItems($csv,$token->accesstoken_dropbox);
+        // $token->accesstoken_ebay = $getAccessToken['access_token'];
+        // $token->save();
+
+        // $getAccessToken = $this->step4EbayRefreshToken($token->refresh_token_ebay);
+
+        // // $token = \App\Token::all()->first();
+        // $token->accesstoken_ebay = $getAccessToken['access_token'];
+        // $token->save();
+        // $this->step5EbayCreadtItems($csv,$token->accesstoken_dropbox);
 
 
 
@@ -665,7 +673,7 @@ class DropboxController extends Controller
          catch(\Exception $e) {
             \Log::info('Job [Ebay] FAIL at '. now());
              if($e->getCode() == 404){
-                $this->createItemsEbay($attribute,$namefile);
+                dispatch(new CreateItemEBay($this->access_token_ebay,$attribute));
                 $this->step5_2CreateItem($attribute,$namefile);
             }
         }
@@ -685,11 +693,13 @@ class DropboxController extends Controller
                     if($product['aspects']['pileheight'][0] == $attribute['Pileheight'] && $product['aspects']['height'][0] == $attribute['Height'] && $product['aspects']['color'][0] == $attribute['Color'] && $product['aspects']['width'][0] == $attribute['Width'] &&$product['aspects']['length'][0] == $attribute['Length'] && $product['aspects']['unitweight'][0] == $attribute['UnitWeight'] && $product['aspects']['construction'][0] == $attribute['Construction'] && $product['aspects']['material'][0] == $attribute['Material'] && $product['aspects']['size'][0] == $attribute['Size']){
                            
                     } else {
-                        $this->createItemsEbay($attribute,$namefile);
+                        // $this->createItemsEbay($attribute,$namefile);
+                        dispatch(new CreateItemEBay($this->access_token_ebay,$attribute));
                     }
 
             } else {
-               $this->createItemsEbay($attribute,$namefile);
+               // $this->createItemsEbay($attribute,$namefile);
+                dispatch(new CreateItemEBay($this->access_token_ebay,$attribute));
             }
                 // return $product;
             \Log::info('Job [Ebay] END at '. now());
