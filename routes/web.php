@@ -23,11 +23,8 @@ Route::group(['middleware'=>'auth'],function(){
 
 });
 
-Route::get('testjob',function(){
 
-     dispatch(new \App\Jobs\TestJob);
-    
-});
+
 
 Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
 
@@ -67,6 +64,8 @@ Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
     Route::get('refresh-app','DropboxController@refreshApp')->name('refresh');
 
     Route::get('test','TestController@index');
+
+    Route::get('testjob','TestController@test');
 });
 
 Route::group(['namespace'=>'Dropbox'],function(){
