@@ -186,7 +186,12 @@ class UploadProductToEbay implements ShouldQueue
             error_log("csvreader: Could not read CSV \"$csvfile\"");
             return null;
         }
-        return $csv;
+        $filtered = collect($csv)->filter(function ($value, $key) {
+            return $value['SKU'] == '401-OATMEAL-165X115' || $value['SKU'] == '871-LATTE-300X80' ;
+        });
+
+
+        return $filtered->all();
     }
 
     public function step4EbayRefreshToken(){
@@ -232,7 +237,7 @@ class UploadProductToEbay implements ShouldQueue
         \Log::info('Job [Ebay] START foreach file CSV');
         try {
             foreach ($attributes as $key_product => $attribute) {
-                if($key_product >= 0){
+                
                     \Log::info('--------START Product : '.$key_product.'--------');
 
                     $getAccessToken = $this->step4EbayRefreshToken();
@@ -296,7 +301,6 @@ class UploadProductToEbay implements ShouldQueue
                     }
                     // ------------- End Delete Image -----------
                     \Log::info('--------END Product : '.$key_product.'--------');
-                }
             }
             // return "Update finish";
             \Log::info('Job [Ebay] END foreach file CSV ');
@@ -471,7 +475,7 @@ class UploadProductToEbay implements ShouldQueue
             $json = json_encode($data);
             $header = [
             'Authorization'=>'Bearer '.$this->friend->accesstoken_ebay,
-            'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
+            'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_AU',
             'Content-Language'=>'en-US',
             'Content-Type'=>'application/json'
         ];

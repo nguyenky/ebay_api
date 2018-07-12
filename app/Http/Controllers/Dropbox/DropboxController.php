@@ -492,8 +492,12 @@ class DropboxController extends Controller
             error_log("csvreader: Could not read CSV \"$csvfile\"");
             return null;
         }
+        $filtered = collect($csv)->filter(function ($value, $key) {
+            return $value['SKU'] == '401-OATMEAL-165X115' || $value['SKU'] == '871-LATTE-300X80' ;
+        });
 
-        return $csv;
+
+        return $filtered->all();
     }
     public function step4EbayRefreshToken($attribute){
         
@@ -794,9 +798,12 @@ class DropboxController extends Controller
 
     function getItem(){
         $csv = $this->step3DropboxConvertFileCsv('files/UNITEX-DATAFEED-ALL.csv');
-        // dd($csv);
 
-        return view('getItem',['items'=>$csv]);
+        $filtered = collect($csv)->filter(function ($value, $key) {
+            return $value['SKU'] == '401-OATMEAL-165X115' || $value['SKU'] == '871-LATTE-300X80' ;
+        });
+
+        return view('getItem',['items'=>$filtered->all()]);
     }
     function getDetail($id){
         try {
