@@ -450,22 +450,22 @@ class TestController extends Controller
     }
 
     public function test(){
-        $token = \App\Token::find(1);
-        $offerId;
+        // $token = \App\Token::find(1);
+        // $offerId;
        
-        $offer = $this->getOffers($token->accesstoken_ebay,'401-OATMEAL-300X80');
-        // dd($offer);
-        if($offer != NULL) {
+        // $offer = $this->getOffers($token->accesstoken_ebay,'401-OATMEAL-300X80');
+        // // dd($offer);
+        // if($offer != NULL) {
             
-            $this->deleteOffer($token->accesstoken_ebay,$offer[0]['offerId']);
-            $offerId = $this->postOffer($token->accesstoken_ebay,'Hoa-02');
+        //     $this->deleteOffer($token->accesstoken_ebay,$offer[0]['offerId']);
+        //     $offerId = $this->postOffer($token->accesstoken_ebay,'Hoa-02');
         
-        } else {
+        // } else {
            
-            $offerId = $this->postOffer($token->accesstoken_ebay,'Hoa-02');
-            $this->publishOffer($offerId,$token->accesstoken_ebay);
-        }
-        // dispatch(new CreateJobOffer);
+        //     $offerId = $this->postOffer($token->accesstoken_ebay,'Hoa-02');
+        //     $this->publishOffer($offerId,$token->accesstoken_ebay);
+        // }
+        dispatch(new CreateJobOffer);
     }
 
     public function deleteOffer($token,$offerID){

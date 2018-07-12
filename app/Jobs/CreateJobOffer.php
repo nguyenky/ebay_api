@@ -45,6 +45,7 @@ class CreateJobOffer implements ShouldQueue
             
                 $this->deleteOffer($token->accesstoken_ebay,$offer[0]['offerId']);
                 $offerId = $this->postOffer($token->accesstoken_ebay,$value['SKU']);
+                $this->publishOffer($offerId,$token->accesstoken_ebay);
             
             } else {
 
@@ -132,7 +133,7 @@ class CreateJobOffer implements ShouldQueue
         $search_results = json_decode($res->getBody(), true);
         // dd($search_results);
         \Log::info('Job Create Offer SUCCESS at '. now());
-        return $search_results;
+        return $search_results['offerId'];
         
         } catch(\Exception $e) {
              \Log::info('Job Create Offer FAIL at '. now());
@@ -174,7 +175,7 @@ class CreateJobOffer implements ShouldQueue
 
     public function publishOffer($orderId,$token) {
         
-             \Log::info('Job Publish Offer START at '. now());
+        \Log::info('Job Publish Offer START at '. now());
         try {
             $client = new \GuzzleHttp\Client();
 
@@ -184,10 +185,11 @@ class CreateJobOffer implements ShouldQueue
                 'Content-Language'=>'en-US',
                 'Content-Type'=>'application/json'
             ];
-            // dd($json);
+            // dd($orderId);
             $res = $client->request('POST','https://api.sandbox.ebay.com/sell/inventory/v1/offer/'.$orderId.'/publish',[
                             'headers'=> $header,
                         ]);
+            
         $search_results = json_decode($res->getBody(), true);
       
         \Log::info('Job Publish Offer SUCCESS at '. now());
@@ -195,10 +197,7 @@ class CreateJobOffer implements ShouldQueue
         
         } catch(\Exception $e) {
              \Log::info('Job Publish Offer FAIL at '. now());
-             if($e->getCode()==404) {
-                // $this->postOffer($token,$sku)
-                return null;
-             }
+            dd($e);
         }
         \Log::info('Job Publish Offer END at '. now());
     }
