@@ -83,3 +83,13 @@ Route::group(['namespace'=>'Dropbox'],function(){
 });
 
 
+Route::group(['namespace'=>'Ebay','middleware'=>'auth'],function(){
+    Route::get('ebay','EbayController@index');
+
+    Route::get('items-ebay','EbayController@showItems');
+
+    Route::get('create-inventory-{slug}','EbayController@createInventoryItem')->name('createInventory');
+    
+    // Route::get('create-inventory-{slug}','EbayController@createInventoryItem')->name('createInventory');
+
+});
