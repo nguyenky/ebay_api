@@ -33,7 +33,16 @@ class CreateItemEBay implements ShouldQueue
      */
     public function handle()
     {
-        \Log::info('Job Create Item to Ebay START at '. now());
+        \Log::info('-------- START PROCESS -------------');
+            $item = $this->getItemEbay();
+            if($item == NULL){
+                $this->createItemEbay();
+            } 
+        \Log::info('-------- END PROCESS -------------');
+    }
+
+    public function createItemEbay(){
+                \Log::info('Job Create Item to Ebay START at '. now());
         try {
             $attribute = $this->item;
             $client = new \GuzzleHttp\Client();
@@ -95,5 +104,35 @@ class CreateItemEBay implements ShouldQueue
             dd($e);
         }      
         \Log::info('Job Create Item to Ebay END at '. now());
+    }
+
+    public function getItemEbay(){
+
+        \Log::info('Job Get Item Ebay STATR at '. now());
+        try {
+            $attribute = $this->item;
+            $client = new \GuzzleHttp\Client();
+            $header = [
+                'Authorization'=>'Bearer '.$this->access_token_ebay,
+                'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
+                'Content-Language'=>'en-US',
+                'Content-Type'=>'application/json'
+            ];
+            $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
+                            'headers'=> $header,
+                        ]);
+            $search_results = json_decode($res->getBody(), true);
+            \Log::info('Job Get Item Ebay SUCCESS at '. now());
+            return $search_results;
+        }
+         catch(\Exception $e) {
+            \Log::info('Job Get Item Ebay FAIL at '. now());
+             if($e->getCode() == 404){
+            //     $this->createItemsEbay($attribute,$namefile);
+            //     $this->step5_2CreateItem($attribute,$namefile);
+                return null;
+            }
+        }
+        \Log::info('Job Get Item Ebay END at '. now());
     }
 }
