@@ -218,30 +218,33 @@ class DropboxController extends Controller
                         'width' => [$attribute['Width']],
                         'height' => [$attribute['Height']],
                         'unitweight' => [$attribute['UnitWeight']],
-                        'construction' => [$attribute['Construction']],
+                        'construction' => [$attribute['Construction'] ? $attribute['Construction'] : 'need additional'],
                         'material' => [$attribute['Material']],
                         'pileheight' => [$attribute['Pileheight']]
                     ],
                     'category' => $attribute['Category'],
-                    'description'=> $attribute['Description'],
+                    'description'=> 'asdd',
                     'cost' => $attribute['Cost (Ex.GST) '],
                     'sell' => $attribute['Sell'],
                     'rrp' => $attribute['RRP'],
                     'origin' => $attribute['Origin'],
                 ]
             ];
+            // dd($data);
             $json = json_encode($data);
             $header = [
-            'Authorization'=>'Bearer '.$this->access_token_ebay,
-            'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
-            'Content-Language'=>'en-US',
-            'Content-Type'=>'application/json'
-        ];
+                'Authorization'=>'Bearer '.$this->access_token_ebay,
+                'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
+                'Content-Language'=>'en-US',
+                'Content-Type'=>'application/json'
+            ];
+            // dd($json);
             $res = $client->request('PUT', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
                             'headers'=> $header,
                             'body'  => $json
                         ]);
         $search_results = json_decode($res->getBody(), true);
+        // dd($search_results);
         }
         catch(\Exception $e) {
             \Log::info('Job [Ebay] FAIL at '. now());
@@ -325,6 +328,7 @@ class DropboxController extends Controller
         $matches = $this->step1DropboxSearchFileCsv($token->accesstoken_dropbox);
         $filename = $this->step2DropboxDownFileCsv($matches,$token->accesstoken_dropbox);
         $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
+        // dd('asdsd');
         $getAccessToken = $this->step4EbayRefreshToken($token->refresh_token_ebay);
 
         // $token = \App\Token::all()->first();
@@ -488,8 +492,12 @@ class DropboxController extends Controller
             error_log("csvreader: Could not read CSV \"$csvfile\"");
             return null;
         }
+        $filtered = collect($csv)->filter(function ($value, $key) {
+            return $value['SKU'] == '401-OATMEAL-165X115' || $value['SKU'] == '871-LATTE-300X80' ;
+        });
 
-        return $csv;
+
+        return $filtered->all();
     }
     public function step4EbayRefreshToken($attribute){
         
@@ -531,53 +539,55 @@ class DropboxController extends Controller
 
         try {
             foreach ($attributes as $key => $attribute) {
-                // echo $key.'<br>';
-            $namefile = Array();
-            $data = Array();
-            $data[] = $attribute['Image1'];
-            $data[] = $attribute['Image2'];
-            $data[] = $attribute['Image3'];
-            $data[] = $attribute['Image4'];
-            $data[] = $attribute['Image5'];
-         
 
-            foreach ($data as $key => $item) {
-            
-                $value = json_encode(
-                    [
-                        'path' => '/DROPSHIP/IMAGES/2018 COLLECTIONS',
-                        'mode' => 'filename',
-                        'query' => $item
-                    ]
-                );
-                $response = $this->api_client->request(
-                'POST', '/2/files/search',
-                [
-                    'headers' => [
-                        'Authorization' => 'Bearer ' . $token_dropbox,
-                        'Content-Type' => 'application/json'
-                    ],
-                    'body' => $value
-                ]);
-                $search_results = json_decode($response->getBody(), true);
-                $matches = $search_results['matches'];
-                foreach ($matches as $key => $value) {
-                    $this->step5_1downloadImage($value['metadata']['path_lower'],$token_dropbox);
-                    $namefile[] = $value['metadata']['name'];
-                    break;
+                if($key > 1056){
+
+                    $namefile = Array();
+                    $data = Array();
+                    $data[] = $attribute['Image1'];
+                    $data[] = $attribute['Image2'];
+                    $data[] = $attribute['Image3'];
+                    $data[] = $attribute['Image4'];
+                    $data[] = $attribute['Image5'];
+                 
+
+                    foreach ($data as $key => $item) {
+                    
+                        $value = json_encode(
+                            [
+                                'path' => '/DROPSHIP/IMAGES/2018 COLLECTIONS',
+                                'mode' => 'filename',
+                                'query' => $item
+                            ]
+                        );
+                        $response = $this->api_client->request(
+                        'POST', '/2/files/search',
+                        [
+                            'headers' => [
+                                'Authorization' => 'Bearer ' . $token_dropbox,
+                                'Content-Type' => 'application/json'
+                            ],
+                            'body' => $value
+                        ]);
+                        $search_results = json_decode($response->getBody(), true);
+                        $matches = $search_results['matches'];
+                        foreach ($matches as $key => $value) {
+                            $this->step5_1downloadImage($value['metadata']['path_lower'],$token_dropbox);
+                            $namefile[] = $value['metadata']['name'];
+                            break;
+                        }
+                        
+                    }
+
+               
+                    $product = $this->step5_2CreateItem($attribute,$namefile);
+                  
+                    // //------------- Delete Image -------------
+                    foreach ($namefile as $key => $item) {
+                         unlink(public_path('/files/'.$item));
+                    }
+                    // ------------- End Delete Image -----------
                 }
-                
-            }
-
-       
-            $product = $this->step5_2CreateItem($attribute,$namefile);
-          
-            // //------------- Delete Image -------------
-            foreach ($namefile as $key => $item) {
-                 unlink(public_path('/files/'.$item));
-            }
-            // ------------- End Delete Image -----------
-
             }
 
             return "Update finish";
@@ -788,9 +798,12 @@ class DropboxController extends Controller
 
     function getItem(){
         $csv = $this->step3DropboxConvertFileCsv('files/UNITEX-DATAFEED-ALL.csv');
-        // dd($csv);
 
-        return view('getItem',['items'=>$csv]);
+        $filtered = collect($csv)->filter(function ($value, $key) {
+            return $value['SKU'] == '401-OATMEAL-165X115' || $value['SKU'] == '871-LATTE-300X80' ;
+        });
+
+        return view('getItem',['items'=>$filtered->all()]);
     }
     function getDetail($id){
         try {
@@ -808,7 +821,7 @@ class DropboxController extends Controller
                             'headers'=> $header,
                         ]);
             $search_results = json_decode($res->getBody(), true);
-            // dd($search_results['product']);
+            // dd($search_results);
             return view('detailItem',['item'=>$search_results['product']]);
             // return view('detailItem',['item'=>'dsds']);
         }

@@ -56,12 +56,6 @@ class UploadProductToEbay implements ShouldQueue
         $matches = $this->step1DropboxSearchFileCsv();
         $filename = $this->step2DropboxDownFileCsv($matches);
         $csv = $this->step3DropboxConvertFileCsv('files/'.$filename);
-    
-        $getAccessToken = $this->step4EbayRefreshToken();
-
-        $token = Token::find($this->friend->id);
-        $token->accesstoken_ebay = $getAccessToken['access_token'];
-        $token->save();
         $this->step5EbayCreadtItems($csv);
         \Log::info('-------- END PROCESS -------------');
     }
@@ -192,11 +186,17 @@ class UploadProductToEbay implements ShouldQueue
             error_log("csvreader: Could not read CSV \"$csvfile\"");
             return null;
         }
-        return $csv;
+        $filtered = collect($csv)->filter(function ($value, $key) {
+            return $value['SKU'] == '401-OATMEAL-165X115' || $value['SKU'] == '871-LATTE-300X80' ;
+        });
+
+
+        return $filtered->all();
     }
 
     public function step4EbayRefreshToken(){
         \Log::info('Job [Ebay] START ----Refresh Token---- at '. now());
+        $search_results = null;
         try {
 
             $client = new \GuzzleHttp\Client();
@@ -236,52 +236,71 @@ class UploadProductToEbay implements ShouldQueue
     public function step5EbayCreadtItems($attributes){
         \Log::info('Job [Ebay] START foreach file CSV');
         try {
-            foreach ($attributes as $key => $attribute) {
-                $this->step4EbayRefreshToken();
-                \Log::info('--------START Product : '.$key.'--------');
-                $namefile = Array();
-                $data = Array();
-                $data[] = $attribute['Image1'];
-                $data[] = $attribute['Image2'];
-                $data[] = $attribute['Image3'];
-                $data[] = $attribute['Image4'];
-                $data[] = $attribute['Image5'];
-                foreach ($data as $key => $item) {
+            foreach ($attributes as $key_product => $attribute) {
+                
+                    \Log::info('--------START Product : '.$key_product.'--------');
 
-                    $value = json_encode(
-                        [
-                            'path' => '/DROPSHIP/IMAGES/2018 COLLECTIONS',
-                            'mode' => 'filename',
-                            'query' => $item
-                        ]
-                    );
-                    $response = Dropbox::api()->request(
-                    'POST', '/2/files/search',
-                    [
-                        'headers' => [
-                            'Authorization' => 'Bearer ' . $this->friend->accesstoken_dropbox,
-                            'Content-Type' => 'application/json'
-                        ],
-                        'body' => $value
-                    ]);
-                    $search_results = json_decode($response->getBody(), true);
-                    $matches = $search_results['matches'];
-                    foreach ($matches as $key => $value) {
-                        $this->step5_1downloadImage($value['metadata']['path_lower']);
-                        $namefile[] = $value['metadata']['name'];
-                        break;
+                    $getAccessToken = $this->step4EbayRefreshToken();
+
+                    if($getAccessToken){
+                        $token = Token::find($this->friend->id);
+                        if($token->accesstoken_ebay != $getAccessToken['access_token']){
+                            $token->accesstoken_ebay = $getAccessToken['access_token'];
+                            $token->save();
+                        }
+                        
                     }
                     
-                }
+                    $namefile = Array();
+                    $data = Array();
+                    $data[] = $attribute['Image1'];
+                    $data[] = $attribute['Image2'];
+                    $data[] = $attribute['Image3'];
+                    $data[] = $attribute['Image4'];
+                    $data[] = $attribute['Image5'];
+                    foreach ($data as $key_image => $item) {
 
-                $product = $this->step5_2CreateItem($attribute,$namefile);
+                        $value = json_encode(
+                            [
+                                'path' => '/DROPSHIP/IMAGES/2018 COLLECTIONS',
+                                'mode' => 'filename',
+                                'query' => $item
+                            ]
+                        );
+                        $response = Dropbox::api()->request(
+                        'POST', '/2/files/search',
+                        [
+                            'headers' => [
+                                'Authorization' => 'Bearer ' . $this->friend->accesstoken_dropbox,
+                                'Content-Type' => 'application/json'
+                            ],
+                            'body' => $value
+                        ]);
+                        $search_results = json_decode($response->getBody(), true);
+                        $matches = $search_results['matches'];
+                        foreach ($matches as $key_matches => $value) {
+                            $this->step5_1downloadImage($value['metadata']['path_lower']);
+                            $namefile[] = $value['metadata']['name'];
+                            break;
+                        }
+                        
+                    }
 
-                // //------------- Delete Image -------------
-                foreach ($namefile as $key => $item) {
-                     unlink(public_path('files/'.$item));
-                }
-                // ------------- End Delete Image -----------
-                \Log::info('--------END Product : '.$key.'--------');
+                    $product = $this->step5_2CreateItem($attribute,$namefile);
+
+                    // //------------- Delete Image -------------
+                    foreach ($namefile as $key_nameFile => $item) {
+                        
+                        if(\File::exists(public_path('files/'.$item))){
+
+                            unlink(public_path('files/'.$item));
+                      
+                        }
+
+                         
+                    }
+                    // ------------- End Delete Image -----------
+                    \Log::info('--------END Product : '.$key_product.'--------');
             }
             // return "Update finish";
             \Log::info('Job [Ebay] END foreach file CSV ');
@@ -291,6 +310,8 @@ class UploadProductToEbay implements ShouldQueue
             \Log::info('Job [Ebay] FAIL START foreach file CSV '. $e);
             dd($e);
         }
+
+        return null;
         
     }
 
@@ -341,6 +362,7 @@ class UploadProductToEbay implements ShouldQueue
             } catch (\Exception $e){
                 dd($e);
             }
+            return null;
     }
 
     public function getItems($attribute,$namefile){
@@ -363,10 +385,12 @@ class UploadProductToEbay implements ShouldQueue
          catch(\Exception $e) {
             \Log::info('Job [Ebay] ---- Not found - > Create product !! --- '. now());
              if($e->getCode() == 404){
-                $this->createItemsEbay($attribute,$namefile);
-                $this->step5_2CreateItem($attribute,$namefile);
+                return null;
+                // $this->createItemsEbay($attribute,$namefile);
+                // $this->step5_2CreateItem($attribute,$namefile);
             }
         }
+        return null;
        
     }
 
@@ -377,19 +401,22 @@ class UploadProductToEbay implements ShouldQueue
 
             $search_results = $this->getItems($attribute,$namefile);
 
-            $product = $search_results['product'];
-         
-            // if($product['title'] == $attribute['Name'] && $product['description'] == $attribute['Description']){
-            if($product['title'] == $attribute['Name']){
-                    if($product['aspects']['pileheight'][0] == $attribute['Pileheight'] && $product['aspects']['height'][0] == $attribute['Height'] && $product['aspects']['color'][0] == $attribute['Color'] && $product['aspects']['width'][0] == $attribute['Width'] &&$product['aspects']['length'][0] == $attribute['Length'] && $product['aspects']['unitweight'][0] == $attribute['UnitWeight'] && $product['aspects']['construction'][0] == $attribute['Construction'] && $product['aspects']['material'][0] == $attribute['Material'] && $product['aspects']['size'][0] == $attribute['Size']){
-                            
-                    } else {
-                        $this->createItemsEbay($attribute,$namefile);
-                    }
-
-            } else {
-               $this->createItemsEbay($attribute,$namefile);
+            if(!$search_results){
+                // $product = $search_results['product'];
+                $this->createItemsEbay($attribute,$namefile);
             }
+            
+        
+            // if($product['title'] == $attribute['Name']){
+            //         if($product['aspects']['pileheight'][0] == $attribute['Pileheight'] && $product['aspects']['height'][0] == $attribute['Height'] && $product['aspects']['color'][0] == $attribute['Color'] && $product['aspects']['width'][0] == $attribute['Width'] &&$product['aspects']['length'][0] == $attribute['Length'] && $product['aspects']['unitweight'][0] == $attribute['UnitWeight'] && $product['aspects']['construction'][0] == $attribute['Construction'] && $product['aspects']['material'][0] == $attribute['Material'] && $product['aspects']['size'][0] == $attribute['Size']){
+                            
+            //         } else {
+            //             $this->createItemsEbay($attribute,$namefile);
+            //         }
+
+            // } else {
+            //    $this->createItemsEbay($attribute,$namefile);
+            // }
                 // return $product;
             \Log::info('Job [Ebay] SUCCESS ---Check product----- at'. now());
         }
@@ -432,7 +459,7 @@ class UploadProductToEbay implements ShouldQueue
                         'width' => [$attribute['Width']],
                         'height' => [$attribute['Height']],
                         'unitweight' => [$attribute['UnitWeight']],
-                        'construction' => [$attribute['Construction']],
+                        'construction' => [$attribute['Construction'] ? $attribute['Construction'] : 'need additional'],
                         'material' => [$attribute['Material']],
                         'pileheight' => [$attribute['Pileheight']]
                     ],
@@ -448,7 +475,7 @@ class UploadProductToEbay implements ShouldQueue
             $json = json_encode($data);
             $header = [
             'Authorization'=>'Bearer '.$this->friend->accesstoken_ebay,
-            'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
+            'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_AU',
             'Content-Language'=>'en-US',
             'Content-Type'=>'application/json'
         ];
@@ -464,7 +491,7 @@ class UploadProductToEbay implements ShouldQueue
             dd($e);
         }
         \Log::info('Job [Ebay] END ----Create item---- at '. now());      
-
+        return null;
     }
 
 }

@@ -8,7 +8,7 @@ use App\Dropbox;
 use Purl\Url;
 use App\Token;
 use Auth;
-use App\Jobs\TestJob;
+use App\Jobs\CreateJobOffer;
 
 class TestController extends Controller
 {
@@ -447,5 +447,172 @@ class TestController extends Controller
         }
         \Log::info('Job [Ebay] END create item ebay at '. now());      
 
+    }
+
+    public function test(){
+        $token = \App\Token::find(1);
+        $offerId;
+       
+        $offer = $this->getOffers($token->accesstoken_ebay,'401-OATMEAL-300X80');
+        // dd($offer);
+        if($offer != NULL) {
+            
+            $this->deleteOffer($token->accesstoken_ebay,$offer[0]['offerId']);
+            $offerId = $this->postOffer($token->accesstoken_ebay,'Hoa-02');
+        
+        } else {
+           
+            $offerId = $this->postOffer($token->accesstoken_ebay,'Hoa-02');
+            $this->publishOffer($offerId,$token->accesstoken_ebay);
+        }
+        // dispatch(new CreateJobOffer);
+    }
+
+    public function deleteOffer($token,$offerID){
+    \Log::info('Job Delete Offer START at '. now());
+        try {
+            $client = new \GuzzleHttp\Client();
+
+            $header = [
+                'Authorization'=>'Bearer '.$token,
+                'Accept'=>'application/json',
+                'Content-Language'=>'en-US',
+                'Content-Type'=>'application/json'
+            ];
+            // dd($json);
+            $res = $client->request('DELETE', 'https://api.sandbox.ebay.com/sell/inventory/v1/offer/'.$offerID,[
+                            'headers'=> $header,
+                        ]);
+        $search_results = json_decode($res->getBody(), true);
+        // dd($search_results["offers"][0]["offerId"]);
+        \Log::info('Job Delete Offer SUCCESS at '. now());
+        return null;
+        } catch(\Exception $e) {
+             \Log::info('Job Delete Offer FAIL at '. now());
+             dd($e);
+        }
+        \Log::info('Job Delete Offer END at '. now());
+    }
+
+    public function postOffer($token,$sku){
+    // $token = \App\Token::find(1);
+
+     \Log::info('Job Create Offer START at '. now());
+        try {
+
+            $client = new \GuzzleHttp\Client();
+            $data = [];
+            $data = [
+                "sku"  =>$sku,
+                "marketplaceId" => "EBAY_US",
+                "format" => "FIXED_PRICE",
+                "listingDescription" => "234",
+                "availableQuantity" => 2,
+                "quantityLimitPerBuyer" => 2,
+                "pricingSummary" => [
+                        "price"  => [
+                            "value" => 0.99,
+                            "currency" => "USD"
+                        ]
+                ],
+                "listingPolicies" => [
+                    "fulfillmentPolicyId" => "5808775000",
+                    "paymentPolicyId"     => "5808776000",
+                    "returnPolicyId"      => "5808774000"
+                ],
+                "categoryId" => "88433",
+                "merchantLocationKey" => "loc-001",
+                "tax" => [
+                    "vatPercentage" => 10.2,
+                    "applyTax"  => true,
+                    "thirdPartyTaxCategory" => "Electronics"
+
+                ]
+            ];
+
+            $json = json_encode($data);
+            $header = [
+                'Authorization'=>'Bearer '.$token,
+                'Accept'=>'application/json',
+                'Content-Language'=>'en-US',
+                'Content-Type'=>'application/json'
+            ];
+            // dd($json);
+            $res = $client->request('POST', 'https://api.sandbox.ebay.com/sell/inventory/v1/offer',[
+                            'headers'=> $header,
+                            'body'  => $json
+                        ]);
+        $search_results = json_decode($res->getBody(), true);
+        // dd($search_results);
+        \Log::info('Job Create Offer SUCCESS at '. now());
+        return $search_results;
+        
+        } catch(\Exception $e) {
+             \Log::info('Job Create Offer FAIL at '. now());
+             dd($e);
+        }
+        \Log::info('Job Create Offer END at '. now());
+    }
+
+    public function getOffers($token,$sku){
+
+     \Log::info('Job Get Offer START at '. now());
+        try {
+            $client = new \GuzzleHttp\Client();
+
+            $header = [
+                'Authorization'=>'Bearer '.$token,
+                'Accept'=>'application/json',
+                'Content-Language'=>'en-US',
+                'Content-Type'=>'application/json'
+            ];
+            // dd($json);
+            $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/offer?sku='.$sku,[
+                            'headers'=> $header,
+                        ]);
+        $search_results = json_decode($res->getBody(), true);
+        // dd($search_results["offers"][0]["offerId"]);
+        \Log::info('Job Get Offer SUCCESS at '. now());
+        return $search_results["offers"];
+        
+        } catch(\Exception $e) {
+             \Log::info('Job Get Offer FAIL at '. now());
+             if($e->getCode()==404) {
+                // $this->postOffer($token,$sku)
+                return null;
+             }
+        }
+        \Log::info('Job Get Offer END at '. now());
+    }
+
+    public function publishOffer($orderId,$token) {
+        
+             \Log::info('Job Publish Offer START at '. now());
+        try {
+            $client = new \GuzzleHttp\Client();
+
+            $header = [
+                'Authorization'=>'Bearer '.$token,
+                'Accept'=>'application/json',
+                'Content-Language'=>'en-US',
+                'Content-Type'=>'application/json'
+            ];
+            // dd($json);
+            $res = $client->request('POST','https://api.sandbox.ebay.com/sell/inventory/v1/offer/'.$orderId.'/publish',[
+                            'headers'=> $header,
+                        ]);
+        $search_results = json_decode($res->getBody(), true);
+      
+        \Log::info('Job Publish Offer SUCCESS at '. now());
+        return $search_results["offers"];
+        
+        } catch(\Exception $e) {
+             \Log::info('Job Publish Offer FAIL at '. now());
+             if($e->getCode()==404) {
+                // $this->postOffer($token,$sku)
+                return null;
+             }
+        }
+        \Log::info('Job Publish Offer END at '. now());
     }
 }

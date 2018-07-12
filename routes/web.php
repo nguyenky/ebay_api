@@ -23,11 +23,8 @@ Route::group(['middleware'=>'auth'],function(){
 
 });
 
-Route::get('testjob',function(){
 
-     dispatch(new \App\Jobs\TestJob);
-    
-});
+
 
 Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
 
@@ -68,38 +65,7 @@ Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
 
     Route::get('test','TestController@index');
 
-    Route::get('json',function(){
-        $attributes=[];
-        $data = [
-                'availability'  => [
-                    'shipToLocationAvailability'    => [
-                        'quantity'  => '123',
-                        // 'quantity'  => 12,
-                    ]
-                ],
-                'condition'     => 'NEW',
-                'product'       => [
-                    'title'     => 'asdsad',
-                    'imageUrls' =>[
-                        "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1000.jpg",
-                        "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1001.jpg",
-                        "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1002.jpg"
-                    ],
-                    'aspects'   => [
-                        'size' => ['asdsad'],
-                        'color' => ['asdsd'],
-                        'length' => ['sfef'],
-                        'width' => ['fsdf'],
-                        'height' => ['assds'],
-                    ],
-                    'category' => ['asd'],
-                    'asdsad' => [$attributes['name']],
-                ]
-            ];
-        dd(json_encode($data));
-    });
-
-
+    Route::get('testjob','TestController@test');
 });
 
 Route::group(['namespace'=>'Dropbox'],function(){
