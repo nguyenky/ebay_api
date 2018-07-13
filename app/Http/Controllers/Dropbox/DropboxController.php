@@ -36,6 +36,16 @@ class DropboxController extends Controller
         $this->api_client = $dropbox->api();
         $this->content_client = $dropbox->content();
         $this->access_token = session('access_token');
+
+        if(env('EBAY_SERVER') == 'sandbox'){
+
+            $this->api = 'https://api.sandbox.ebay.com/';
+
+        }else{
+
+            $this->api = 'https://api.ebay.com/';
+        }
+        $this->tokenGloble = \App\Token::find(1);  
     }
     // 1
     public function index(){
@@ -144,7 +154,7 @@ class DropboxController extends Controller
         ];
         // dd($body);
 
-        $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
+        $res = $client->request('POST', $this->api.'identity/v1/oauth2/token',[
                             'headers'=> $header,
                             'data'  => $body
                         ]);
@@ -172,7 +182,7 @@ class DropboxController extends Controller
             'refresh_token'=>$this->refreshCode,
             'scope'=>'https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.inventory',
         ];
-        $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
+        $res = $client->request('POST', $this->api.'identity/v1/oauth2/token',[
                             'headers'=> $header,
                             'form_params'  => $body
                         ]);
@@ -239,7 +249,7 @@ class DropboxController extends Controller
                 'Content-Type'=>'application/json'
             ];
             // dd($json);
-            $res = $client->request('PUT', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
+            $res = $client->request('PUT', $this->api.'sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
                             'headers'=> $header,
                             'body'  => $json
                         ]);
@@ -262,7 +272,7 @@ class DropboxController extends Controller
                 'Content-Language'=>'en-US',
                 'Content-Type'=>'application/json'
             ];
-            $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/401-OATMEAL-280X190',[
+            $res = $client->request('GET', $this->api.'sell/inventory/v1/inventory_item/401-OATMEAL-280X190',[
                             'headers'=> $header,
                             // 'body'  => $json
                         ]);
@@ -311,7 +321,7 @@ class DropboxController extends Controller
         ];
    
 
-        $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
+        $res = $client->request('POST', $this->api.'identity/v1/oauth2/token',[
                             'headers'=> $header,
                             'form_params'  => $body
                         ]);
@@ -520,12 +530,13 @@ class DropboxController extends Controller
                 'refresh_token'=>$attribute,
                 'scope'=>'https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.inventory',
             ];
-            $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
+            $res = $client->request('POST', $this->api.'identity/v1/oauth2/token',[
                                 'headers'=> $header,
                                 'form_params'  => $body
                             ]);
 
             $search_results = json_decode($res->getBody(), true);
+
             $this->access_token_ebay = $search_results['access_token'];
         }
          catch (\Exception $e){
@@ -660,7 +671,7 @@ class DropboxController extends Controller
                 'Content-Language'=>'en-US',
                 'Content-Type'=>'application/json'
             ];
-            $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
+            $res = $client->request('GET', $this->api.'sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
                             'headers'=> $header,
                         ]);
             $search_results = json_decode($res->getBody(), true);
@@ -817,7 +828,7 @@ class DropboxController extends Controller
                 'Content-Type'=>'application/json'
             ];
             // dd($header);
-            $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$id,[
+            $res = $client->request('GET', $this->api.'sell/inventory/v1/inventory_item/'.$id,[
                             'headers'=> $header,
                         ]);
             $search_results = json_decode($res->getBody(), true);
