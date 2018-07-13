@@ -35,8 +35,6 @@ class UpdateProductToEbayOne extends Command
     public function __construct()
     {
         parent::__construct();
-        $token = Token::find(1);
-        $this->friend = $token;
     }
 
     /**
@@ -47,7 +45,7 @@ class UpdateProductToEbayOne extends Command
     public function handle()
     {
         //------- Call Jobs ---------------
-        dispatch(new UploadProductToEbay($this->friend))->onQueue('uploads');
+        dispatch(new UploadProductToEbay)->onQueue('uploads');
     }
 
 }

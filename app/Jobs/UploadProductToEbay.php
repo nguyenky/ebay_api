@@ -21,9 +21,11 @@ class UploadProductToEbay implements ShouldQueue
     protected  $path   = '/picture';
     protected  $mode   = 'filename';
     protected  $query  = 'UNITEX-DATAFEED-ALL.csv';
-    protected  $friend;
+    // protected  $tokenGloble;
     protected  $access_token_ebay;
     protected  $filecsv;
+    protected  $api;
+    protected  $tokenGloble;
 
 
 
@@ -35,12 +37,21 @@ class UploadProductToEbay implements ShouldQueue
     // public function __construct($filename,User $userId)
     // {
     //     $this->filecsv = json_decode($filename,true);
-    //     $this->friend = $userId;  
+    //     $this->tokenGloble = $userId;  
     // }
 
-    public function __construct($token)
+    public function __construct()
     {
-        $this->friend = $token;  
+        // $this->tokenGloble = ;
+        if(env('EBAY_SERVER') == 'sandbox'){
+
+            $this->api = 'https://api.sandbox.ebay.com/';
+
+        }else{
+
+            $this->api = 'https://api.ebay.com/';
+        }
+        $this->tokenGloble = \App\Token::find(1);  
        
     }
 
@@ -76,7 +87,7 @@ class UploadProductToEbay implements ShouldQueue
                 'POST', '/2/files/search',
                 [
                     'headers' => [
-                        'Authorization' => 'Bearer ' . $this->friend->accesstoken_dropbox,
+                        'Authorization' => 'Bearer ' . $this->tokenGloble->accesstoken_dropbox,
                         'Content-Type' => 'application/json'
                     ],
                     'body' => $data
@@ -115,7 +126,7 @@ class UploadProductToEbay implements ShouldQueue
                     '/2/files/download',
                     [
                         'headers' => [
-                            'Authorization' => 'Bearer ' .$this->friend->accesstoken_dropbox,
+                            'Authorization' => 'Bearer ' .$this->tokenGloble->accesstoken_dropbox,
                             'Dropbox-API-Arg' => $data
                         ]
                 ]);
@@ -205,18 +216,16 @@ class UploadProductToEbay implements ShouldQueue
 
             $code = $appID .':'.$clientID;
 
-            $this->base64 = 'Basic '.base64_encode($code);
-
             $header = [
                 'Content-Type'=>'application/x-www-form-urlencoded',
-                'Authorization'=> $this->base64,
+                'Authorization'=> 'Basic '.base64_encode($code),
             ];
             $body = [
                 'grant_type'=>'refresh_token',
-                'refresh_token'=>$this->friend->refresh_token_ebay,
+                'refresh_token'=>$this->tokenGloble->refresh_token_ebay,
                 'scope'=>'https://api.ebay.com/oauth/api_scope/sell.account https://api.ebay.com/oauth/api_scope/sell.inventory',
             ];
-            $res = $client->request('POST', 'https://api.sandbox.ebay.com/identity/v1/oauth2/token',[
+            $res = $client->request('POST', $this->api.'identity/v1/oauth2/token',[
                                 'headers'=> $header,
                                 'form_params'  => $body
                             ]);
@@ -243,11 +252,12 @@ class UploadProductToEbay implements ShouldQueue
                     $getAccessToken = $this->step4EbayRefreshToken();
 
                     if($getAccessToken){
-                        $token = Token::find($this->friend->id);
-                        if($token->accesstoken_ebay != $getAccessToken['access_token']){
-                            $token->accesstoken_ebay = $getAccessToken['access_token'];
-                            $token->save();
-                        }
+                        // $token = Token::find($this->tokenGloble->id);
+                        // if($token->accesstoken_ebay != $getAccessToken['access_token']){
+                        //     $token->accesstoken_ebay = $getAccessToken['access_token'];
+                        //     $token->save();
+                            $this->tokenGloble->accesstoken_ebay = $getAccessToken['access_token'];
+                        // }
                         
                     }
                     
@@ -271,7 +281,7 @@ class UploadProductToEbay implements ShouldQueue
                         'POST', '/2/files/search',
                         [
                             'headers' => [
-                                'Authorization' => 'Bearer ' . $this->friend->accesstoken_dropbox,
+                                'Authorization' => 'Bearer ' . $this->tokenGloble->accesstoken_dropbox,
                                 'Content-Type' => 'application/json'
                             ],
                             'body' => $value
@@ -326,7 +336,7 @@ class UploadProductToEbay implements ShouldQueue
                 '/2/files/download',
                 [
                     'headers' => [
-                        'Authorization' => 'Bearer ' .$this->friend->accesstoken_dropbox,
+                        'Authorization' => 'Bearer ' .$this->tokenGloble->accesstoken_dropbox,
                         'Dropbox-API-Arg' => $data
                     ]
             ]);
@@ -370,12 +380,12 @@ class UploadProductToEbay implements ShouldQueue
         try {
             $client = new \GuzzleHttp\Client();
             $header = [
-                'Authorization'=>'Bearer '.$this->friend->accesstoken_ebay,
+                'Authorization'=>'Bearer '.$this->tokenGloble->accesstoken_ebay,
                 'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_US',
                 'Content-Language'=>'en-US',
                 'Content-Type'=>'application/json'
             ];
-            $res = $client->request('GET', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
+            $res = $client->request('GET', $this->api.'sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
                             'headers'=> $header,
                         ]);
             $search_results = json_decode($res->getBody(), true);
@@ -399,12 +409,12 @@ class UploadProductToEbay implements ShouldQueue
 
         try {
 
-            $search_results = $this->getItems($attribute,$namefile);
+            // $search_results = $this->getItems($attribute,$namefile);
 
-            if(!$search_results){
+            // if(!$search_results){
                 // $product = $search_results['product'];
                 $this->createItemsEbay($attribute,$namefile);
-            }
+            // }
             
         
             // if($product['title'] == $attribute['Name']){
@@ -464,8 +474,8 @@ class UploadProductToEbay implements ShouldQueue
                         'pileheight' => [$attribute['Pileheight']]
                     ],
                     'category' => $attribute['Category'],
-                    'description'=> 'Description',
-                    // 'description'=> $attribute['Description'],
+                    // 'description'=> 'Description',
+                    'description'=> $attribute['Description'],
                     'cost' => $attribute['Cost (Ex.GST) '],
                     'sell' => $attribute['Sell'],
                     'rrp' => $attribute['RRP'],
@@ -474,12 +484,12 @@ class UploadProductToEbay implements ShouldQueue
             ];
             $json = json_encode($data);
             $header = [
-            'Authorization'=>'Bearer '.$this->friend->accesstoken_ebay,
+            'Authorization'=>'Bearer '.$this->tokenGloble->accesstoken_ebay,
             'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_AU',
             'Content-Language'=>'en-US',
             'Content-Type'=>'application/json'
         ];
-            $res = $client->request('PUT', 'https://api.sandbox.ebay.com/sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
+            $res = $client->request('PUT', $this->api.'sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
                             'headers'=> $header,
                             'body'  => $json
                         ]);

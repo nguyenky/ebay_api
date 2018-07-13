@@ -81,5 +81,3 @@ Route::group(['namespace'=>'Dropbox'],function(){
     Route::get('step3','DropboxController@step3RefreshToken');
 
 });
-
-
