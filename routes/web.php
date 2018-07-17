@@ -81,3 +81,9 @@ Route::group(['namespace'=>'Dropbox'],function(){
     Route::get('step3','DropboxController@step3RefreshToken');
 
 });
+
+Route::get('test-dropbox-job',function(){
+
+    dispatch(new \App\Jobs\dropbox\CheckCSVFile);
+    
+});

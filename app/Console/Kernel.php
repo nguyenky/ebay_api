@@ -25,14 +25,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('command:ebay-product')
+        $schedule->command('command:download-file-csv')
                  ->daily();
 
-            // $schedule->call(function(){
-            //      \Log::info('Job [Ebay] 123 ');
-            // })->everyMinute();
-        // $schedule->job(new UploadProductToEbay(auth()->user()))
-        //          ->daily();
+        $schedule->command('command:ebay-product')
+                 ->daily();
     }
 
     /**
