@@ -48,7 +48,7 @@ class CreateInventoryEbay implements ShouldQueue
         $products = \App\Product::all();
         foreach ($products as $key => $value) {
             $images = $this->searchImages($value);
-            $refreshToken = $this->refreshToken();
+           // $refreshToken = $this->refreshToken();
             $product = $this->createInventory($value,$images);
         }
     }
@@ -198,7 +198,7 @@ class CreateInventoryEbay implements ShouldQueue
                 'body'  => $json
             ]);
         $search_results = json_decode($res->getBody(), true);
-        // dd($search_results);
+       // dd($search_results);
         \Log::info('Job [Ebay] SUCCESS ----Create item---- at '. now());
         }
         catch(\Exception $e) {
