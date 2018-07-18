@@ -217,9 +217,10 @@ class DropboxController extends Controller
                     'title'     => $attribute['Name'],
                     // 'title'     => 'uchiha',
                     'imageUrls' =>[
-                        "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1000.jpg",
-                        "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1001.jpg",
-                        "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1002.jpg"
+                        // "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1000.jpg",
+                        // "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1001.jpg",
+                        // "http://i.ebayimg.com/images/i/182196556219-0-1/s-l1002.jpg",
+                        "https://i.ebayimg.com/images/g/WDUAAOSwX0xbTE22/s-l500.jpg"
                     ],
                     'aspects'   => [
                         'size' => [$attribute['Size']],
@@ -248,7 +249,7 @@ class DropboxController extends Controller
                 'Content-Language'=>'en-US',
                 'Content-Type'=>'application/json'
             ];
-            // dd($json);
+            dd($json);
             $res = $client->request('PUT', $this->api.'sell/inventory/v1/inventory_item/'.$attribute['SKU'],[
                             'headers'=> $header,
                             'body'  => $json
@@ -503,7 +504,8 @@ class DropboxController extends Controller
             return null;
         }
         $filtered = collect($csv)->filter(function ($value, $key) {
-            return $value['SKU'] == '401-OATMEAL-165X115' || $value['SKU'] == '871-LATTE-300X80' ;
+            // return $value['SKU'] == '401-OATMEAL-165X115' || $value['SKU'] == '871-LATTE-300X80' ;
+            return$value['SKU'] == '871-LATTE-300X80' ;
         });
 
 
@@ -551,7 +553,7 @@ class DropboxController extends Controller
         try {
             foreach ($attributes as $key => $attribute) {
 
-                if($key > 1056){
+                if($key >=0){
 
                     $namefile = Array();
                     $data = Array();
@@ -695,17 +697,17 @@ class DropboxController extends Controller
             $search_results = $this->getItems($attribute,$namefile,$token->accesstoken_ebay);
 
             $product = $search_results['product'];
-         
-            if($product['title'] == $attribute['Name'] && $product['description'] == $attribute['Description']){
-                    if($product['aspects']['pileheight'][0] == $attribute['Pileheight'] && $product['aspects']['height'][0] == $attribute['Height'] && $product['aspects']['color'][0] == $attribute['Color'] && $product['aspects']['width'][0] == $attribute['Width'] &&$product['aspects']['length'][0] == $attribute['Length'] && $product['aspects']['unitweight'][0] == $attribute['UnitWeight'] && $product['aspects']['construction'][0] == $attribute['Construction'] && $product['aspects']['material'][0] == $attribute['Material'] && $product['aspects']['size'][0] == $attribute['Size']){
+            $this->createItemsEbay($attribute,$namefile);
+            // if($product['title'] == $attribute['Name'] && $product['description'] == $attribute['Description']){
+            //         if($product['aspects']['pileheight'][0] == $attribute['Pileheight'] && $product['aspects']['height'][0] == $attribute['Height'] && $product['aspects']['color'][0] == $attribute['Color'] && $product['aspects']['width'][0] == $attribute['Width'] &&$product['aspects']['length'][0] == $attribute['Length'] && $product['aspects']['unitweight'][0] == $attribute['UnitWeight'] && $product['aspects']['construction'][0] == $attribute['Construction'] && $product['aspects']['material'][0] == $attribute['Material'] && $product['aspects']['size'][0] == $attribute['Size']){
                            
-                    } else {
-                        $this->createItemsEbay($attribute,$namefile);
-                    }
+            //         } else {
+            //             $this->createItemsEbay($attribute,$namefile);
+            //         }
 
-            } else {
-               $this->createItemsEbay($attribute,$namefile);
-            }
+            // } else {
+            //    $this->createItemsEbay($attribute,$namefile);
+            // }
                 // return $product;
             \Log::info('Job [Ebay] END at '. now());
         }
@@ -848,6 +850,11 @@ class DropboxController extends Controller
         }
         // return $search_results;
         // return view('detail-item',['item'=>'asdsd']);
+    }
+    ///products
+    public function products(){
+        $products = \App\Product::all();
+        return view('products',['items'=>$products]);
     }
 }
 

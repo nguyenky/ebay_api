@@ -41,7 +41,17 @@
                     </div>
                     <div>
                         <!-- <a href="/search-file-dropbox">Dropbox User infor</a> -->
-                    </div>                    
+                    </div> 
+                    <div>
+                        @foreach($items as $key => $item)
+                            @if($item->listingID)
+                            <div class="col-ms-6 col-md-4">
+                                <span style="color: #3b7ec4;">{{$key}} : </span>
+                                <a href="https://www.ebay.com.au/itm/{{$item->listingID}}">{{$item['SKU']}}</a>
+                            </div>
+                            @endif
+                        @endforeach
+                    </div>                   
                 </div>
             </div>
         </div>

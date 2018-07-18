@@ -66,6 +66,9 @@ Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){
     Route::get('test','TestController@index');
 
     Route::get('testjob','TestController@test');
+
+    Route::get('products','DropboxController@products');
+
 });
 
 Route::group(['namespace'=>'Dropbox'],function(){
@@ -80,4 +83,27 @@ Route::group(['namespace'=>'Dropbox'],function(){
     Route::get('step2','DropboxController@step2GetAccessTokenEbay');
     Route::get('step3','DropboxController@step3RefreshToken');
 
+});
+
+Route::get('CheckCSVFile',function(){
+
+    dispatch(new \App\Jobs\dropbox\CheckCSVFile);
+    
+});
+Route::get('DownloadCSV',function(){
+
+    dispatch(new \App\Jobs\dropbox\DownloadCSV);
+    
+});
+Route::get('CreateInventoryEbay',function(){
+
+
+    dispatch(new \App\Jobs\dropbox\CreateInventoryEbay);
+    
+});
+Route::get('CreateOfferEbay',function(){
+    // dispatch(new \App\Jobs\ebay\CreateInventoryEbay);
+    //dispatch(new \App\Jobs\ebay\UpdateOffer);
+    dispatch(new \App\Jobs\dropbox\CreateOfferEbay);
+    
 });
