@@ -83,7 +83,14 @@ Route::group(['namespace'=>'Dropbox'],function(){
 });
 
 Route::get('test-dropbox-job',function(){
+    // $file = file_get_contents('contents/description.php', true);
+    // dd($file);
+    // $url = url('/images/');
+    // dd($url);
 
-    dispatch(new \App\Jobs\dropbox\CheckCSVFile);
+    // dispatch(new \App\Jobs\ebay\CreateInventoryEbay);
+    dispatch(new \App\Jobs\ebay\CreateOfferEbay);
+
+    // dispatch(new \App\Jobs\dropbox\CheckCSVFile);
     
 });
