@@ -851,6 +851,11 @@ class DropboxController extends Controller
         // return $search_results;
         // return view('detail-item',['item'=>'asdsd']);
     }
+    ///products
+    public function products(){
+        $products = \App\Product::all();
+        return view('products',['items'=>$products]);
+    }
 }
 
 class eBaySession

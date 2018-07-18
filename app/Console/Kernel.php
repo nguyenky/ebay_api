@@ -25,11 +25,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('command:download-file-csv')
-                 ->daily();
+        // $schedule->command('command:download-file-csv')
+        //          ->daily();
 
-        $schedule->command('command:ebay-product')
-                 ->daily();
+        // $schedule->command('command:ebay-product')
+        //          ->daily();
     }
 
     /**
