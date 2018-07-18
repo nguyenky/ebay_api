@@ -98,12 +98,12 @@ Route::get('DownloadCSV',function(){
 Route::get('CreateInventoryEbay',function(){
 
 
-    dispatch(new \App\Jobs\dropbox\CreateInventoryEbay);
+    dispatch(new \App\Jobs\ebay\CreateInventoryEbay);
     
 });
 Route::get('CreateOfferEbay',function(){
     // dispatch(new \App\Jobs\ebay\CreateInventoryEbay);
     //dispatch(new \App\Jobs\ebay\UpdateOffer);
-    dispatch(new \App\Jobs\dropbox\CreateOfferEbay);
+    dispatch(new \App\Jobs\ebay\CreateOfferEbay);
     
 });
