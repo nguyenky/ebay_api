@@ -89,7 +89,7 @@ Route::get('test-dropbox-job',function(){
     // dd($url);
 
     // dispatch(new \App\Jobs\ebay\CreateInventoryEbay);
-    dispatch(new \App\Jobs\ebay\CreateOfferEbay);
+    dispatch(new \App\Jobs\ebay\UpdateOffer);
 
     // dispatch(new \App\Jobs\dropbox\CheckCSVFile);
     
