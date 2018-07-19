@@ -48,7 +48,7 @@ class CreateInventoryEbay implements ShouldQueue
         $products = \App\Product::all();
         foreach ($products as $key => $value) {
             $images = $this->searchImages($value);
-           // $refreshToken = $this->refreshToken();
+            $refreshToken = $this->refreshToken();
             $product = $this->createInventory($value,$images);
         }
     }
@@ -234,8 +234,7 @@ class CreateInventoryEbay implements ShouldQueue
 
             $search_results = json_decode($res->getBody(), true);
 
-            $this->token->refresh_token_ebay = $search_results['access_token'];
-
+            $this->token->refresh_token_ebay = $search_results['refresh_token'];
             $token = \App\Token::find(1);
             $token->refresh_token_ebay = $search_results['access_token'];
             $token->save();
