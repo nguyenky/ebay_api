@@ -234,9 +234,9 @@ class CreateInventoryEbay implements ShouldQueue
 
             $search_results = json_decode($res->getBody(), true);
 
-            $this->token->refresh_token_ebay = $search_results['refresh_token'];
+            $this->token->accesstoken_ebay = $search_results['access_token'];
             $token = \App\Token::find(1);
-            $token->refresh_token_ebay = $search_results['refresh_token'];
+            $token->accesstoken_ebay = $search_results['access_token'];
             $token->save();
         }
          catch (\Exception $e){
