@@ -44,11 +44,9 @@ class UpdateOffer implements ShouldQueue
         $product = \App\Product::all();
         foreach ($product as $key => $value) {
             // $offer = $this->getOffer($value->SKU);
-            if($value->offerID != null){
+            if(!$value->offerID){
                 $updateOffer = $this->updateOffer($value,$value->offerID);
-            } else {
-                
-            }    
+            } 
         }
     }
 
@@ -68,9 +66,9 @@ class UpdateOffer implements ShouldQueue
                 'headers'=> $header,
             ]);
             // dd($res);
-            $search_results = json_decode($res->getBody(), true);
-            // dd($search_results);
-            return $search_results['offers'];
+            $search_results = json_decode($res->getBody(), true););
+
+            // dd($search_results            return $search_results['offers'];
             // return true;
         } catch (\Exception $e) {
              \Log::info('Job [Ebay] FAIL ----Get Offer---- at '. now());
