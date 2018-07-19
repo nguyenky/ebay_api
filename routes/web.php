@@ -84,17 +84,17 @@ Route::group(['namespace'=>'Dropbox'],function(){
     Route::get('step3','DropboxController@step3RefreshToken');
 
 });
-
-Route::get('CheckCSVFile',function(){
-
-    dispatch(new \App\Jobs\dropbox\CheckCSVFile);
-    
-});
 Route::get('DownloadCSV',function(){
 
     dispatch(new \App\Jobs\dropbox\DownloadCSV);
     
 });
+Route::get('CheckCSVFile',function(){
+
+    dispatch(new \App\Jobs\dropbox\CheckCSVFile);
+    
+});
+
 Route::get('CreateInventoryEbay',function(){
 
 
@@ -102,12 +102,14 @@ Route::get('CreateInventoryEbay',function(){
     
 });
 Route::get('CreateOfferEbay',function(){
-    // dispatch(new \App\Jobs\ebay\CreateInventoryEbay);
-    //dispatch(new \App\Jobs\ebay\UpdateOffer);
     dispatch(new \App\Jobs\ebay\CreateOfferEbay);
     
 });
 Route::get('RefreshToken',function(){
     dispatch(new \App\Jobs\ebay\RefreshToken);
+    
+});
+Route::get('PublicOfferEbay',function(){
+    dispatch(new \App\Jobs\ebay\PublicOfferEbay);
     
 });
