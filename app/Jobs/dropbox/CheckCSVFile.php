@@ -146,7 +146,8 @@ class CheckCSVFile implements ShouldQueue
         }
         $filtered = collect($csv)->filter(function ($value, $key) {
             // return $value['SKU'] == '401-OATMEAL-165X115' || $value['SKU'] == '871-LATTE-300X80';
-            return $value['SKU'] == '401-RED-165X115' || $value['SKU'] == '401-RED-225X155';
+            // return $value['SKU'] == '401-RED-165X115' || $value['SKU'] == '401-RED-225X155';
+            return $value['SKU'] == '401-RED-165X115';
         });
 
 
