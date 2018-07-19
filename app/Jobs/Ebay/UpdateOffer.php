@@ -43,9 +43,11 @@ class UpdateOffer implements ShouldQueue
         \Log::info('Job [Ebay] START ----Update Offer---- at '. now());
         $product = \App\Product::all();
         foreach ($product as $key => $value) {
-            $offer = $this->getOffer($value->SKU);
-            if($offer != null){
-                $updateOffer = $this->updateOffer($value,$offer[0]['offerId']);
+            // $offer = $this->getOffer($value->SKU);
+            if($value->offerID != null){
+                $updateOffer = $this->updateOffer($value,$value->offerID);
+            } else {
+                
             }    
         }
     }
