@@ -17,6 +17,8 @@ class PublicOfferEbay implements ShouldQueue
      *
      * @return void
      */
+    protected  $token;
+    protected  $api;
     public function __construct()
     {
         if(env('EBAY_SERVER') == 'sandbox'){
