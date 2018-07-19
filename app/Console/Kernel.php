@@ -30,8 +30,16 @@ class Kernel extends ConsoleKernel
 
         // $schedule->command('command:ebay-product')
         //          ->daily();
-         $schedule->command('command:refresh-token-ebay')
+        $schedule->command('command:refresh-token-ebay')
                   ->hourly();
+
+        $schedule->command('command:create-offer')
+                  ->timezone('America/New_York')
+                    ->at('00:00');
+                    
+        $schedule->command('command:create-inventory')
+                  ->timezone('America/New_York')
+                    ->at('12:00');
     }
 
     /**

@@ -47,9 +47,11 @@ class CreateInventoryEbay implements ShouldQueue
     {
         $products = \App\Product::all();
         foreach ($products as $key => $value) {
-            $images = $this->searchImages($value);
-            $refreshToken = $this->refreshToken();
-            $product = $this->createInventory($value,$images);
+            if(!$value->listingID){
+                $images = $this->searchImages($value);
+                $refreshToken = $this->refreshToken();
+                $product = $this->createInventory($value,$images);
+            }
         }
     }
     public function searchImages($attribute){
@@ -60,6 +62,7 @@ class CreateInventoryEbay implements ShouldQueue
         $data[] = $attribute['Image3'];
         $data[] = $attribute['Image4'];
         $data[] = $attribute['Image5'];
+ 
         foreach ($data as $key_image => $item) {
 
             $pathPublic = public_path().'/images/';
@@ -68,7 +71,9 @@ class CreateInventoryEbay implements ShouldQueue
                 \File::makeDirectory($pathPublic, $mode = 0777, true, true);
 
             }
+            // dd($item);
             if(!\File::exists($pathPublic.$item)){
+
                 $value = json_encode(
                     [
                         'path' => $this->path_image,
@@ -88,8 +93,15 @@ class CreateInventoryEbay implements ShouldQueue
                 $search_results = json_decode($response->getBody(), true);
                 $matches = $search_results['matches'];
 
+                if(!count($matches)){
+                    $product = \App\Product::where('SKU',$attribute->SKU)->first();
+                    $key_image = $key_image +1;
+                    $image = 'Image'.(int)$key_image;
+                    $product->$image = null;
+                    $product->save();
+                }
                 foreach ($matches as $key_matches => $value) {
-                    $this->downImage($value['metadata']['path_lower']);
+                    $this->downImage($value['metadata']['path_lower'],$attribute->SKU,$key_image);
                     $namefile[] = $value['metadata']['name'];
                     break;
                 }
@@ -98,7 +110,7 @@ class CreateInventoryEbay implements ShouldQueue
         return $namefile;
     }
 
-    public function downImage($attribute){
+    public function downImage($attribute,$sku,$key_image){
         $data = json_encode([
             'path' => $attribute
         ]);
@@ -123,7 +135,15 @@ class CreateInventoryEbay implements ShouldQueue
         $file_extension = substr($filename, strrpos($filename, '.'));
 
         $file = $filename;
-
+        $file = str_replace('-','_',$file);
+        if($file){
+            $product = \App\Product::where('SKU',$sku)->first();
+            $key_image = $key_image +1;
+            $image = 'Image'.(int)$key_image;
+            $product->$image = $file;
+            $product->save();
+            // dd($product->toArray());
+        }
         $file_size = $file_info['size'];
 
         $pathPublic = public_path().'/images/';
@@ -142,70 +162,70 @@ class CreateInventoryEbay implements ShouldQueue
         try {
             \File::put(public_path() . '/images/' . $file, $content);
         } catch (\Exception $e){
-            dd($e);
+            // dd($e);
+            return null;
         }
         return null;
     }
 
     public function createInventory($attribute,$images){
+        // dd($attribute);
         $imageUrls =[];
         foreach ($images as $key => $value) {
             $url = url('/images/'.$value); 
             array_push($imageUrls,$url);
         }
-        try {
-            $client = new \GuzzleHttp\Client();
-            $data = [];
-            $data = [
-                'availability'  => [
-                    'shipToLocationAvailability'    => [
-                        'quantity'  => $attribute->QTY,
-                    ]
-                ],
-                'condition'     => 'NEW',
-                'product'       => [
-                    'title'     => $attribute->Name,
-                    'imageUrls' =>$imageUrls,
-                    'aspects'   => [
-                        'size' => [$attribute->Size],
-                        'color' => [$attribute->Color],
-                        'length' => [$attribute->Length],
-                        'width' => [$attribute->Width],
-                        'height' => [$attribute->Height],
-                        'unitweight' => [$attribute->UnitWeight],
-                        'construction' => [$attribute->Construction ? $attribute->Construction : 'NEW'],
-                        'material' => [$attribute->Material],
-                        'pileheight' => [$attribute->Pileheight]
-                    ],
-                    'category' => $attribute->Category,
-                    // 'description'=> 'Description',
-                    'description'=> $attribute->Description,
-                    'cost' => $attribute->Cost,
-                    'sell' => $attribute->Sell,
-                    'rrp' => $attribute->RRP,
-                    'origin' => $attribute->Origin,
-                ]
-            ];
-            $json = json_encode($data);
-            $header = [
-                'Authorization'=>'Bearer '.$this->token->accesstoken_ebay,
-                'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_AU',
-                'Content-Language'=>'en-AU',
-                'Content-Type'=>'application/json'
-            ];
-            $res = $client->request('PUT', $this->api.'sell/inventory/v1/inventory_item/'.$attribute->SKU,[
-                'headers'=> $header,
-                'body'  => $json
-            ]);
-        $search_results = json_decode($res->getBody(), true);
-       // dd($search_results);
-        \Log::info('Job [Ebay] SUCCESS ----Create item---- at '. now());
-        }
-        catch(\Exception $e) {
-            \Log::info('Job [Ebay] FAIL ----Create item---- at '. now());
-            dd($e);
-        }
-        \Log::info('Job [Ebay] END ----Create item---- at '. now());      
+        // try {
+        //     $client = new \GuzzleHttp\Client();
+        //     $data = [];
+        //     $data = [
+        //         'availability'  => [
+        //             'shipToLocationAvailability'    => [
+        //                 'quantity'  => $attribute->QTY,
+        //             ]
+        //         ],
+        //         'condition'     => 'NEW',
+        //         'product'       => [
+        //             'title'     => $attribute->Name,
+        //             'imageUrls' =>$imageUrls,
+        //             'aspects'   => [
+        //                 'size' => [$attribute->Size],
+        //                 'color' => [$attribute->Color],
+        //                 'length' => [$attribute->Length],
+        //                 'width' => [$attribute->Width],
+        //                 'height' => [$attribute->Height],
+        //                 'unitweight' => [$attribute->UnitWeight],
+        //                 'construction' => [$attribute->Construction ? $attribute->Construction : 'NEW'],
+        //                 'material' => [$attribute->Material],
+        //                 'pileheight' => [$attribute->Pileheight]
+        //             ],
+        //             'category' => $attribute->Category,
+        //             'description'=> $attribute->Description,
+        //             'cost' => $attribute->Cost,
+        //             'sell' => $attribute->Sell,
+        //             'rrp' => $attribute->RRP,
+        //             'origin' => $attribute->Origin,
+        //         ]
+        //     ];
+        //     $json = json_encode($data);
+        //     $header = [
+        //         'Authorization'=>'Bearer '.$this->token->accesstoken_ebay,
+        //         'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_AU',
+        //         'Content-Language'=>'en-AU',
+        //         'Content-Type'=>'application/json'
+        //     ];
+        //     $res = $client->request('PUT', $this->api.'sell/inventory/v1/inventory_item/'.$attribute->SKU,[
+        //         'headers'=> $header,
+        //         'body'  => $json
+        //     ]);
+        // $search_results = json_decode($res->getBody(), true);
+        // \Log::info('Job [Ebay] SUCCESS ----Create item---- at '. now());
+        // }
+        // catch(\Exception $e) {
+        //     \Log::info('Job [Ebay] FAIL ----Create item---- at '. now());
+        //     dd($e);
+        // }
+        // \Log::info('Job [Ebay] END ----Create item---- at '. now());      
         return null;
     }
 
