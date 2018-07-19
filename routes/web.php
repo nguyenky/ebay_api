@@ -107,3 +107,7 @@ Route::get('CreateOfferEbay',function(){
     dispatch(new \App\Jobs\ebay\CreateOfferEbay);
     
 });
+Route::get('RefreshToken',function(){
+    dispatch(new \App\Jobs\ebay\RefreshToken);
+    
+});

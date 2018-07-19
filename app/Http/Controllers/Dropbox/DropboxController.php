@@ -521,11 +521,11 @@ class DropboxController extends Controller
 
             $code = $appID .':'.$clientID;
 
-            $this->base64 = 'Basic '.base64_encode($code);
+            // $this->base64 = 'Basic '.base64_encode($code);
 
             $header = [
                 'Content-Type'=>'application/x-www-form-urlencoded',
-                'Authorization'=> $this->base64,
+                'Authorization'=> 'Basic '.base64_encode($code),
             ];
             $body = [
                 'grant_type'=>'refresh_token',

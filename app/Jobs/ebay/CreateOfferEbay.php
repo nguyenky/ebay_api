@@ -44,6 +44,11 @@ class CreateOfferEbay implements ShouldQueue
             $offer = $this->getOffer($value->SKU);
             if(!$offer){
                 $createOffer = $this->createOffer($value);
+                if($createOffer){
+                    $product = \App\Product::where('SKU',$value->SKU)->first();
+                    $product->offerID = $createOffer['offerId'];
+                    $product->save();
+                }
             }    
         }
         
@@ -143,7 +148,7 @@ class CreateOfferEbay implements ShouldQueue
                             'body'  => $json
                         ]);
         $search_results = json_decode($res->getBody(), true);
-        // dd($search_results);
+
         \Log::info('Job Create Offer SUCCESS at '. now());
         return $search_results;
         
