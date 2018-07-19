@@ -47,11 +47,11 @@ class CreateInventoryEbay implements ShouldQueue
     {
         $products = \App\Product::all();
         foreach ($products as $key => $value) {
-            // if(!$value->listingID){
+            if(!$value->listingID){
                 $images = $this->searchImages($value);
                 $refreshToken = $this->refreshToken();
                 $product = $this->createInventory($value,$images);
-            // }
+            }
         }
     }
     public function searchImages($attribute){
@@ -175,57 +175,57 @@ class CreateInventoryEbay implements ShouldQueue
             $url = url('/images/'.$value); 
             array_push($imageUrls,$url);
         }
-        // try {
-        //     $client = new \GuzzleHttp\Client();
-        //     $data = [];
-        //     $data = [
-        //         'availability'  => [
-        //             'shipToLocationAvailability'    => [
-        //                 'quantity'  => $attribute->QTY,
-        //             ]
-        //         ],
-        //         'condition'     => 'NEW',
-        //         'product'       => [
-        //             'title'     => $attribute->Name,
-        //             'imageUrls' =>$imageUrls,
-        //             'aspects'   => [
-        //                 'size' => [$attribute->Size],
-        //                 'color' => [$attribute->Color],
-        //                 'length' => [$attribute->Length],
-        //                 'width' => [$attribute->Width],
-        //                 'height' => [$attribute->Height],
-        //                 'unitweight' => [$attribute->UnitWeight],
-        //                 'construction' => [$attribute->Construction ? $attribute->Construction : 'NEW'],
-        //                 'material' => [$attribute->Material],
-        //                 'pileheight' => [$attribute->Pileheight]
-        //             ],
-        //             'category' => $attribute->Category,
-        //             'description'=> $attribute->Description,
-        //             'cost' => $attribute->Cost,
-        //             'sell' => $attribute->Sell,
-        //             'rrp' => $attribute->RRP,
-        //             'origin' => $attribute->Origin,
-        //         ]
-        //     ];
-        //     $json = json_encode($data);
-        //     $header = [
-        //         'Authorization'=>'Bearer '.$this->token->accesstoken_ebay,
-        //         'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_AU',
-        //         'Content-Language'=>'en-AU',
-        //         'Content-Type'=>'application/json'
-        //     ];
-        //     $res = $client->request('PUT', $this->api.'sell/inventory/v1/inventory_item/'.$attribute->SKU,[
-        //         'headers'=> $header,
-        //         'body'  => $json
-        //     ]);
-        // $search_results = json_decode($res->getBody(), true);
-        // \Log::info('Job [Ebay] SUCCESS ----Create item---- at '. now());
-        // }
-        // catch(\Exception $e) {
-        //     \Log::info('Job [Ebay] FAIL ----Create item---- at '. now());
-        //     dd($e);
-        // }
-        // \Log::info('Job [Ebay] END ----Create item---- at '. now());      
+        try {
+            $client = new \GuzzleHttp\Client();
+            $data = [];
+            $data = [
+                'availability'  => [
+                    'shipToLocationAvailability'    => [
+                        'quantity'  => $attribute->QTY,
+                    ]
+                ],
+                'condition'     => 'NEW',
+                'product'       => [
+                    'title'     => $attribute->Name,
+                    'imageUrls' =>$imageUrls,
+                    'aspects'   => [
+                        'size' => [$attribute->Size],
+                        'color' => [$attribute->Color],
+                        'length' => [$attribute->Length],
+                        'width' => [$attribute->Width],
+                        'height' => [$attribute->Height],
+                        'unitweight' => [$attribute->UnitWeight],
+                        'construction' => [$attribute->Construction ? $attribute->Construction : 'NEW'],
+                        'material' => [$attribute->Material],
+                        'pileheight' => [$attribute->Pileheight]
+                    ],
+                    'category' => $attribute->Category,
+                    'description'=> $attribute->Description,
+                    'cost' => $attribute->Cost,
+                    'sell' => $attribute->Sell,
+                    'rrp' => $attribute->RRP,
+                    'origin' => $attribute->Origin,
+                ]
+            ];
+            $json = json_encode($data);
+            $header = [
+                'Authorization'=>'Bearer '.$this->token->accesstoken_ebay,
+                'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_AU',
+                'Content-Language'=>'en-AU',
+                'Content-Type'=>'application/json'
+            ];
+            $res = $client->request('PUT', $this->api.'sell/inventory/v1/inventory_item/'.$attribute->SKU,[
+                'headers'=> $header,
+                'body'  => $json
+            ]);
+        $search_results = json_decode($res->getBody(), true);
+        \Log::info('Job [Ebay] SUCCESS ----Create item---- at '. now());
+        }
+        catch(\Exception $e) {
+            \Log::info('Job [Ebay] FAIL ----Create item---- at '. now());
+            dd($e);
+        }
+        \Log::info('Job [Ebay] END ----Create item---- at '. now());      
         return null;
     }
 

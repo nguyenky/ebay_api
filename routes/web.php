@@ -113,3 +113,7 @@ Route::get('PublicOfferEbay',function(){
     dispatch(new \App\Jobs\ebay\PublicOfferEbay);
     
 });
+Route::get('UpdateEbay',function(){
+    $find = \App\Product::first();
+    dispatch(new \App\Jobs\ebay\UpdateEbay($find));
+});
