@@ -47,11 +47,11 @@ class CreateInventoryEbay implements ShouldQueue
     {
         $products = \App\Product::all();
         foreach ($products as $key => $value) {
-            if(!$value->listingID){
+            // if(!$value->listingID){
                 $images = $this->searchImages($value);
                 $refreshToken = $this->refreshToken();
                 $product = $this->createInventory($value,$images);
-            }
+            // }
         }
     }
     public function searchImages($attribute){
