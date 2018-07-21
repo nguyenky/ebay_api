@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">Dashboard</div>
 
@@ -43,15 +43,47 @@
                         <!-- <a href="/search-file-dropbox">Dropbox User infor</a> -->
                     </div> 
                     <div>
-                        @foreach($items as $key => $item)
-                            @if($item->listingID)
-                            <div class="col-ms-6 col-md-4">
-                                <span style="color: #3b7ec4;">{{$key}} : </span>
-                                <a href="https://www.ebay.com.au/itm/{{$item->listingID}}">{{$item['SKU']}}</a>
-                            </div>
-                            @endif
-                        @endforeach
-                    </div>                   
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>SKU</th>
+                                    <th>Name</th>
+                                    <th>Cost</th>
+                                    <th>Sell</th>
+                                    <th>RRP</th>
+                                    <th>QTY</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach($items as $key => $item)
+                                @if($item->listingID)
+                                    <tr>
+                                        <td>{{$item->id}}</td>
+                                        <td>{{$item->SKU}}</td>
+                                        <td>{{$item->Name}}</td>
+                                        <td>{{$item->Cost}}</td>
+                                        <td>{{$item->Sell}}</td>
+                                        <td>{{$item->RRP}}</td>
+                                        <td>{{$item->QTY}}</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    Options
+                                                </button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item" href="/ebay/preview/?id={{$item->id}}" target="_blank">Preview</a>
+                                                    <a class="dropdown-item" href="https://www.ebay.com.au/itm/{{$item->listingID}}" target="_blank">View on eBay</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endif
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
