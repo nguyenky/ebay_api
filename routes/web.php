@@ -20,7 +20,7 @@ Auth::routes();
 Route::get('/home', 'Dropbox\DropboxController@products')->name('home');
 
 Route::group(['middleware'=>'auth'],function(){
-
+    Route::get('/ebay/preview', 'Ebay\EbayDescriptionController@index')->name('ebay_preview');
 });
 
 
