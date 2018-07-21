@@ -88,7 +88,7 @@
             width:20%
         }
         .input:checked+.label{
-            color:#92bcba;
+            color:#D8A95B;
             position:relative;
             z-index:1;
             top:1px;
@@ -182,7 +182,7 @@
         }
         .defaultimg{
             position:absolute;
-            top:15%;
+            top:10px;
             right:0;
             bottom:0;
             left:84px;
@@ -217,6 +217,9 @@
             width:84px;
             height:105px;
             border-bottom:1px solid #d9d9d9
+        }
+        .small-images li:last-child .item-content{
+            border-bottom:0px none;
         }
         .small-images .small-image{
             position:absolute;
@@ -286,7 +289,7 @@
         .gallery-detail{
             width:40%;
             float:right;
-            padding-top:80px;
+            padding-top:10px;
             box-sizing:border-box
         }
         .gallery-detail h1{
@@ -310,45 +313,25 @@
     <div class='content'>
         <section class='product'>
             <div class='gallery-content'>
+                @if(@$item && $item->hasImages)
                 <div class='gallery'>
                     <div class='images-box'></div>
                     <ul class='small-images' id='list-thumnail'>
+                        @foreach($images as $img)
                         <li class='image'>
-                            <div class='item-content'> <img class='small-image' src='https://i.ebayimg.com/images/g/WDUAAOSwX0xbTE22/s-l500.jpg'></div>
+                            <div class='item-content'> <img class='small-image' src='/images/{{$img}}'></div>
                             <div class='gallery-content' id='image'>
-                                <div class='item-wrapper'> <img src='https://i.ebayimg.com/images/g/WDUAAOSwX0xbTE22/s-l500.jpg'></div>
+                                <div class='item-wrapper'> <img src='/images/{{$img}}'></div>
                             </div>
                         </li>
-                        <li class='image'>
-                            <div class='item-content'> <img class='small-image' src='https://i.ebayimg.com/images/g/WDUAAOSwX0xbTE22/s-l500.jpg'></div>
-                            <div class='gallery-content' id='image'>
-                                <div class='item-wrapper'> <img src='https://i.ebayimg.com/images/g/WDUAAOSwX0xbTE22/s-l500.jpg'></div>
-                            </div>
-                        </li>
-                        <li class='image'>
-                            <div class='item-content'> <img class='small-image' src='https://i.ebayimg.com/images/g/WDUAAOSwX0xbTE22/s-l500.jpg'></div>
-                            <div class='gallery-content' id='image'>
-                                <div class='item-wrapper'> <img src='https://i.ebayimg.com/images/g/WDUAAOSwX0xbTE22/s-l500.jpg'></div>
-                            </div>
-                        </li>
-                        <li class='image'>
-                            <div class='item-content'> <img class='small-image' src='https://i.ebayimg.com/images/g/WDUAAOSwX0xbTE22/s-l500.jpg'></div>
-                            <div class='gallery-content' id='image'>
-                                <div class='item-wrapper'> <img src='https://i.ebayimg.com/images/g/WDUAAOSwX0xbTE22/s-l500.jpg'></div>
-                            </div>
-                        </li>
-                        <li class='image'>
-                            <div class='item-content'> <img class='small-image' src='https://i.ebayimg.com/images/g/WDUAAOSwX0xbTE22/s-l500.jpg'></div>
-                            <div class='gallery-content' id='image'>
-                                <div class='item-wrapper'> <img src='https://i.ebayimg.com/images/g/WDUAAOSwX0xbTE22/s-l500.jpg'></div>
-                            </div>
-                        </li>
+                        @endforeach
                         <div class='defaultimg'>
-                            <div class='inner'> <img src='https://i.ebayimg.com/images/g/WDUAAOSwX0xbTE22/s-l500.jpg'></div>
+                            <div class='inner'> <img src='/images/{{$images[0]}}'></div>
                         </div>
                     </ul>
                     <div class='clear'></div>
                 </div>
+                @endif
                 <div class='gallery-detail'>
                     <h1>{{ @$item["Name"] }}</h1>
                     <p class='price'>{{"$".number_format(@$item["Price"],2)}}</p>
@@ -390,6 +373,7 @@
             </div>
         </section>
     </div>
+    <p>&nbsp;</p>
 </div>
 </body>
 </html>

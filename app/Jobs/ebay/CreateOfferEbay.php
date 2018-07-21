@@ -51,7 +51,6 @@ class CreateOfferEbay implements ShouldQueue
                 }
             }    
         }
-        
     }
 
     public function getOffer($attribute){

@@ -10,6 +10,7 @@ class EbayDescriptionController extends Controller
 {
     public function index(Request $request){
         $item=false;
+        $images=false;
         if((int)@$request->id>0){
             $item=Product::find($request->id);
         }
@@ -40,8 +41,21 @@ class EbayDescriptionController extends Controller
 
             $item->Description=$desc;
         }
+
+        if($item){
+            $item->hasImages=($item->Image1 || $item->Image2 || $item->Image3 || $item->Image4 || $item->Image5);
+            if($item->hasImages){
+                $images=[];
+                for($c=1;$c<=5;$c++){
+                    if($item["Image".$c]){
+                        $images[]=$item["Image".$c];
+                    }
+                }
+            }
+        }
         return(view("ebay.description",[
-            "item"=>$item
+            "item"=>$item,
+            "images"=>$images
         ]));
     }
 }
