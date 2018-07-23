@@ -101,7 +101,7 @@ class UpdateEbay implements ShouldQueue
                 'Content-Type'=>'application/json'
             ];
         
-            $res = $client->request('PUT', $this->api.'/sell/inventory/v1/offer/'.$attribute->offerID,[
+            $res = $client->request('PUT', $this->api.'sell/inventory/v1/offer/'.$attribute->offerID,[
                             'headers'=> $header,
                             'body'  => $json
                         ]);

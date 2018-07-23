@@ -22,7 +22,7 @@ class CreateUsersTable extends Migration
             $table->text('grant_code')->nullable();
             $table->text('refresh_token_ebay')->nullable();
             $table->text('accesstoken_ebay')->nullable();
-            $table->int('authorised')->default(0);
+            $table->integer('authorised')->default(0);
             $table->rememberToken();
             $table->timestamps();
         });

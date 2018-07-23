@@ -40,6 +40,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('command:create-inventory')
                   ->timezone('America/New_York')
                     ->at('12:00');
+        
     }
 
     /**
