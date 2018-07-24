@@ -39,7 +39,12 @@ class PublicOfferEbay implements ShouldQueue
      */
     public function handle()
     {
-        $products = \App\Product::all();
+        $system = \App\System::first();
+        if($system->mode_test){
+            $products = \App\Product::where('product_mode_test',1)->get();
+        }else{
+            $products = \App\Product::where('product_mode_test',0)->get();
+        }
         foreach ($products as $key => $value) {
             if(!$value->listingID && $value->offerID){
                 $listingID = $this->publicOffer($value);

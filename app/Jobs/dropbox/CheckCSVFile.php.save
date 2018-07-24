@@ -29,19 +29,11 @@ class CheckCSVFile implements ShouldQueue
      */
     public function handle()
     {
-        $system = \App\System::find(1);
-
+        $system = \App\System::find(
         $csv = $this->convertToArray('files/'.$system->filecsv);
         if($csv){
             foreach ($csv as $key => $value) {
-                if($system->mode_test){
-                    $find = \App\Product::where('SKU',$value['SKU'])->where('product_mode_test')->first();
-                    $value['product_mode_test'] = 1;
-                }else{
-                    $find = \App\Product::where('SKU',$value['SKU'])->first();
-                    $value['product_mode_test'] = 0;
-                }
-                
+                $find = \App\Product::where('SKU',$value['SKU'])->first();
                 if(!$find){
                     $product = \App\Product::create([
                         'SKU'=> $value['SKU'],
@@ -66,8 +58,7 @@ class CheckCSVFile implements ShouldQueue
                         'Origin'=>$value['Origin'],
                         'Construction'=>$value['Construction'],
                         'Material'=>$value['Material'],
-                        'Pileheight'=>$value['Pileheight'],
-                        'product_mode_test'=>$value['product_mode_test']
+                        'Pileheight'=>$value['Pileheight']
                     ]);
                 }else{
                     if( 
@@ -154,8 +145,7 @@ class CheckCSVFile implements ShouldQueue
         }
         $filtered = collect($csv)->filter(function ($value, $key) {
             // return $value['SKU'] == '401-OATMEAL-165X115' || $value['SKU'] == '871-LATTE-300X80';
-            // return $value['SKU'] == '401-RED-165X115' || $value['SKU'] == '401-RED-225X155';
-            return $value['SKU'] == '401-RED-165X115';
+            return $value['SKU'] == '401-RED-165X115' || $value['SKU'] == '401-RED-225X155';
         });
 
 

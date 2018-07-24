@@ -17,10 +17,22 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::group(['middleware'=>'auth'],function(){
+Route::group([],function(){
     Route::get('/home', 'Dropbox\DropboxController@products')->name('home');
 
     Route::get('/ebay/preview', 'Ebay\EbayDescriptionController@index')->name('ebay_preview');
+});
+
+Route::group(['middleware'=>'auth','namespace'=>'ModeTest'],function(){
+
+    Route::get('mode-test','ModeTestController@index')->name('mode-test');
+
+    Route::post('update-mode-test','ModeTestController@update')->name('update-mode-test');
+
+    Route::post('create-test-product','ModeTestController@create')->name('create-test-product');
+
+    Route::get('del-product-test-{id}','ModeTestController@delete')->name('del-product-test');
+
 });
 
 Route::group(['namespace'=>'Dropbox','middleware'=>'auth'],function(){

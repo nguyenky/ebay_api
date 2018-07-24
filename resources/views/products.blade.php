@@ -16,6 +16,7 @@
                             <a class="dropdown-item" href="{{route('begin')}}">Begin Process</a>
                             <a class="dropdown-item" href="{{route('refresh')}}">Refresh Token</a>
                             <a class="dropdown-item" href="{{route('getItem')}}">Get Item</a>
+                            <a class="dropdown-item" href="{{route('mode-test')}}">Mode Test</a>
                         </div>
                     </div>
                 </div>
