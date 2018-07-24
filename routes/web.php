@@ -123,10 +123,10 @@ Route::get('PublicOfferEbay',function(){
     
 });
 Route::get('UpdateEbay',function(){
-    $content=file_get_contents('http://127.0.0.1:8080/ebay/preview/?id=1');
-    dd($content);
-    // $find = \App\Product::first();
-    // dispatch(new \App\Jobs\ebay\UpdateEbay($find));
+   // $content=file_get_contents('http://127.0.0.1:8080/ebay/preview/?id=1');
+    //dd($content);
+     $find = \App\Product::first();
+     dispatch(new \App\Jobs\ebay\UpdateEbay($find));
 });
 
 Route::get('test-description',function(){

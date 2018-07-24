@@ -317,16 +317,19 @@
                 <div class='gallery'>
                     <div class='images-box'></div>
                     <ul class='small-images' id='list-thumnail'>
+			<?php
+			$url = url('/');
+			?>
                         @foreach($images as $img)
                         <li class='image'>
-                            <div class='item-content'> <img class='small-image' src='/images/{{$img}}'></div>
+                            <div class='item-content'> <img class='small-image' src='{{$url}}/images/{{$img}}'></div>
                             <div class='gallery-content' id='image'>
-                                <div class='item-wrapper'> <img src='/images/{{$img}}'></div>
+                                <div class='item-wrapper'> <img src='{{$url}}/images/{{$img}}'></div>
                             </div>
                         </li>
                         @endforeach
                         <div class='defaultimg'>
-                            <div class='inner'> <img src='/images/{{$images[0]}}'></div>
+                            <div class='inner'> <img src='{{$url}}/images/{{$images[0]}}'></div>
                         </div>
                     </ul>
                     <div class='clear'></div>
