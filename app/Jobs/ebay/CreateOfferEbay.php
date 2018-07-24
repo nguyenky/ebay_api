@@ -81,7 +81,7 @@ class CreateOfferEbay implements ShouldQueue
             $search_results = json_decode($res->getBody(), true);
             // dd($search_results);
             // return $search_results['offers'];
-            return true;
+            return $search_results;
         } catch (\Exception $e) {
              \Log::info('Job [Ebay] FAIL ----Get Offer---- at '. now());
             if($e->getCode()==404){
