@@ -200,7 +200,8 @@ class CreateInventoryEbay implements ShouldQueue
                         'pileheight' => [$attribute->Pileheight]
                     ],
                     'category' => $attribute->Category,
-                    'description'=> $attribute->Description,
+                    // 'description'=> $attribute->Description,
+                    'description'=> 'Description',
                     'cost' => $attribute->Cost,
                     'sell' => $attribute->Sell,
                     'rrp' => $attribute->RRP,

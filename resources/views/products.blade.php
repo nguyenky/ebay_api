@@ -63,7 +63,10 @@
                                                 <div class="dropdown-menu">
                                                     <a class="dropdown-item" href="/ebay/preview/?id={{$item->id}}" target="_blank">Preview</a>
                                                     <a class="dropdown-item" href="https://www.ebay.com.au/itm/{{$item->listingID}}" target="_blank">View on eBay</a>
+<<<<<<< HEAD
                                                     <a class="dropdown-item" href="https://bulksell.ebay.com.au/ws/eBayISAPI.dll?SingleList&sellingMode=ReviseItem&ReturnURL=https%3A%2F%2Fwww.ebay.com.au%2Fsh%2Flst%2Factive&lineID={{$item->listingID}}" target="_blank">Edit on eBay</a>
+=======
+>>>>>>> 3b1b9bf8498cd7fc1a6613526e2c23dde8143949
                                                 </div>
                                             </div>
                                         </td>
@@ -72,7 +75,10 @@
                             @endforeach
                             </tbody>
                         </table>
+<<<<<<< HEAD
                         {{ $items->links() }}
+=======
+>>>>>>> 3b1b9bf8498cd7fc1a6613526e2c23dde8143949
                     </div>
                 </div>
             </div>
