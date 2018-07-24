@@ -34,7 +34,14 @@ class CheckCSVFile implements ShouldQueue
         $csv = $this->convertToArray('files/'.$system->filecsv);
         if($csv){
             foreach ($csv as $key => $value) {
-                $find = \App\Product::where('SKU',$value['SKU'])->first();
+                if($system->mode_test){
+                    $find = \App\Product::where('SKU',$value['SKU'])->where('product_mode_test')->first();
+                    $value['product_mode_test'] = 1;
+                }else{
+                    $find = \App\Product::where('SKU',$value['SKU'])->first();
+                    $value['product_mode_test'] = 0;
+                }
+                
                 if(!$find){
                     $product = \App\Product::create([
                         'SKU'=> $value['SKU'],
@@ -59,7 +66,8 @@ class CheckCSVFile implements ShouldQueue
                         'Origin'=>$value['Origin'],
                         'Construction'=>$value['Construction'],
                         'Material'=>$value['Material'],
-                        'Pileheight'=>$value['Pileheight']
+                        'Pileheight'=>$value['Pileheight'],
+                        'product_mode_test'=>$value['product_mode_test']
                     ]);
                 }else{
                     if( 
