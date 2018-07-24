@@ -25,13 +25,17 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('command:download-file-csv')
-        //          ->daily();
+        $schedule->command('command:download-file-csv')
+                 ->daily();
 
         // $schedule->command('command:ebay-product')
         //          ->daily();
+        
         $schedule->command('command:refresh-token-ebay')
                   ->hourly();
+
+        $schedule->command('command:check-file-csv')
+                  ->daily();
 
         $schedule->command('command:create-offer')
                   ->timezone('America/New_York')
