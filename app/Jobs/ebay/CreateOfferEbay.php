@@ -45,7 +45,7 @@ class CreateOfferEbay implements ShouldQueue
         }else{
             $products = \App\Product::where('product_mode_test',0)->get();
         }
-        foreach ($product as $key => $value) {
+        foreach ($products as $key => $value) {
             $offer = $this->getOffer($value->SKU);
             if(!$offer){
                 $createOffer = $this->createOffer($value);
@@ -54,7 +54,11 @@ class CreateOfferEbay implements ShouldQueue
                     $product->offerID = $createOffer['offerId'];
                     $product->save();
                 }
-            }    
+            }else{
+                $product = \App\Product::where('SKU',$value->SKU)->first();
+                $product->offerID = $offer['offers'][0]['offerId'];
+                $product->save();
+            }
         }
     }
 
