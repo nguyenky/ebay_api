@@ -27,8 +27,11 @@
                         </div>
                     @endif
                     <div>
-                        <h4>Active Items</h4>
-                        <table class="table table-bordered">
+                        <h4>
+                            Active Items
+                            <a href="#" class="btn pull-right"><i class="fas fa-search"></i></a>
+                        </h4>
+                        <table class="table table-bordered table-hover">
                             <thead>
                                 <tr>
                                     <th class="text-center">ID</th>
@@ -60,6 +63,7 @@
                                                 <div class="dropdown-menu">
                                                     <a class="dropdown-item" href="/ebay/preview/?id={{$item->id}}" target="_blank">Preview</a>
                                                     <a class="dropdown-item" href="https://www.ebay.com.au/itm/{{$item->listingID}}" target="_blank">View on eBay</a>
+                                                    <a class="dropdown-item" href="https://bulksell.ebay.com.au/ws/eBayISAPI.dll?SingleList&sellingMode=ReviseItem&ReturnURL=https%3A%2F%2Fwww.ebay.com.au%2Fsh%2Flst%2Factive&lineID={{$item->listingID}}" target="_blank">Edit on eBay</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -68,6 +72,7 @@
                             @endforeach
                             </tbody>
                         </table>
+                        {{ $items->links() }}
                     </div>
                 </div>
             </div>

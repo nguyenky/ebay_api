@@ -114,3 +114,8 @@ Route::get('UpdateEbay',function(){
     $find = \App\Product::first();
     dispatch(new \App\Jobs\ebay\UpdateEbay($find));
 });
+Route::get('test-update-ebay',function(){
+    $find = \App\Product::first();
+    $x=new \App\Jobs\ebay\UpdateEbay($find);
+    $x->handle();
+});

@@ -41,6 +41,7 @@ class CreateProductsTable extends Migration
             $table->string('offerID')->nullable();
             $table->string('listingID')->nullable();
             $table->float('listing_price',10,2)->nullable();
+            $table->timestamp('ebayupdated_at')->nullable();
             $table->timestamps();
         });
     }

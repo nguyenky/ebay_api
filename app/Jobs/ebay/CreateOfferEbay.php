@@ -165,6 +165,4 @@ class CreateOfferEbay implements ShouldQueue
         }
         \Log::info('Job Create Offer END at '. now());
     }
-
-
 }
