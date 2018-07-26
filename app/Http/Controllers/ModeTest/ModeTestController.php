@@ -60,8 +60,9 @@ class ModeTestController extends Controller
                     'Construction'=>$value['Construction'],
                     'Material'=>$value['Material'],
                     'Pileheight'=>$value['Pileheight'],
-                    'product_mode_test'=>true
+                    'product_mode_test'=>1
                 ]);
+                $product->setListingPrice();
             }else{
             	$request->session()->flash('status','Sku alredy !!!!');
             }

@@ -38,11 +38,9 @@ class Kernel extends ConsoleKernel
                   ->daily();
 
         $schedule->command('command:create-offer')
-                  ->timezone('America/New_York')
                     ->at('00:00');
                     
         $schedule->command('command:create-inventory')
-                  ->timezone('America/New_York')
                     ->at('12:00');
         
     }
