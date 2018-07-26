@@ -53,6 +53,7 @@ class PublicOfferEbay implements ShouldQueue
                 $product->save();
             }
         }
+
     }
 
     public function publicOffer($attribute){

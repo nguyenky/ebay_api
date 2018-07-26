@@ -123,9 +123,8 @@ Route::get('PublicOfferEbay',function(){
     
 });
 Route::get('UpdateEbay',function(){
-   // $content=file_get_contents('http://127.0.0.1:8080/ebay/preview/?id=1');
-    //dd($content);
-     $find = \App\Product::first();
+
+     $find = \App\Product::where('product_mode_test',0)->first();
      dispatch(new \App\Jobs\ebay\UpdateEbay($find));
 });
 

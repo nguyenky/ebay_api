@@ -54,7 +54,7 @@ class CreateInventoryEbay implements ShouldQueue
         foreach ($products as $key => $value) {
             if(!$value->listingID){
                 $images = $this->searchImages($value);
-                $refreshToken = $this->refreshToken();
+                // $refreshToken = $this->refreshToken();
                 $product = $this->createInventory($value,$images);
             }
         }
@@ -229,7 +229,6 @@ class CreateInventoryEbay implements ShouldQueue
         }
         catch(\Exception $e) {
             \Log::info('Job [Ebay] FAIL ----Create item---- at '. now());
-            dd($e);
         }
         \Log::info('Job [Ebay] END ----Create item---- at '. now());      
         return null;
@@ -266,8 +265,7 @@ class CreateInventoryEbay implements ShouldQueue
             $token->save();
         }
          catch (\Exception $e){
-            \Log::info('Job [Ebay] FAIL at '. $e);
-            dd($e);
+            \Log::info('Job [Ebay] FAIL at '. $e->getMessage());
         }
         return $search_results;
     }

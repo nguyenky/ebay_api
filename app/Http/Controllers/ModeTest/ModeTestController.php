@@ -24,7 +24,6 @@ class ModeTestController extends Controller
     }
 
     public function create(Request $request){
-    	// dd($request->all());
     	$system = \App\System::find(1);
 
         $csv = $this->convertToArray('files/'.$system->filecsv,$request->sku);
@@ -34,7 +33,7 @@ class ModeTestController extends Controller
         }
         // dd($csv);
         foreach ($csv as $key => $value) {
-       	 $find = \App\Product::where('SKU',$value['SKU'])->first();
+       	 $find = \App\Product::where('SKU',$value['SKU'])->where('product_mode_test',1)->first();
             if(!$find){
                 $product = \App\Product::create([
                     'SKU'=> $value['SKU'],

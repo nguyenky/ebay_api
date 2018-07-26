@@ -57,15 +57,23 @@ class CreateOfferEbay implements ShouldQueue
             }else{
                 $product = \App\Product::where('SKU',$value->SKU)->first();
                 $product->offerID = $offer['offers'][0]['offerId'];
+                if($offer['offers'][0]['status']=='PUBLISHED'){
+                    $product->listingID = $offer['offers'][0]['listing']['listingId'];
+                }
+
+                if($offer['offers'][0]['status']=='UNPUBLISHED'){
+                    $product->listingID = null;
+                }
                 $product->save();
             }
         }
     }
 
     public function getOffer($attribute){
+
         \Log::info('Job [Ebay] START ----Get Offer---- at '. now());
+
         try {
-            // dd($attribute);
             $client = new \GuzzleHttp\Client();
             $header = [
                 'Authorization'=>'Bearer '.$this->token->accesstoken_ebay,
@@ -73,15 +81,13 @@ class CreateOfferEbay implements ShouldQueue
                 'Accept'=>'application/json',
                 'Content-Type'=>'application/json'
             ];
-            // dd($header);
             $res = $client->request('GET', $this->api.'sell/inventory/v1/offer?sku='.$attribute,[
                 'headers'=> $header,
             ]);
-            // dd($res);
             $search_results = json_decode($res->getBody(), true);
-            // dd($search_results);
-            // return $search_results['offers'];
+
             return $search_results;
+
         } catch (\Exception $e) {
              \Log::info('Job [Ebay] FAIL ----Get Offer---- at '. now());
             if($e->getCode()==404){
