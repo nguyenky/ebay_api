@@ -25,25 +25,23 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('command:download-file-csv')
-        //          ->daily();
+        $schedule->command('command:download-file-csv')
+                 ->daily();
         
-        // $schedule->command('command:refresh-token-ebay')
-        //           ->everyThirtyMinutes();
+        $schedule->command('command:refresh-token-ebay')
+                  ->everyThirtyMinutes();
 
-        // $schedule->command('command:check-file-csv')
-        //           ->daily();
+        $schedule->command('command:check-file-csv')
+                  ->daily();
 
-        // $schedule->command('command:create-offer')
-        //           ->timezone('America/New_York')
-        //             ->at('00:00');
-                    
-        // $schedule->command('command:create-inventory')
-        //           ->timezone('America/New_York')
-        //             ->at('12:00');
         $schedule->command('command:public-offer')
-                 ->everyMinute();
-        // $schedule->job(new \App\Jobs\ebay\PublicOfferEbay, 'public')->everyMinute();
+                 ->daily();
+
+        $schedule->command('command:create-offer')
+                    ->at('00:00');
+                    
+        $schedule->command('command:create-inventory')
+                    ->at('12:00');
         
     }
 

@@ -337,7 +337,7 @@
                 @endif
                 <div class='gallery-detail'>
                     <h1>{{ @$item["Name"] }}</h1>
-                    <p class='price'>{{"$".number_format(@$item["Price"],2)}}</p>
+                    <p class='price'>{{"$".number_format(@$item["listing_price"],2)}}</p>
                 </div>
                 <div class='clear'></div>
             </div>

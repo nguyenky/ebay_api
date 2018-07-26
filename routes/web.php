@@ -115,6 +115,7 @@ Route::get('CreateOfferEbay',function(){
     
 });
 Route::get('RefreshToken',function(){
+\Log::info("Refresh Token at ". now());
     dispatch(new \App\Jobs\ebay\RefreshToken);
     
 });
@@ -123,11 +124,11 @@ Route::get('PublicOfferEbay',function(){
     
 });
 Route::get('UpdateEbay',function(){
-
      $find = \App\Product::where('product_mode_test',0)->first();
      dispatch(new \App\Jobs\ebay\UpdateEbay($find));
 });
-
-Route::get('test-description',function(){
-    dd('abc');
-})->name('test-description');
+Route::get('test-update-ebay',function(){
+    $find = \App\Product::where('product_mode_test',0)->first();
+    $x=new \App\Jobs\ebay\UpdateEbay($find);
+    $x->handle();
+});

@@ -39,6 +39,7 @@ class RefreshToken implements ShouldQueue
      */
     public function handle()
     {
+	\Log::info('Start refresh token job at '. now());
         try {
 
             $client = new \GuzzleHttp\Client();
@@ -65,10 +66,11 @@ class RefreshToken implements ShouldQueue
             $token = \App\Token::find(1);
             $token->accesstoken_ebay = $search_results['access_token'];
             $token->save();
+	    \Log::info('Completed refresh token job at' . now());
         }
          catch (\Exception $e){
-            \Log::info('Job [Ebay] FAIL at '. $e);
-            dd($e);
+            \Log::info('Job [Ebay] FAIL at '. $e->getMessage());
+            report($e);
         }
     }
 }
