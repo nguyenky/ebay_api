@@ -167,14 +167,12 @@ class CreateInventoryEbay implements ShouldQueue
         try {
             \File::put(public_path() . '/images/' . $file, $content);
         } catch (\Exception $e){
-            // dd($e);
             return null;
         }
         return null;
     }
 
     public function createInventory($attribute,$images){
-        // dd($attribute);
         $imageUrls =[];
         foreach ($images as $key => $value) {
             $url = url('/images/'.$value); 
@@ -205,8 +203,7 @@ class CreateInventoryEbay implements ShouldQueue
                         'pileheight' => [$attribute->Pileheight]
                     ],
                     'category' => $attribute->Category,
-                    // 'description'=> $attribute->Description,
-                    'description'=> 'Description',
+                    'description'=> $attribute->Description,
                     'cost' => $attribute->Cost,
                     'sell' => $attribute->Sell,
                     'rrp' => $attribute->RRP,

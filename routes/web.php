@@ -124,7 +124,7 @@ Route::get('PublicOfferEbay',function(){
     
 });
 Route::get('UpdateEbay',function(){
-     // $find = \App\Product::where('product_mode_test',0)->first();
+     // $find = \App\Product::where('product_mode_test',1)->first();
      $products = \App\Product::where('product_mode_test',1)->get();
      foreach ($products as $key => $value) {
          dispatch(new \App\Jobs\ebay\UpdateEbay($value));

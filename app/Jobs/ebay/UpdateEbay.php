@@ -76,13 +76,14 @@ class UpdateEbay implements ShouldQueue
         return($token->accesstoken_ebay);
     }
 
-    public function updateOffer($attribute){
+    public function updateOffer(Product $attribute){
         
         $attribute->setListingPrice();
         info('Job Update Offer START at '. now());
         print("Trying to load: ".env("PROD_APP_URL")."/ebay/preview/?id=".$attribute->id);
         $description=file_get_contents(env("PROD_APP_URL")."/ebay/preview/?id=".$attribute->id);
-        $token=$this->getToken();
+        // $token=$this->getToken();
+        //Here you do not need to get token again. Because the token will be update every 30 minutes !
 
         try {
             $client = new \GuzzleHttp\Client();
@@ -111,23 +112,21 @@ class UpdateEbay implements ShouldQueue
 
             $json = json_encode($data);
             $header = [
-                'Authorization'=>'Bearer '.$token,
+                'Authorization'=>'Bearer '.$this->token->accesstoken_ebay,
                 'Accept'=>'application/json',
                 'Content-Language'=>'en-AU',
                 'Content-Type'=>'application/json'
             ];
-
-            dump("URL:",$this->api.'sell/inventory/v1/offer/'.$attribute->offerID);
-            dump("Header:",$header);
-            dump("Body:",$json);
             $res = $client->request('PUT', $this->api.'sell/inventory/v1/offer/'.$attribute->offerID,[
                             'headers'=> $header,
                             'body'  => $json
                         ]);
 
             $search_results = json_decode($res->getBody(), true);
+            // dd('ok',$search_results);
             info('Job Update Offer SUCCESS at '. now(),$search_results);
         } catch(\Exception $e) {
+            // dd('error',$e->getMessage());
              info('Job Update Offer FAIL at '. now());
         }
         info('Job Update Offer END at '. now());
