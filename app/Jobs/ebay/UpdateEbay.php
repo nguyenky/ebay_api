@@ -77,12 +77,11 @@ class UpdateEbay implements ShouldQueue
     }
 
     public function updateOffer($attribute){
+        
         $attribute->setListingPrice();
-
         info('Job Update Offer START at '. now());
         print("Trying to load: ".env("PROD_APP_URL")."/ebay/preview/?id=".$attribute->id);
         $description=file_get_contents(env("PROD_APP_URL")."/ebay/preview/?id=".$attribute->id);
-
         $token=$this->getToken();
 
         try {
@@ -130,7 +129,6 @@ class UpdateEbay implements ShouldQueue
             info('Job Update Offer SUCCESS at '. now(),$search_results);
         } catch(\Exception $e) {
              info('Job Update Offer FAIL at '. now());
-             dd($e);
         }
         info('Job Update Offer END at '. now());
 
