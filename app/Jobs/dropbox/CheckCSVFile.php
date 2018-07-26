@@ -36,7 +36,7 @@ class CheckCSVFile implements ShouldQueue
         \Log::info('Start Check CSV File !');
 
         if($system->mode_test){
-            
+
             \Log::info('Mode test !!');
 
             $this->modeTest($csv);
@@ -172,11 +172,11 @@ class CheckCSVFile implements ShouldQueue
                         $find->Sell != $value['Sell'] ||
                         $find->RRP != $value['RRP'] ||
                         $find->QTY != $value['QTY'] ||
-                        $find->Image1 != $value['Image1'] ||
-                        $find->Image2 != $value['Image2'] ||
-                        $find->Image3 != $value['Image3'] ||
-                        $find->Image4 != $value['Image4'] ||
-                        $find->Image5 != $value['Image5'] ||
+                        $find->Image1 != str_replace("-","_",$this->product['Image1']) ||
+                        $find->Image2 != str_replace("-","_",$this->product['Image2']) ||
+                        $find->Image3 != str_replace("-","_",$this->product['Image3']) ||
+                        $find->Image4 != str_replace("-","_",$this->product['Image4']) ||
+                        $find->Image5 != str_replace("-","_",$this->product['Image5']) ||
                         $find->Length != $value['Length'] ||
                         $find->Width != $value['Width'] ||
                         $find->Height != $value['Height'] ||
@@ -196,11 +196,11 @@ class CheckCSVFile implements ShouldQueue
                         $find->Sell = $value['Sell'];
                         $find->RRP = $value['RRP'];
                         $find->QTY = $value['QTY'];
-                        $find->Image1 = $value['Image1'];
-                        $find->Image2 = $value['Image2'];
-                        $find->Image3 = $value['Image3'];
-                        $find->Image4 = $value['Image4'];
-                        $find->Image5 = $value['Image5'];
+                        $find->Image1 = str_replace("-","_",$this->product['Image1']);
+                        $find->Image2 = str_replace("-","_",$this->product['Image2']);
+                        $find->Image3 = str_replace("-","_",$this->product['Image3']);
+                        $find->Image4 = str_replace("-","_",$this->product['Image4']);
+                        $find->Image5 = str_replace("-","_",$this->product['Image5']);
                         $find->Length = $value['Length'];
                         $find->Width = $value['Width'];
                         $find->Height = $value['Height'];
