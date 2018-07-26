@@ -94,7 +94,7 @@ class UpdateEbay implements ShouldQueue
                 "SKU"=>$attribute->SKU,
                 "marketplaceId"=>"EBAY_AU",
                 "format"=>"FIXED_PRICE",
-		"pricingSummary"=>[
+		        "pricingSummary"=>[
                     "price"  => [
                         "currency" => "AUD",
                         "value" => $attribute->listing_price
