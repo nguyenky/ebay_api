@@ -49,8 +49,8 @@ class UpdateEbay implements ShouldQueue
     }
     public function updateOffer($attribute){
         \Log::info('Job Update Offer START at '. now());
-        print("Trying to load: ".env("APP_URL")."/ebay/preview/?id=".$attribute->id);
-        $description=file_get_contents(env("APP_URL")."/ebay/preview/?id=".$attribute->id);
+        print("Trying to load: ".env("PROD_APP_URL")."/ebay/preview/?id=".$attribute->id);
+        $description=file_get_contents(env("PROD_APP_URL")."/ebay/preview/?id=".$attribute->id);
 
         try {
             $client = new \GuzzleHttp\Client();
@@ -63,7 +63,10 @@ class UpdateEbay implements ShouldQueue
                             "currency" => "AUD",
                             "value" => $attribute->RRP
                         ]
-                ]
+                ],
+                "SKU"=>$attribute->SKU,
+                "marketplaceId"=>"EBAY_AU",
+                "format"=>"FIXED_PRICE"
             ];
 
             $json = json_encode($data);
@@ -73,8 +76,12 @@ class UpdateEbay implements ShouldQueue
                 'Content-Language'=>'en-AU',
                 'Content-Type'=>'application/json'
             ];
-        
-            $res = $client->request('PUT', $this->api.'sell/inventory/v1/offer/'.$attribute->offerID,[
+
+            dump("URL:",$this->api.'sell/inventory/v1/offer/'.$attribute->offerID);
+            dump("Header:",$header);
+            dump("Body:",$json);
+
+            $res = $client->request('POST', $this->api.'sell/inventory/v1/offer/'.$attribute->offerID,[
                             'headers'=> $header,
                             'body'  => $json
                         ]);

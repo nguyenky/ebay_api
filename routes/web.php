@@ -115,6 +115,7 @@ Route::get('CreateOfferEbay',function(){
     
 });
 Route::get('RefreshToken',function(){
+\Log::info("Refresh Token at ". now());
     dispatch(new \App\Jobs\ebay\RefreshToken);
     
 });
