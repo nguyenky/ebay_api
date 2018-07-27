@@ -21,6 +21,8 @@ Route::group(['middleware'=>'auth'],function(){
     Route::get('/home', 'Dropbox\DropboxController@products')->name('home');
 
     Route::get('/ebay/preview', 'Ebay\EbayDescriptionController@index')->name('ebay_preview');
+
+    Route::get('/manual-processing', 'ManualProcessingController@index')->name('manual-processing');
 });
 
 Route::group(['middleware'=>'auth','namespace'=>'ModeTest'],function(){

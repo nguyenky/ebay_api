@@ -11,6 +11,7 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="{{ asset('js/app.js') }}" defer></script>
 
     <!-- Fonts -->
@@ -23,7 +24,6 @@
 
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    
 
     <!-- Optional theme -->
     <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"> -->
@@ -54,16 +54,17 @@
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item"><a class="nav-link" href="{{ url('/home') }}">Home</a></li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">eBay Links</a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="dd-ebay-links" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">eBay Links</a>
+                            <div class="dropdown-menu" aria-labelledby="dd-ebay-links">
                                 <a class="dropdown-item" href="https://www.ebay.com.au/sh/lst/active" target="_blank">Active Listings</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="https://www.ebay.com.au/usr/ixplorestoreaus" target="_blank">Store (Public)</a>
                             </div>
                         </li>
+                        <li class="nav-item"><a class="nav-link" href="{{route('manual-processing')}}">Manual Processing</a></li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Testing</a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="dd-testing" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Testing</a>
+                            <div class="dropdown-menu" aria-labelledby="dd-testing">
                                 <a class="dropdown-item" href="{{route('begin')}}">Begin Process</a>
                                 <a class="dropdown-item" href="{{route('refresh')}}">Refresh Token</a>
                                 <a class="dropdown-item" href="{{route('getItem')}}">Get Item</a>
@@ -120,7 +121,5 @@
     </div>
 </body>
 <footer>
-    <!-- Latest compiled and minified JavaScript -->
-    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script> -->
 </footer>
 </html>
