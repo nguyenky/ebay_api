@@ -17,7 +17,7 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::group([],function(){
+Route::group(['middleware'=>'auth'],function(){
     Route::get('/home', 'Dropbox\DropboxController@products')->name('home');
 
     Route::get('/ebay/preview', 'Ebay\EbayDescriptionController@index')->name('ebay_preview');

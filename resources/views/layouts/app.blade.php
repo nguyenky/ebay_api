@@ -48,6 +48,8 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    @guest
+                    @else
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item"><a class="nav-link" href="{{ url('/home') }}">Home</a></li>
@@ -69,6 +71,7 @@
                             </div>
                         </li>
                     </ul>
+                    @endguest
 
                     <div class="pull-right">
                         <!-- Right Side Of Navbar -->
