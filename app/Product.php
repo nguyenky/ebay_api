@@ -23,11 +23,13 @@ class Product extends Model
         return($price);
     }
 
-    public function setListingPrice(){
+    public function setListingPrice($save=true){
         $price=$this->getListingPrice();
         if($price!=$this->listing_price){
             $this->listing_price=$price;
-            $this->save();
+            if($save){
+                $this->save();
+            }
         }
         return($this->listing_price);
     }

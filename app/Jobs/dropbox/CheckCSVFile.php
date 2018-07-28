@@ -87,59 +87,65 @@ class CheckCSVFile implements ShouldQueue
         foreach ($productsTest as $key_product => $productTest) {
 
             foreach ($csv as $key_csv => $value) {
-                $find = \App\Product::where('SKU',$value['SKU'])->where('product_mode_test',1)->first();
-                if($find){
-                    if( 
-                        $find->SKU != $value['SKU'] ||
-                        $find->Name != $value['Name'] ||
-                        $find->Description != $value['Description'] ||
-                        $find->Category != $value['Category'] ||
-                        $find->Size != $value['Size'] ||
-                        $find->Color != $value['Color'] ||
-                        $find->Cost != $value['Cost (Ex.GST) '] ||
-                        $find->Sell != $value['Sell'] ||
-                        $find->RRP != $value['RRP'] ||
-                        $find->QTY != $value['QTY'] ||
-                        $find->Image1 != $value['Image1'] ||
-                        $find->Image2 != $value['Image2'] ||
-                        $find->Image3 != $value['Image3'] ||
-                        $find->Image4 != $value['Image4'] ||
-                        $find->Image5 != $value['Image5'] ||
-                        $find->Length != $value['Length'] ||
-                        $find->Width != $value['Width'] ||
-                        $find->Height != $value['Height'] ||
-                        $find->UnitWeight != $value['UnitWeight'] ||
-                        $find->Origin != $value['Origin'] ||
-                        $find->Construction != $value['Construction'] ||
-                        $find->Material != $value['Material'] ||
-                        $find->Pileheight != $value['Pileheight']
+                #$find = \App\Product::where('SKU',$value['SKU'])->where('product_mode_test',1)->first();
+                if($productTest->SKU == $value['SKU']){
+                    infolog("Found SKU \"".$productTest->SKU."\" in the CSV.");
+                    if(
+                        $productTest->SKU != $value['SKU'] ||
+                        $productTest->Name != $value['Name'] ||
+                        $productTest->Description != $value['Description'] ||
+                        $productTest->Category != $value['Category'] ||
+                        $productTest->Size != $value['Size'] ||
+                        $productTest->Color != $value['Color'] ||
+                        $productTest->Cost != $value['Cost (Ex.GST) '] ||
+                        $productTest->Sell != $value['Sell'] ||
+                        $productTest->RRP != $value['RRP'] ||
+                        $productTest->QTY != $value['QTY'] ||
+                        $productTest->Image1 != $value['Image1'] ||
+                        $productTest->Image2 != $value['Image2'] ||
+                        $productTest->Image3 != $value['Image3'] ||
+                        $productTest->Image4 != $value['Image4'] ||
+                        $productTest->Image5 != $value['Image5'] ||
+                        $productTest->Length != $value['Length'] ||
+                        $productTest->Width != $value['Width'] ||
+                        $productTest->Height != $value['Height'] ||
+                        $productTest->UnitWeight != $value['UnitWeight'] ||
+                        $productTest->Origin != $value['Origin'] ||
+                        $productTest->Construction != $value['Construction'] ||
+                        $productTest->Material != $value['Material'] ||
+                        $productTest->Pileheight != $value['Pileheight']
                     ){
-                        $find->SKU = $value['SKU'];
-                        $find->Name = $value['Name'];
-                        $find->Description = $value['Description'];
-                        $find->Category = $value['Category'];
-                        $find->Size = $value['Size'];
-                        $find->Color = $value['Color'];
-                        $find->Cost = $value['Cost (Ex.GST) '];
-                        $find->Sell = $value['Sell'];
-                        $find->RRP = $value['RRP'];
-                        $find->QTY = $value['QTY'];
-                        $find->Image1 = $value['Image1'];
-                        $find->Image2 = $value['Image2'];
-                        $find->Image3 = $value['Image3'];
-                        $find->Image4 = $value['Image4'];
-                        $find->Image5 = $value['Image5'];
-                        $find->Length = $value['Length'];
-                        $find->Width = $value['Width'];
-                        $find->Height = $value['Height'];
-                        $find->UnitWeight = $value['UnitWeight'];
-                        $find->Origin = $value['Origin'];
-                        $find->Construction = $value['Construction'];
-                        $find->Material = $value['Material'];
-                        $find->Pileheight = $value['Pileheight'];
-                        $find->save();
-                        dispatch(new \App\Jobs\ebay\UpdateEbay($find));
+                        $productTest->SKU = $value['SKU'];
+                        $productTest->Name = $value['Name'];
+                        $productTest->Description = $value['Description'];
+                        $productTest->Category = $value['Category'];
+                        $productTest->Size = $value['Size'];
+                        $productTest->Color = $value['Color'];
+                        $productTest->Cost = $value['Cost (Ex.GST) '];
+                        $productTest->Sell = $value['Sell'];
+                        $productTest->RRP = $value['RRP'];
+                        $productTest->QTY = $value['QTY'];
+                        $productTest->Image1 = $value['Image1'];
+                        $productTest->Image2 = $value['Image2'];
+                        $productTest->Image3 = $value['Image3'];
+                        $productTest->Image4 = $value['Image4'];
+                        $productTest->Image5 = $value['Image5'];
+                        $productTest->Length = $value['Length'];
+                        $productTest->Width = $value['Width'];
+                        $productTest->Height = $value['Height'];
+                        $productTest->UnitWeight = $value['UnitWeight'];
+                        $productTest->Origin = $value['Origin'];
+                        $productTest->Construction = $value['Construction'];
+                        $productTest->Material = $value['Material'];
+                        $productTest->Pileheight = $value['Pileheight'];
+                        $productTest->setListingPrice(false);
+                        $productTest->save();
+                        infolog("--- SKU \"".$productTest->SKU."\" needs updating.");
+                        dispatch(new \App\Jobs\ebay\UpdateEbay($productTest));
+                    }else{
+                        infolog("--- SKU \"".$productTest->SKU."\" does NOT need updating.");
                     }
+                    break;
                 }
             }
         }

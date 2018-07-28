@@ -35,8 +35,7 @@ class ManualProcessingController extends Controller
      */
     public function step1()
     {
-        $step=new DownloadCSV();
-        $step->handle();
+        dispatch_now(new DownloadCSV);
         session('manual-step','step1');
     }
 
@@ -47,8 +46,7 @@ class ManualProcessingController extends Controller
      */
     public function step2()
     {
-        $step=new CheckCSVFile();
-        $step->handle();
+        dispatch_now(new CheckCSVFile);
         session('manual-step','step2');
     }
 }
