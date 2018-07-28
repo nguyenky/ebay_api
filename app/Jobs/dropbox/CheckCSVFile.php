@@ -33,21 +33,21 @@ class CheckCSVFile implements ShouldQueue
 
         $csv = $this->convertToArray('files/'.$system->filecsv);
 
-        \Log::info('Start Check CSV File !');
+        infolog('Start Check CSV File !');
 
         if($system->mode_test){
 
-            \Log::info('Mode test !!');
+            infolog('Mode test !!');
 
             $this->modeTest($csv);
 
         }else{
-            \Log::info('Mode live !!');
+            infolog('Mode live !!');
 
             $this->modeLive($csv);
 
         }
-        \Log::info('End Check CSV File !');
+        infolog('End Check CSV File !');
 
 
     }
@@ -74,7 +74,7 @@ class CheckCSVFile implements ShouldQueue
             fclose($handle);
         }
         else {
-            error_log("csvreader: Could not read CSV \"$csvfile\"");
+            error_log("csvreader: Could not read CSV \"$file\"");
             return null;
         }
         return $csv;
@@ -150,7 +150,7 @@ class CheckCSVFile implements ShouldQueue
         if($csv){
             foreach ($csv as $key => $value) {
 
-                \Log::info('Foreach '.$key);
+                infolog('Foreach '.$key);
 
                 $find = \App\Product::where('SKU',$value['SKU'])->where('product_mode_test',0)->first();
 

@@ -42,20 +42,20 @@ class DownloadCSV implements ShouldQueue
      */
     public function handle()
     {
-        \Log::info('START download file csv process !');
+        infolog('START download file csv process !');
         $searchFile = $this->searchFile();
 
         if(!$searchFile){
-            \Log::info('ERROR search file csv !');
-            \Log::info('END download file csv process !');
+            infolog('ERROR search file csv !');
+            infolog('END download file csv process !');
             // return false;
         }
 
         $downloadFile = $this->downloadFile($searchFile);
 
         if(!$downloadFile){
-            \Log::info('ERROR down file csv !');
-            \Log::info('END download file csv process !');
+            infolog('ERROR down file csv !');
+            infolog('END download file csv process !');
             // return false;
         }
         
@@ -63,13 +63,13 @@ class DownloadCSV implements ShouldQueue
         $system->filecsv = $downloadFile;
         $system->save();
 
-        \Log::info('SUCCESS download file csv process !');
-        \Log::info('END download file csv process !');
+        infolog('SUCCESS download file csv process !');
+        infolog('END download file csv process !');
         // return true;
     }
 
     public function searchFile(){
-        \Log::info('START search file csv  !');
+        infolog('START search file csv  !');
         try {       
             $data = json_encode(
                     [
@@ -91,24 +91,24 @@ class DownloadCSV implements ShouldQueue
 
             $matches = $search_results['matches'];
 
-            \Log::info('SUCCESS search file csv  !');
+            infolog('SUCCESS search file csv  !');
 
-            \Log::info('END search file csv  !');
+            infolog('END search file csv  !');
 
             return $matches;
         }
         catch(\Exception $e) {
 
-            \Log::info('ERROR search file csv - '.$e);
+            infolog('ERROR search file csv - '.$e);
 
-            \Log::info('END search file csv  !');
+            infolog('END search file csv  !');
 
             return false;
 
         }   
     }
     public function downloadFile($matches){
-        \Log::info('START down file csv  !');
+        infolog('START down file csv  !');
         try {
            
             if($matches == null) {
@@ -162,14 +162,14 @@ class DownloadCSV implements ShouldQueue
                 
                 dd($e);
             }
-            \Log::info('SUCCESS down file csv  !');
-            \Log::info('END down file csv  !');
+            infolog('SUCCESS down file csv  !');
+            infolog('END down file csv  !');
             return $filename;
 
         } 
         catch (\Exception $e){
-            \Log::info('ERROR down file csv  !');
-            \Log::info('END down file csv  !');
+            infolog('ERROR down file csv  !');
+            infolog('END down file csv  !');
             return false;
         }
 

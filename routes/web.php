@@ -23,6 +23,8 @@ Route::group(['middleware'=>'auth'],function(){
     Route::get('/ebay/preview', 'Ebay\EbayDescriptionController@index')->name('ebay_preview');
 
     Route::get('/manual-processing', 'ManualProcessingController@index')->name('manual-processing');
+    Route::get('/manual-processing/step1', 'ManualProcessingController@step1')->name('manual-processing-step1');
+    Route::get('/manual-processing/step2', 'ManualProcessingController@step2')->name('manual-processing-step2');
 });
 
 Route::group(['middleware'=>'auth','namespace'=>'ModeTest'],function(){

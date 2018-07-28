@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\dropbox\CheckCSVFile;
+use App\Jobs\dropbox\DownloadCSV;
 use Illuminate\Http\Request;
 
 class ManualProcessingController extends Controller
@@ -24,5 +26,29 @@ class ManualProcessingController extends Controller
     public function index()
     {
         return view('manual-processing.index');
+    }
+
+    /**
+     * Step1
+     *
+     * @return void
+     */
+    public function step1()
+    {
+        $step=new DownloadCSV();
+        $step->handle();
+        session('manual-step','step1');
+    }
+
+    /**
+     * Step1
+     *
+     * @return void
+     */
+    public function step2()
+    {
+        $step=new CheckCSVFile();
+        $step->handle();
+        session('manual-step','step2');
     }
 }
