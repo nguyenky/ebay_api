@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use App\Product;
+
 class HomeController extends Controller
 {
     /**
@@ -23,6 +25,17 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $products = Product::whereNotNull('listingID')->paginate(100);
+        return view('products',['items'=>$products]);
+    }
+
+    /**
+     * Resync a Product across Marketplaces
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function resync()
+    {
+        return redirect()->route('home');
     }
 }
