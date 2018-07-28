@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\ModeTest;
 
+use App\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\System;
@@ -17,6 +18,12 @@ class ModeTestController extends Controller
     }
 
     public function update(Request $request){
+        $ids=$request->check;
+        Product::whereIn("id",$ids)->where("product_mode_test",1)->update(["product_mode_test"=>0]);
+    	return redirect()->route('mode-test');
+    }
+
+    public function updateSystemTest(Request $request){
     	$system = System::first();
     	$system->mode_test = (int)$request->mode_test;
     	$system->save();
