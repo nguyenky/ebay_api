@@ -106,7 +106,7 @@ class CreateOfferEbay implements ShouldQueue
             return $search_results;
 
         } catch (\Exception $e) {
-             infolog('Job [Ebay] FAIL ----Get Offer---- at '. now());
+             infolog('Job [Get Ebay] FAIL ----Get Offer:  at '. now());
             if($e->getCode()==404){
                 return false;
             }
@@ -117,7 +117,7 @@ class CreateOfferEbay implements ShouldQueue
     public function createOffer($attribute){
         infolog('Job Update Offer START at '. now());
         print("Trying to load: ".env("APP_URL")."/ebay/preview/?id=".$attribute->id);
-        $description=file_get_contents(env("APP_URL")."/ebay/preview/?id=".$attribute->id);
+        $description=file_get_contents(env("PROD_APP_URL")."/ebay/preview/?id=".$attribute->id);
         try {
             $client = new \GuzzleHttp\Client();
             $data = [];
@@ -161,6 +161,7 @@ class CreateOfferEbay implements ShouldQueue
         
         } catch(\Exception $e) {
              infolog('Job Create Offer FAIL at '. now());
+             infolog("Details",$e->getResponse()->getBody()->getContents());
              dd($e);
         }
         infolog('Job Create Offer END at '. now());

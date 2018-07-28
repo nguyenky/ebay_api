@@ -24,11 +24,8 @@ class CreateInventoryEbay implements ShouldQueue
     public function __construct()
     {
         if(env('EBAY_SERVER') == 'sandbox'){
-
             $this->api = 'https://api.sandbox.ebay.com/';
-
         }else{
-
             $this->api = 'https://api.ebay.com/';
         }
         $this->token = \App\Token::find(1);
@@ -40,35 +37,31 @@ class CreateInventoryEbay implements ShouldQueue
      *
      * @return void
      */
-
-    
-
     public function handle()
     {
         infolog('Job [CreateInventoryEbay] START at '. now());
-        $system = \App\System::first();
-        if($system->mode_test){
-            $products = \App\Product::where('product_mode_test',1)->get();
-        }else{
-            $products = \App\Product::where('product_mode_test',0)->get();
-        }
+
+        $products = \App\Product::whereNull('listingID')->whereNull('offerID')->get();
+
         infolog('Job [CreateInventoryEbay] FOUND '.count($products).' products at '. now());
+
         $updateCount=0;
         foreach ($products as $key => $value) {
-            if(!$value->listingID && $value->offerID){
-                infolog('Job [CreateInventoryEbay] FOUND OFFER WITHOUT LISTING (OfferID='.$value->offerID.') at '. now());
+            #if(!$value->listingID && $value->offerID){
+                infolog('Job [CreateInventoryEbay] FOUND OFFER WITHOUT LISTING or OFFER at '. now());
                 $updateCount++;
                 $images = $this->searchImages($value);
                 // $refreshToken = $this->refreshToken();
                 $this->createInventory($value,$images);
-            }
+            #}
         }
         infolog('Job [CreateInventoryEbay] UPDATED '.$updateCount.' products at '. now());
         infolog('Job [CreateInventoryEbay] FINISH at '. now());
     }
+
     public function searchImages($attribute){
-        $namefile = Array();
-        $data = Array();
+        $namefile=[];
+        $data = [];
         $data[] = $attribute['Image1'];
         $data[] = $attribute['Image2'];
         $data[] = $attribute['Image3'];
@@ -78,13 +71,17 @@ class CreateInventoryEbay implements ShouldQueue
         foreach ($data as $key_image => $item) {
 
             $pathPublic = public_path().'/images/';
+
             if(!\File::exists($pathPublic)) {
-
+                infolog("Images directory does not exist, creating...");
                 \File::makeDirectory($pathPublic, $mode = 0777, true, true);
-
+                infolog("Created.");
             }
             // dd($item);
+
             if(!\File::exists($pathPublic.$item)){
+
+                infolog("Image does not exist: ".$pathPublic.$item);
 
                 $value = json_encode(
                     [
@@ -117,7 +114,10 @@ class CreateInventoryEbay implements ShouldQueue
                     $namefile[] = $value['metadata']['name'];
                     break;
                 }
-            }  
+            }else{
+                infolog("Image exists: ".$item);
+                $namefile[]=$item;
+            }
         }
         return $namefile;
     }
@@ -181,14 +181,12 @@ class CreateInventoryEbay implements ShouldQueue
 
     public function createInventory($attribute,$images){
         $imageUrls =[];
-        $description=file_get_contents(env("PROD_APP_URL")."/ebay/preview/?id=".$attribute->id);
         foreach ($images as $key => $value) {
-            $url = url('/images/'.$value); 
-            array_push($imageUrls,$url);
+            $url = url('/images/'.$value);
+            $imageUrls[]=$url;
         }
         try {
             $client = new \GuzzleHttp\Client();
-            $data = [];
             $data = [
                 'availability'  => [
                     'shipToLocationAvailability'    => [
@@ -211,7 +209,6 @@ class CreateInventoryEbay implements ShouldQueue
                         'pileheight' => [$attribute->Pileheight]
                     ],
                     'category' => $attribute->Category,
-                    'description'=> $description,
                     'cost' => $attribute->Cost,
                     'sell' => $attribute->Sell,
                     'rrp' => $attribute->RRP,
@@ -229,11 +226,12 @@ class CreateInventoryEbay implements ShouldQueue
                 'headers'=> $header,
                 'body'  => $json
             ]);
-        $search_results = json_decode($res->getBody(), true);
-        infolog('Job [Ebay] SUCCESS ----Create item---- at '. now());
+            $search_results = json_decode($res->getBody(), true);
+            infolog('Job [Ebay] SUCCESS ----Create item---- at '. now());
         }
         catch(\Exception $e) {
             infolog('Job [Ebay] FAIL ----Create item---- at '. now());
+            infolog("Details",$e->getResponse()->getBody()->getContents());
         }
         infolog('Job [Ebay] END ----Create item---- at '. now());
         return null;
