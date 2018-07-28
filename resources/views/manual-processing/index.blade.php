@@ -47,7 +47,7 @@
                                 <div id="collapse3" class="panel-collapse collapse{{(session('manual-step')==='step3')?' in':''}}">
                                     <div class="panel-body">
                                         <p>It will run job <code>app\Jobs\ebay\CreateInventoryEbay</code> at 12:00 o'clock to create inventory ebay. You can also press the button below to execute manually. It will get the items in DB, if the item has "offerID" and empty "listingID", it will create inventory on eBay.</p>
-                                        <a href="#" class="btn btn-default">Run</a>
+                                        <a href="{{route("manual-processing-step3")}}" class="btn btn-default runnable">Run</a>
                                     </div>
                                 </div>
                             </div>
@@ -59,7 +59,7 @@
                                 <div id="collapse4" class="panel-collapse collapse{{(session('manual-step')==='step4')?' in':''}}">
                                     <div class="panel-body">
                                         <p>It will run job <code>app\Jobs\ebay\CreateOfferEbay</code> at 0:00 o'clock to create offer ebay. You can also press the button below to execute manually.</p>
-                                        <a href="#" class="btn btn-default">Run</a>
+                                        <a href="{{route("manual-processing-step4")}}" class="btn btn-default runnable">Run</a>
                                     </div>
                                 </div>
                             </div>
@@ -71,7 +71,7 @@
                                 <div id="collapse5" class="panel-collapse collapse{{(session('manual-step')==='step5')?' in':''}}">
                                     <div class="panel-body">
                                         <p>It will run job <code>app\Jobs\ebay\PublicOfferEbay</code> at 0:00 o'clock to create offer ebay. You can also press the button below to execute manually. If item empty "listingID", it will listing item on eBay.</p>
-                                        <a href="#" class="btn btn-default">Run</a>
+                                        <a href="{{route("manual-processing-step5")}}" class="btn btn-default runnable">Run</a>
                                     </div>
                                 </div>
                             </div>

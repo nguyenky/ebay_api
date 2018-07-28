@@ -39,12 +39,17 @@ class CreateOfferEbay implements ShouldQueue
      */
     public function handle()
     {
+        infolog('Job [CreateOfferEbay] START at '. now());
         $system = \App\System::first();
         if($system->mode_test){
             $products = \App\Product::where('product_mode_test',1)->get();
         }else{
             $products = \App\Product::where('product_mode_test',0)->get();
         }
+        $not_created=0;
+        $created=0;
+        $published=0;
+        $unpublished=0;
         foreach ($products as $key => $value) {
             $offer = $this->getOffer($value->SKU);
             if(!$offer){
@@ -53,25 +58,35 @@ class CreateOfferEbay implements ShouldQueue
                     $product = \App\Product::where('SKU',$value->SKU)->first();
                     $product->offerID = $createOffer['offerId'];
                     $product->save();
+                    $created++;
+                }else{
+                    $not_created++;
                 }
             }else{
                 $product = \App\Product::where('SKU',$value->SKU)->first();
                 $product->offerID = $offer['offers'][0]['offerId'];
                 if($offer['offers'][0]['status']=='PUBLISHED'){
                     $product->listingID = $offer['offers'][0]['listing']['listingId'];
+                    $published++;
                 }
 
                 if($offer['offers'][0]['status']=='UNPUBLISHED'){
                     $product->listingID = null;
+                    $unpublished++;
                 }
                 $product->save();
             }
         }
+        infolog('Job [CreateOfferEbay] RESULT $not_created='.$not_created.' at '. now());
+        infolog('Job [CreateOfferEbay] RESULT $created='.$created.' at '. now());
+        infolog('Job [CreateOfferEbay] RESULT $published='.$published.' at '. now());
+        infolog('Job [CreateOfferEbay] RESULT $unpublished='.$unpublished.' at '. now());
+        infolog('Job [CreateOfferEbay] END at '. now());
     }
 
     public function getOffer($attribute){
 
-        \Log::info('Job [Ebay] START ----Get Offer---- at '. now());
+        infolog('Job [Ebay] START ----Get Offer---- at '. now());
 
         try {
             $client = new \GuzzleHttp\Client();
@@ -86,20 +101,21 @@ class CreateOfferEbay implements ShouldQueue
             ]);
             $search_results = json_decode($res->getBody(), true);
 
+            infolog('Job [Ebay] END ----Get Offer---- at '. now(), $search_results);
+
             return $search_results;
 
         } catch (\Exception $e) {
-             \Log::info('Job [Ebay] FAIL ----Get Offer---- at '. now());
+             infolog('Job [Ebay] FAIL ----Get Offer---- at '. now());
             if($e->getCode()==404){
                 return false;
             }
         }
-        \Log::info('Job [Ebay] END ----Get Offer---- at '. now());
         
     }
 
     public function createOffer($attribute){
-        \Log::info('Job Update Offer START at '. now());
+        infolog('Job Update Offer START at '. now());
         print("Trying to load: ".env("APP_URL")."/ebay/preview/?id=".$attribute->id);
         $description=file_get_contents(env("APP_URL")."/ebay/preview/?id=".$attribute->id);
         try {
@@ -140,13 +156,13 @@ class CreateOfferEbay implements ShouldQueue
                         ]);
         $search_results = json_decode($res->getBody(), true);
 
-        \Log::info('Job Create Offer SUCCESS at '. now());
+        infolog('Job Create Offer SUCCESS at '. now());
         return $search_results;
         
         } catch(\Exception $e) {
-             \Log::info('Job Create Offer FAIL at '. now());
+             infolog('Job Create Offer FAIL at '. now());
              dd($e);
         }
-        \Log::info('Job Create Offer END at '. now());
+        infolog('Job Create Offer END at '. now());
     }
 }

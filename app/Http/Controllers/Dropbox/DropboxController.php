@@ -853,7 +853,7 @@ class DropboxController extends Controller
     }
     ///products
     public function products(){
-        $products = \App\Product::where('id','>',0)->where('product_mode_test',0)->paginate(100);
+        $products = \App\Product::whereNotNull('listingID')->paginate(100);
         return view('products',['items'=>$products]);
     }
 }

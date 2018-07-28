@@ -25,6 +25,9 @@ Route::group(['middleware'=>'auth'],function(){
     Route::get('/manual-processing', 'ManualProcessingController@index')->name('manual-processing');
     Route::get('/manual-processing/step1', 'ManualProcessingController@step1')->name('manual-processing-step1');
     Route::get('/manual-processing/step2', 'ManualProcessingController@step2')->name('manual-processing-step2');
+    Route::get('/manual-processing/step3', 'ManualProcessingController@step3')->name('manual-processing-step3');
+    Route::get('/manual-processing/step4', 'ManualProcessingController@step4')->name('manual-processing-step4');
+    Route::get('/manual-processing/step5', 'ManualProcessingController@step5')->name('manual-processing-step5');
 });
 
 Route::group(['middleware'=>'auth','namespace'=>'ModeTest'],function(){

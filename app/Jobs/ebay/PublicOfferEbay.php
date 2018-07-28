@@ -39,21 +39,35 @@ class PublicOfferEbay implements ShouldQueue
      */
     public function handle()
     {
+        infolog('Job [PublishOfferEbay] START at '. now());
         $system = \App\System::first();
         if($system->mode_test){
             $products = \App\Product::where('product_mode_test',1)->get();
+            infolog('Job [PublishOfferEbay] FOUND '.count($products).' products in TEST MODE at '. now());
         }else{
             $products = \App\Product::where('product_mode_test',0)->get();
+            infolog('Job [PublishOfferEbay] FOUND '.count($products).' products in LIVE MODE at '. now());
         }
+        $published=0;
+        $already_published=0;
+        $no_offer=0;
         foreach ($products as $key => $value) {
             if(!$value->listingID && $value->offerID){
                 $listingID = $this->publicOffer($value);
                 $product = \App\Product::where('SKU',$value->SKU)->first();
                 $product->listingID = $listingID;
                 $product->save();
+                $published++;
+            }elseif($value->listingID && $value->offerID){
+                $already_published++;
+            }else{
+                $no_offer++;
             }
         }
-
+        infolog('Job [PublishOfferEbay] RESULT $published='.$published.' at '. now());
+        infolog('Job [PublishOfferEbay] RESULT $already_published='.$already_published.' at '. now());
+        infolog('Job [PublishOfferEbay] RESULT $no_offer='.$no_offer.' at '. now());
+        infolog('Job [PublishOfferEbay] END at '. now());
     }
 
     public function publicOffer($attribute){
@@ -71,7 +85,7 @@ class PublicOfferEbay implements ShouldQueue
             $search_results = json_decode($res->getBody(), true);
             return $search_results['listingId'];
         } catch (\Exception $e) {
-             \Log::info('Job [Ebay] FAIL ----Get Offer---- at '. now());
+             infolog('Job [PublishOfferEbay] FAIL ----Publish Offer---- at '. now());
             if($e->getCode()==404){
                 return false;
             }
