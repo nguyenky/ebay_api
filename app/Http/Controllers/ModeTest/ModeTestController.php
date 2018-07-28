@@ -38,14 +38,29 @@ class ModeTestController extends Controller
         	$request->session()->flash('status','Sku not found !!!!');    
         	return redirect()->route('mode-test'); 
         }
+
+        $regex = <<<'END'
+/
+  (
+    (?: [\x00-\x7F]                 # single-byte sequences   0xxxxxxx
+    |   [\xC0-\xDF][\x80-\xBF]      # double-byte sequences   110xxxxx 10xxxxxx
+    |   [\xE0-\xEF][\x80-\xBF]{2}   # triple-byte sequences   1110xxxx 10xxxxxx * 2
+    |   [\xF0-\xF7][\x80-\xBF]{3}   # quadruple-byte sequence 11110xxx 10xxxxxx * 3 
+    ){1,100}                        # ...one or more times
+  )
+| .                                 # anything else
+/x
+END;
+
         // dd($csv);
         foreach ($csv as $key => $value) {
        	 $find = \App\Product::where('SKU',$value['SKU'])->where('product_mode_test',1)->first();
             if(!$find){
+                $desc=preg_replace($regex, '$1', $value['Description']);
                 $product = \App\Product::create([
                     'SKU'=> $value['SKU'],
                     'Name'=> $value['Name'],
-                    'Description'=>$value['Description'],
+                    'Description'=>$desc,
                     'Category'=>$value['Category'],
                     'Size'=>$value['Size'],
                     'Color'=>$value['Color'],

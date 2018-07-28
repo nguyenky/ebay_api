@@ -11,13 +11,18 @@ class AppServiceProvider extends ServiceProvider
      * Bootstrap any application services.
      *
      * @return void
+     * @return void
      */
     public function boot(UrlGenerator $url)
     {
         \Schema::defaultStringLength(255);
+
         if(env('REDIRECT_HTTPS')){
-            #$url->forceScheme('https');
+            $url->forceScheme('https');
         }
+
+        // Set app protocol url
+        \URL::forceScheme(env('APP_PROTOCOL', 'https'));
     }
 
     /**
