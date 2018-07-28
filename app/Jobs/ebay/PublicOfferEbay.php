@@ -40,19 +40,19 @@ class PublicOfferEbay implements ShouldQueue
     public function handle()
     {
         infolog('Job [PublishOfferEbay] START at '. now());
-        $system = \App\System::first();
-        if($system->mode_test){
-            $products = \App\Product::where('product_mode_test',1)->get();
-            infolog('Job [PublishOfferEbay] FOUND '.count($products).' products in TEST MODE at '. now());
-        }else{
-            $products = \App\Product::where('product_mode_test',0)->get();
-            infolog('Job [PublishOfferEbay] FOUND '.count($products).' products in LIVE MODE at '. now());
-        }
+
+        $products = \App\Product::where('product_mode_test',0)->get();
+
+        infolog('Job [PublishOfferEbay] FOUND '.count($products).' products in LIVE MODE at '. now());
+
         $published=0;
         $already_published=0;
         $no_offer=0;
+        $skipped_test_mode=0;
         foreach ($products as $key => $value) {
-            if(!$value->listingID && $value->offerID){
+            if($value->product_mode_test){
+                $skipped_test_mode++;
+            }elseif(!$value->listingID && $value->offerID){
                 $listingID = $this->publicOffer($value);
                 $product = \App\Product::where('SKU',$value->SKU)->first();
                 $product->listingID = $listingID;
@@ -64,6 +64,7 @@ class PublicOfferEbay implements ShouldQueue
                 $no_offer++;
             }
         }
+        infolog('Job [PublishOfferEbay] RESULT $skipped_test_mode='.$skipped_test_mode.' at '. now());
         infolog('Job [PublishOfferEbay] RESULT $published='.$published.' at '. now());
         infolog('Job [PublishOfferEbay] RESULT $already_published='.$already_published.' at '. now());
         infolog('Job [PublishOfferEbay] RESULT $no_offer='.$no_offer.' at '. now());

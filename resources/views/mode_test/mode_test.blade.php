@@ -6,7 +6,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    Mode Test
+                    Test Mode Products
                     <a href="#" class="btn btn-xs pull-right" data-toggle="modal" data-target="#exampleModalCenter"><i class="fas fa-plus-square"></i></a>
                 </div>
 
@@ -16,6 +16,8 @@
                             {{ session('status') }}
                         </div>
                     @endif
+
+                    <p>The following products are in TEST mode and should not appear on eBay.</p>
 
                     <div>
                         <!-- Modal -->
@@ -96,22 +98,9 @@
                                 </tr>
                             @endforeach
                         </tbody>
-                        <tfoot>
+                        <tfoot id="update-options">
                         <tr>
-                            <th class="text-left" colspan="11">
-                                <div class="row" id="update-options">
-                                    <div class="col-md-2">
-                                        <select name="mode" class="form-control" style="font-size: 12px;height: 27px;">
-                                            <option value="">Select</option>
-                                            <option value="0">Live</option>
-                                            <option value="1">Test</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-10">
-                                        <button class="btn btn-sm btn-success" type="submit">Update</button>
-                                    </div>
-                                </div>
-                            </th>
+                            <th class="text-left" colspan="11"><button class="btn btn-sm btn-success" type="submit" id="btn-live">Mark Live</button></th>
                         </tr>
                         </tfoot>
                     </table>
@@ -124,7 +113,10 @@
 <script type="application/javascript">
     $(function(){
         $.checkUpdated=function(){
-            if($(".mode_test:checked").length>0){
+            var cnt=$(".mode_test:checked").length;
+            if(cnt>0){
+                var plural=(cnt>1)?"s":"";
+                $("#btn-live").text("Mark "+$(".mode_test:checked").length+" Product"+plural+" Live");
                 $("#update-options").show();
             }else{
                 $("#update-options").hide();
