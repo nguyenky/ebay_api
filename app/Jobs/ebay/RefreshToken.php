@@ -67,6 +67,7 @@ class RefreshToken implements ShouldQueue
             $token->accesstoken_ebay = $search_results['access_token'];
             $token->save();
 	    \Log::info('Completed refresh token job at' . now());
+	        return($token);
         }
          catch (\Exception $e){
             \Log::info('Job [Ebay] FAIL at '. $e->getMessage());

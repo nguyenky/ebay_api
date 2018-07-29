@@ -127,7 +127,8 @@ class UpdateEbay implements ShouldQueue
             infolog('Job Update Offer SUCCESS at '. now(),$search_results);
         } catch(\Exception $e) {
             // dd('error',$e->getMessage());
-             infolog('Job Update Offer FAIL at '. now());
+            infolog('Job Update Offer FAIL at '. now());
+            infolog("Details",$e->getResponse()->getBody()->getContents());
         }
         infolog('Job Update Offer END at '. now());
 

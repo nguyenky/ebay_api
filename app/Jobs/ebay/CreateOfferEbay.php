@@ -111,7 +111,6 @@ class CreateOfferEbay implements ShouldQueue
                 return false;
             }
         }
-        
     }
 
     public function createOffer($attribute){
@@ -120,7 +119,6 @@ class CreateOfferEbay implements ShouldQueue
         $description=file_get_contents(env("PROD_APP_URL")."/ebay/preview/?id=".$attribute->id);
         try {
             $client = new \GuzzleHttp\Client();
-            $data = [];
             $data = [
                 "sku"  =>$attribute->SKU,
                 "marketplaceId" => "EBAY_AU",

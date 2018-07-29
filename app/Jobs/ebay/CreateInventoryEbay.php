@@ -194,6 +194,7 @@ class CreateInventoryEbay implements ShouldQueue
                     ]
                 ],
                 'condition'     => 'NEW',
+                "merchantLocationKey" => env('MERCHANTLOCATIONKEY') ,
                 'product'       => [
                     'title'     => $attribute->Name,
                     'imageUrls' =>$imageUrls,

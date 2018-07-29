@@ -53,11 +53,12 @@ class PublicOfferEbay implements ShouldQueue
             if($value->product_mode_test){
                 $skipped_test_mode++;
             }elseif(!$value->listingID && $value->offerID){
-                $listingID = $this->publicOffer($value);
-                $product = \App\Product::where('SKU',$value->SKU)->first();
-                $product->listingID = $listingID;
-                $product->save();
-                $published++;
+                if($listingID=$this->publicOffer($value)){
+                    $product = \App\Product::where('SKU',$value->SKU)->first();
+                    $product->listingID = $listingID;
+                    $product->save();
+                    $published++;
+                }
             }elseif($value->listingID && $value->offerID){
                 $already_published++;
             }else{
@@ -87,6 +88,7 @@ class PublicOfferEbay implements ShouldQueue
             return $search_results['listingId'];
         } catch (\Exception $e) {
              infolog('Job [PublishOfferEbay] FAIL ----Publish Offer---- at '. now());
+            infolog("Details",$e->getResponse()->getBody()->getContents());
             if($e->getCode()==404){
                 return false;
             }

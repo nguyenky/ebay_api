@@ -17,11 +17,13 @@ Route::get('/', function () {
 
 Auth::routes();
 
+Route::get('/ebay/preview', 'Ebay\EbayDescriptionController@index')->name('ebay_preview');
+
 Route::group(['middleware'=>'auth'],function(){
     Route::get('/home', 'HomeController@index')->name('home');
     Route::get('/resync/{id}', 'HomeController@resync')->name('resync');
 
-    Route::get('/ebay/preview', 'Ebay\EbayDescriptionController@index')->name('ebay_preview');
+    Route::get('/merchant-location', 'Ebay\MerchantLocationController@index')->name('merchant-location');
 
     Route::get('/manual-processing', 'ManualProcessingController@index')->name('manual-processing');
     Route::get('/manual-processing/step1', 'ManualProcessingController@step1')->name('manual-processing-step1');

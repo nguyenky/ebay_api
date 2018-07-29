@@ -34,6 +34,11 @@
             display: flex;
             justify-content: space-around;
         }
+        H4.modal-title,
+        H5.modal-title{
+            font-size: 23px;
+            font-weight: 500;
+        }
     </style>
 
     
@@ -59,8 +64,10 @@
                             <a class="nav-link dropdown-toggle" href="#" id="dd-ebay-links" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">eBay Links</a>
                             <div class="dropdown-menu" aria-labelledby="dd-ebay-links">
                                 <a class="dropdown-item" href="https://www.ebay.com.au/sh/lst/active" target="_blank">Active Listings</a>
-                                <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="https://www.ebay.com.au/usr/ixplorestoreaus" target="_blank">Store (Public)</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{route("merchant-location")}}" target="_blank">Merchant Location</a>
+                                <a class="dropdown-item" href="https://developer.ebay.com/my/api_test_tool?index=0&api=inventory&call=offer__GET&variation=json&env=production" target="_blank">API Test Tool</a>
                             </div>
                         </li>
                         <li class="nav-item"><a class="nav-link" href="{{route('manual-processing')}}">Manual Processing</a></li>

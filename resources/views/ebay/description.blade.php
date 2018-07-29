@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang='en'>
 <head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
     <title>{{ @$item["Name"] }}</title>
     <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Anton'>
     <style>
@@ -359,7 +356,7 @@
                 <input class='input' name='tabs' type='radio' id='tab-2'/> <label class='label tab2' for='tab-2'>Shipping & Returns</label>
                 <div class='panel'>
                     <div id='Shipping-returns' class='tabcontent'>
-                        <p> 30 day returns<br><br> We want you to love the products you buy from us. If you change your mind, you may return it to us within 30 days of the date you received it, no questions asked. You will be responsible for all shipping charges to facilitate a change of mind return. If you change your mind, we will provide you with a refund in an amount equal to the price you paid for the product, less all shipping costs. Items returned must be in 'as-new' condition. This means you have not used, assembled, damaged, washed or laundered any of the items. Please return items secured in their original packaging. If you cannot return an item 'as new' in its original packaging, a handling and restocking fee may apply up to 20% of the value of the item. <br><br> Non-returnable items excluded from all change of mind returns include:</p>
+                        <p> 30 day returns<br><br> We want you to love the products you buy from us. If you change your mind, you may return it to us within 30 days of the date you received it, no questions asked. You will be responsible for all shipping charges to facilitate a change of mind return. If you change your mind, we will provide you with a refund in an amount equal to the price you paid for the product, less all shipping costs. Items returned must be in 'as-new' condition. This means you have not used, assembled, damaged, washed or laundered any of the items. Please return items secured in their original packaging. If you cannot return an item 'as new' in its original packaging, a handling and restocking fee may apply up to 20% of the value of the item. <br><br> Non-returnable items excluded from all change of mind returns:</p>
                         <ul>
                             <li>Products described as 'made to order'</li>
                             <li>Mattresses, bedding and pillows</li>
