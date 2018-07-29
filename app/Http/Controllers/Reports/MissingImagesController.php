@@ -11,7 +11,9 @@ use Illuminate\Support\Facades\Storage;
 class MissingImagesController extends Controller
 {
     public $found=[];
+    public $normal_files=[];
     public $not_found=[];
+    public $not_found_fixed=[];
 
     public function convertToArray($attribute){
         $csv = Array();
@@ -49,6 +51,10 @@ class MissingImagesController extends Controller
                 $this->found[]=$img;
             }else{
                 $this->not_found[]=$img;
+                $norm=preg_replace("/[^a-zA-Z0-9\.]/","",$img);
+                if(in_array($norm,array_keys($this->normal_files))){
+                    $this->not_found_fixed[$img]="Can fix to $norm";
+                }
             }
         }else{
             $result=true;
@@ -69,13 +75,12 @@ class MissingImagesController extends Controller
         $files=[];
         foreach (glob(public_path("images/")."*") as $filename) {
             $files[]=basename($filename);
+            $this->normal_files[preg_replace("/[^a-zA-Z0-9\.]/","",basename($filename))]=basename($filename);
         }
         if(!$files){
             infolog("Error finding ANY image files: ".public_path("images/"));
             dd("Error");
         }
-
-        infolog("Files:",$files);
 
         foreach($csv as $row){
             $this->findImageInArray($row["Image1"],$files);
@@ -89,11 +94,13 @@ class MissingImagesController extends Controller
     }
 
     public function index(){
-        $report=$this->getUnitexMissingImagesReport();
+        $report=false;
+        $this->getUnitexMissingImagesReport();
 
         infolog("Found: ".count($this->found));
         infolog("Not Found: ".count($this->not_found));
-        dd("Die");
+        infolog("Can Fix: ".count($this->not_found_fixed));
+        dd($this->not_found_fixed);
 
     	return view('reports.missing-images',[
     	    "report"=>$report
