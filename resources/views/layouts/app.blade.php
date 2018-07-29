@@ -73,7 +73,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dd-testing" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Reports</a>
                             <div class="dropdown-menu" aria-labelledby="dd-testing">
-                                <a class="dropdown-item" href="#">Missing Images Report</a>
+                                <a class="dropdown-item" href="{{route("report-missing-images")}}">Missing Images Report</a>
                                 <a class="dropdown-item" href="#">Bad File Sync Report</a>
                                 <a class="dropdown-item" href="#">Stale eBay Sync Report</a>
                                 <a class="dropdown-item" href="#">Overpriced Report</a>
