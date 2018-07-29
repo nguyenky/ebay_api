@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ebay\PublicOfferEbay;
 use App\Jobs\ebay\RefreshToken;
 use App\Jobs\ebay\UpdateEbay;
 use Illuminate\Http\Request;
@@ -36,6 +37,57 @@ class HomeController extends Controller
 
     public function refreshToken(){
         $this->token=RefreshToken::dispatchNow();
+    }
+
+    public function createOfferEbay($product){
+        infolog('[CreateOfferEbay] START at '. now());
+        $description=file_get_contents(env("PROD_APP_URL")."/ebay/preview/?id=".$product->id);
+        try {
+            $client = new \GuzzleHttp\Client();
+            $data = [
+                "sku"  =>$product->SKU,
+                "marketplaceId" => "EBAY_AU",
+                "format" => "FIXED_PRICE",
+                "listingDescription" => $description,
+                "availableQuantity" => $product->QTY,
+                "quantityLimitPerBuyer" => $product->QTY,
+                "pricingSummary" => [
+                    "price"  => [
+                        "value" => $product->listing_price,
+                        "currency" => "AUD"
+                    ]
+                ],
+                "listingPolicies" => [
+                    "fulfillmentPolicyId" => env('FULFILLMENTPOLICYID'),
+                    "paymentPolicyId"     => env('PAYMENTPOLICYID') ,
+                    "returnPolicyId"      => env('RETURNPOLICYID')
+                ],
+                "categoryId" => env('CATEGORYID') ,
+                "merchantLocationKey" => env('MERCHANTLOCATIONKEY')
+            ];
+
+            $json = json_encode($data);
+            $header = [
+                'Authorization'=>'Bearer '.$this->token->accesstoken_ebay,
+                'Accept'=>'application/json',
+                'Content-Language'=>'en-AU',
+                'Content-Type'=>'application/json'
+            ];
+            $res = $client->request('POST', $this->api.'sell/inventory/v1/offer',[
+                'headers'=> $header,
+                'body'  => $json
+            ]);
+            $search_results = json_decode($res->getBody(), true);
+
+            infolog('Job Create Offer SUCCESS at '. now());
+            return $search_results;
+
+        } catch(\Exception $e) {
+            infolog('Job Create Offer FAIL at '. now());
+            infolog("Details",$e->getResponse()->getBody()->getContents());
+            dd($e);
+        }
+        infolog('Job Create Offer END at '. now());
     }
 
     /**
@@ -205,6 +257,41 @@ class HomeController extends Controller
     }
 
     /**
+     * Performs an eBay Get Inventory API call.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getInventory($id=0)
+    {
+        infolog("[GetEbayInventory] START at ".now());
+        $this->token=RefreshToken::dispatchNow();
+        $product=Product::find($id);
+        try {
+            $client = new \GuzzleHttp\Client();
+            $header = [
+                'Authorization'=>'Bearer '.$this->token->accesstoken_ebay,
+                'Content-Language'=>'en-AU',
+                'Accept'=>'application/json',
+                'Content-Type'=>'application/json'
+            ];
+            $res = $client->request('GET', $this->api.'sell/inventory/v1/inventory_item/'.$product->SKU,[
+                'headers'=> $header,
+            ]);
+            $search_results = json_decode($res->getBody(), true);
+
+            infolog('[GetEbayInventory] SUCCESS at '. now(), $search_results);
+            return $search_results;
+
+        } catch (\Exception $e) {
+            infolog('[GetEbayInventory] FAIL at '. now());
+            if($e->getCode()==404){
+                return false;
+            }
+        }
+        infolog("[GetEbayInventory] END at ".now());
+    }
+
+    /**
      * Resync a Product across Marketplaces
      *
      * @return \Illuminate\Http\Response
@@ -215,15 +302,45 @@ class HomeController extends Controller
 
         $this->refreshToken();
 
-        if($product->offerID && !$product->listingID){
-            infolog('[Resync] ISSUE product has an OfferID but not a ListingID. Checking eBay...'. now());
-            if($listingID=$this->checkForEbayListingID($product)){
+        $createdOffer=false;
+        if(!$product->offerID){
+            infolog('[Resync] ISSUE product does NOT have an OfferID . Checking eBay... at '. now());
+            if($result=$this->createOfferEbay($product)){
+                $product->offerID=$result['offerId'];
+                $product->save();
+                infolog('[Resync] SAVED product now has a OfferID: '.$product->offerID.' at '. now());
+                $createdOffer=true;
+            }else{
+                infolog('[Resync] ERROR product could NOT GET a OfferID at '. now());
             }
         }
 
-        $this->updateOfferEbay($product);
+        if($product->offerID && !$product->listingID){
+            infolog('[Resync] ISSUE product has an OfferID but not a ListingID. Checking eBay... at'. now());
+            if($listingID=$this->checkForEbayListingID($product)){
+                $product->listingID=$listingID;
+                $product->save();
+                infolog('[Resync] SAVED product now has a ListingID: '.$product->listingID.' at '. now());
+            }else{
+                infolog('[Resync] ERROR product could NOT GET a ListingID at '. now());
+            }
+        }
+
+        if(!$createdOffer){
+            $this->updateOfferEbay($product);
+        }
 
         $this->updateInventoryEbay($product);
+
+        if($product->offerID && !$product->listingID){
+            infolog('[Resync] ISSUE product has an OfferID but not a ListingID. attempting to publish at '. now());
+            $po=new PublicOfferEbay();
+            if($listingID=$po->publicOffer($product)){
+                $product->listingID=$listingID;
+                $product->save();
+                infolog('[Resync] SAVED product now has a ListingID: '.$product->listingID.' at '. now());
+            }
+        }
 
         //dispatch_now(new UpdateEbay($product));
     }

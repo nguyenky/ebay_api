@@ -70,6 +70,16 @@
                                 <a class="dropdown-item" href="https://developer.ebay.com/my/api_test_tool?index=0&api=inventory&call=offer__GET&variation=json&env=production" target="_blank">API Test Tool</a>
                             </div>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="dd-testing" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Reports</a>
+                            <div class="dropdown-menu" aria-labelledby="dd-testing">
+                                <a class="dropdown-item" href="#">Missing Images Report</a>
+                                <a class="dropdown-item" href="#">Bad File Sync Report</a>
+                                <a class="dropdown-item" href="#">Stale eBay Sync Report</a>
+                                <a class="dropdown-item" href="#">Overpriced Report</a>
+                                <a class="dropdown-item" href="#">Low Stock Report</a>
+                            </div>
+                        </li>
                         <li class="nav-item"><a class="nav-link" href="{{route('manual-processing')}}">Manual Processing</a></li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dd-testing" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Testing</a>
