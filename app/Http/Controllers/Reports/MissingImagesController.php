@@ -14,6 +14,7 @@ class MissingImagesController extends Controller
     public $normal_files=[];
     public $not_found=[];
     public $not_found_fixed=[];
+    public $do_fix=true;
 
     public function convertToArray($attribute){
         $csv = Array();
@@ -54,6 +55,10 @@ class MissingImagesController extends Controller
                 $norm=preg_replace("/[^a-zA-Z0-9\.]/","",$img);
                 if(in_array($norm,array_keys($this->normal_files))){
                     $this->not_found_fixed[$img]="Can fix to $norm";
+                    if($this->do_fix){
+                        copy(public_path("images/".$this->normal_files[$norm]),public_path("images/".$img));
+                        infolog("Fixed ".public_path("images/".$this->normal_files[$norm])." to ".public_path("images/".$img));
+                    }
                 }
             }
         }else{
