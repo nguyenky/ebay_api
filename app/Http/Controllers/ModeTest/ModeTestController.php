@@ -10,7 +10,7 @@ class ModeTestController extends Controller
 {
     public function index(){
     	$system = System::first();
-    	$products = \App\Product::where('product_mode_test',1)->get();
+    	$products = \App\Product::where('product_mode_test',1)->paginate(100);
     	return view('mode_test.mode_test',[
     		'system'=>$system,
     		'items'=>$products
@@ -31,12 +31,12 @@ class ModeTestController extends Controller
     }
 
     public function create(Request $request){
-    	$system = \App\System::find(1);
+        $system = \App\System::find(1);
 
         $csv = $this->convertToArray('files/'.$system->filecsv,$request->sku);
         if(!count($csv)){
-        	$request->session()->flash('status','Sku not found !!!!');    
-        	return redirect()->route('mode-test'); 
+            $request->session()->flash('status','Sku not found !!!!');
+            return redirect()->route('mode-test');
         }
 
         $regex = <<<'END'
@@ -51,10 +51,8 @@ class ModeTestController extends Controller
 | .                                 # anything else
 /x
 END;
-
-        // dd($csv);
         foreach ($csv as $key => $value) {
-       	 $find = \App\Product::where('SKU',$value['SKU'])->where('product_mode_test',1)->first();
+            $find = \App\Product::where('SKU',$value['SKU'])->first();
             if(!$find){
                 $desc=preg_replace($regex, '$1', $value['Description']);
                 $product = \App\Product::create([
@@ -85,12 +83,23 @@ END;
                 ]);
                 $product->setListingPrice();
             }else{
-            	$request->session()->flash('status','Sku alredy !!!!');
+                $request->session()->flash('status','Sku alredy !!!!');
             }
         }
         return redirect()->route('mode-test');
     }
-    public function convertToArray($attribute,$sku){
+
+    public function bulk(Request $request){
+    	$system = \App\System::find(1);
+
+        $csv = $this->convertToArray('files/'.$system->filecsv);
+        if(!count($csv)){
+        	$request->session()->flash('status','Sku not found !!!!');    
+        	return redirect()->route('mode-test'); 
+        }
+        return redirect()->route('mode-test');
+    }
+    public function convertToArray($attribute,$sku=NULL){
         $csv = Array();
         $rowcount = 0;
         $file =  public_path($attribute);
@@ -110,9 +119,11 @@ END;
                 $rowcount++;
             }
             fclose($handle);
-        }
-        else {
-            error_log("csvreader: Could not read CSV \"$csvfile\"");
+            if($sku===NULL){
+                return($csv);
+            }
+        } else {
+            error_log("csvreader: Could not read CSV \"$file\"");
             return null;
         }
         $filtered = collect($csv)->filter(function ($value, $key) use($sku) {
@@ -121,11 +132,10 @@ END;
             return $value['SKU'] == $sku;
         });
 
-
         return $filtered->all();
     }
     public function delete($id){
-    	$product = \App\Product::find($id)->delete();
+    	\App\Product::find($id)->delete();
     	return redirect()->route('mode-test');
     }
 }

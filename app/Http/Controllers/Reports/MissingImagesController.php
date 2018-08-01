@@ -105,7 +105,8 @@ class MissingImagesController extends Controller
         infolog("Found: ".count($this->found));
         infolog("Not Found: ".count($this->not_found));
         infolog("Can Fix: ".count($this->not_found_fixed));
-        dd($this->not_found_fixed);
+        dump("Not Found",$this->not_found);
+        dd("Finished");
 
     	return view('reports.missing-images',[
     	    "report"=>$report

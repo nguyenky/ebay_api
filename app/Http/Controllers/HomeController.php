@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\dropbox\BulkInventory;
 use App\Jobs\ebay\PublicOfferEbay;
 use App\Jobs\ebay\RefreshToken;
 use App\Jobs\ebay\UpdateEbay;
@@ -343,5 +344,18 @@ class HomeController extends Controller
         }
 
         //dispatch_now(new UpdateEbay($product));
+        infolog("[GetEbayInventory] END at ".now());
+    }
+
+    /**
+     * Perform a Master Stock File Update
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function masterStockUpdate()
+    {
+        infolog('[MasterStockUpdate] START at '. now());
+        dispatch_now(new BulkInventory());
+        infolog('[MasterStockUpdate] END at '. now());
     }
 }

@@ -14,3 +14,6 @@ yarn-error.log
 /public/files
 /public/images
 /*.env
+/public/files/UNITEX-DATAFEED-ALL-BULK-IMPORT.xlsx
+/public/files/FIXALL.xlsx
+/public/files/FixImport.xlsx

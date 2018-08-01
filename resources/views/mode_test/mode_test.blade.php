@@ -105,6 +105,19 @@
                         </tfoot>
                     </table>
                     </form>
+
+                    <div class="dataTables_wrapper">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">Showing {{$items->firstItem()}} to {{$items->lastItem()}} of {{$items->total()}} products</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="dataTables_paginate paging_simple_numbers" id="dataTables-dataTables-example_paginate" role="status" aria-live="polite">
+                                    {{ $items->links() }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

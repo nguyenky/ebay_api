@@ -37,6 +37,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('command:public-offer')
                  ->daily();
 
+        $schedule->command('command:update-inventory')
+                 ->daily();
+
         $schedule->command('command:create-offer')
                     ->at('00:00');
                     

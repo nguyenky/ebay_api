@@ -23,6 +23,7 @@ Route::group(['middleware'=>'auth'],function(){
     Route::get('/home', 'HomeController@index')->name('home');
     Route::get('/resync/{id}', 'HomeController@resync')->name('resync');
     Route::get('/get-inventory/{id}', 'HomeController@getInventory')->name('get-inventory');
+    Route::get('/master-stock-update', 'HomeController@masterStockUpdate')->name('master-stock-update');
 
     Route::get('/merchant-location', 'Ebay\MerchantLocationController@index')->name('merchant-location');
 
