@@ -23,7 +23,7 @@ class TokenSeedTable extends Seeder
         ];
         $token_live_lars = [
             'grant_code'=> 'v^1.1#i^1#I^3#r^1#p^3#f^0#t^Ul41XzM6QTM3M0JFMDkwMEM1NTk0MTIzREExOUExMjczRDk5OERfMF8xI0VeMjYw',
-            'accesstoken_dropbox'=>'cRJ80fE5KDAAAAAAAAA0ngtuNCWtTuF4Jg9AfeaAMCXCKVNntavrE8UNXZ3jfBmV',
+            'accesstoken_dropbox'=>'r_RVY0lcXjAAAAAAAAAAv0ZbQ96d7pZalEBhkZ17pBVkuKKvxNHVsrOZLAeX2EeP',
             'refresh_token_ebay'=>'v^1.1#i^1#r^1#I^3#f^0#p^3#t^Ul4xMF81OkM1ODJDQkJGMTAwNTdFMzJEQzk4RkZCQkUyNDlBNjRBXzJfMSNFXjI2MA==',
         ];
         Token::truncate();
