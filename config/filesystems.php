@@ -64,6 +64,22 @@ return [
             'url' => env('AWS_URL'),
         ],
 
+        'sftp' => [
+            'driver' => 'sftp',
+            'host' =>       'mip.ebay.com',
+            'username' =>   'ixplorestoreaus',
+            'password' =>   'v^1.1#i^1#f^0#r^1#p^3#I^3#t^Ul4xMF81OjlGNjY2MTk1OTJGRjFCN0ZFQjEzOTc4NzhDMDA3MkM1XzJfMSNFXjI2MA==',
+
+            // Settings for SSH key based authentication...
+            // 'privateKey' => '/path/to/privateKey',
+            // 'password' => 'encryption-password',
+
+            // Optional SFTP Settings...
+            'port' => 22,
+            'root' => '/store/',
+            'timeout' => 160,
+        ],
+
     ],
 
 ];

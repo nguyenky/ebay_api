@@ -25,6 +25,8 @@ Route::group(['middleware'=>'auth'],function(){
     Route::get('/get-inventory/{id}', 'HomeController@getInventory')->name('get-inventory');
     Route::get('/master-stock-update', 'HomeController@masterStockUpdate')->name('master-stock-update');
 
+    Route::get('/ebay/inventory-sync', 'Ebay\EbayController@inventorySync')->name('ebay-inventory-sync');
+
     Route::get('/merchant-location', 'Ebay\MerchantLocationController@index')->name('merchant-location');
 
     Route::get('/manual-processing', 'ManualProcessingController@index')->name('manual-processing');

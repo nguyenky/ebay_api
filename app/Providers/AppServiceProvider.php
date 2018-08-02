@@ -2,8 +2,12 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Routing\UrlGenerator;
+
+use League\Flysystem\Filesystem;
+use League\Flysystem\Sftp\SftpAdapter;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +27,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Set app protocol url
         \URL::forceScheme(env('APP_PROTOCOL', 'https'));
+
+        Storage::extend('sftp', function ($app, $config) {
+            return new Filesystem(new SftpAdapter($config));
+        });
     }
 
     /**
