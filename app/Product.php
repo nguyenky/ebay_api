@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $table = 'products';
-    protected $fillable = ['SKU','Name','Description','Category','Size','Color','Cost','Sell','RRP','QTY','Image1','Image2','Image3','Image4','Image5','Length','Width','Height','UnitWeight','Origin','Construction','Material','Pileheight','listing_price','OfferID','listingID','ebayupdated_at','product_mode_test'];
+    protected $fillable = ['SKU','Name','Description','Category','Size','Color','Cost','Sell','RRP','QTY','Image1','Image2','Image3','Image4','Image5','images_percent','Length','Width','Height','UnitWeight','Origin','Construction','Material','Pileheight','listing_price','OfferID','listingID','ebayupdated_at','product_mode_test'];
     public $timestamps = false;
 
     public function getListingPrice(){
@@ -32,5 +32,56 @@ class Product extends Model
             }
         }
         return($this->listing_price);
+    }
+
+    public function calculateImagePercent($save=true){
+        $result=0;
+        $imagesCount=0;
+        $imagesFound=0;
+        $images=[];
+        foreach (glob(public_path("images/")."*") as $filename) {
+            $images[]=basename($filename);
+        }
+        if(strlen($this->Image1)>0){
+            $imagesCount++;
+            if(in_array($this->Image1,$images)){
+                $imagesFound++;
+            }
+        }
+        if(strlen($this->Image2)>0){
+            $imagesCount++;
+            if(in_array($this->Image2,$images)){
+                $imagesFound++;
+            }
+        }
+        if(strlen($this->Image3)>0){
+            $imagesCount++;
+            if(in_array($this->Image3,$images)){
+                $imagesFound++;
+            }
+        }
+        if(strlen($this->Image4)>0){
+            $imagesCount++;
+            if(in_array($this->Image4,$images)){
+                $imagesFound++;
+            }
+        }
+        if(strlen($this->Image5)>0){
+            $imagesCount++;
+            if(in_array($this->Image5,$images)){
+                $imagesFound++;
+            }
+        }
+        if($imagesCount>0){
+            $result=round(($imagesFound/$imagesCount) * 100,2);
+        }
+
+        $this->images_percent=$result;
+
+        if($save){
+            $this->save();
+        }
+
+        return($result);
     }
 }

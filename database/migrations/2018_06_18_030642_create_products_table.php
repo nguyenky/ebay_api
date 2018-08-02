@@ -30,7 +30,7 @@ class CreateProductsTable extends Migration
             $table->string('Image3')->nullable();
             $table->string('Image4')->nullable();
             $table->string('Image5')->nullable();
-            $table->integer('has_images')->nullable()->default(0);
+            $table->float('images_percent',10,2)->nullable()->default(0);
             $table->integer('Length')->nullable();
             $table->integer('Width')->nullable();
             $table->integer('Height')->nullable();

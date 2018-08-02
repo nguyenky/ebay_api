@@ -35,6 +35,7 @@ Route::group(['middleware'=>'auth'],function(){
     Route::get('/manual-processing/step5', 'ManualProcessingController@step5')->name('manual-processing-step5');
 
     Route::get('/reports/missing-images', 'Reports\MissingImagesController@index')->name('report-missing-images');
+    Route::get('/reports/missing-images/percents', 'Reports\MissingImagesController@generateImagesPercentages')->name('report-missing-images-percent');
 });
 
 Route::group(['middleware'=>'auth','namespace'=>'ModeTest'],function(){

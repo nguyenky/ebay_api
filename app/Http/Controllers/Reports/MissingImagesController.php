@@ -98,6 +98,17 @@ class MissingImagesController extends Controller
         return($result);
     }
 
+    public function generateImagesPercentages(){
+        $all=Product::get();
+        foreach($all as $product){
+            if($per=$product->calculateImagePercent(true)){
+                infolog($product->SKU." has ".$per."% images found.");
+            }else{
+                infolog($product->SKU." has an error.");
+            }
+        }
+    }
+
     public function index(){
         $report=false;
         $this->getUnitexMissingImagesReport();
