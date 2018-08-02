@@ -99,7 +99,7 @@ class MissingImagesController extends Controller
     }
 
     public function generateImagesPercentages(){
-        $all=Product::get();
+        $all=Product::paginate(250);
         foreach($all as $product){
             if($per=$product->calculateImagePercent(true)){
                 infolog($product->SKU." has ".$per."% images found.");
