@@ -186,9 +186,9 @@
             width:100%;
             max-width:504px;
             height:392px;
-            -webkit-animation:cssAnimation 0.7661s 1 ease-in-out;
-            -moz-animation:cssAnimation 0.7661s 1 ease-in-out;
-            -o-animation:cssAnimation 0.7661s 1 ease-in-out;
+            -webkit-animation:cssAnimation 0.8s 1 ease-in-out;
+            -moz-animation:cssAnimation 0.8s 1 ease-in-out;
+            -o-animation:cssAnimation 0.8s 1 ease-in-out;
             padding-left:46px;
             box-sizing:border-box
         }
@@ -261,7 +261,7 @@
         }
         @-webkit-keyframes cssAnimation{
             from{
-                -webkit-transform:rotate(0deg) scale(0.48) skew(-180deg) translate(0px)
+                -webkit-transform:rotate(0deg) scale(1.0) skew(-180deg) translate(0px)
             }
             to{
                 -webkit-transform:rotate(0deg) scale(1.0) skew(-180deg) translate(0px)
@@ -269,7 +269,7 @@
         }
         @-moz-keyframes cssAnimation{
             from{
-                -moz-transform:rotate(0deg) scale(0.48) skew(-180deg) translate(0px)
+                -moz-transform:rotate(0deg) scale(1.0) skew(-180deg) translate(0px)
             }
             to{
                 -moz-transform:rotate(0deg) scale(1.0) skew(-180deg) translate(0px)
@@ -277,7 +277,7 @@
         }
         @-o-keyframes cssAnimation{
             from{
-                -o-transform:rotate(0deg) scale(0.48) skew(-180deg) translate(0px)
+                -o-transform:rotate(0deg) scale(1.0) skew(-180deg) translate(0px)
             }
             to{
                 -o-transform:rotate(0deg) scale(1.0) skew(-180deg) translate(0px)

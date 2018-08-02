@@ -30,6 +30,7 @@ class CreateProductsTable extends Migration
             $table->string('Image3')->nullable();
             $table->string('Image4')->nullable();
             $table->string('Image5')->nullable();
+            $table->integer('has_images')->nullable()->default(0);
             $table->integer('Length')->nullable();
             $table->integer('Width')->nullable();
             $table->integer('Height')->nullable();
@@ -42,6 +43,7 @@ class CreateProductsTable extends Migration
             $table->string('listingID')->nullable();
             $table->float('listing_price',10,2)->nullable();
             $table->timestamp('ebayupdated_at')->nullable();
+            $table->integer('product_mode_test')->nullable()->default(1);
             $table->timestamps();
         });
     }
