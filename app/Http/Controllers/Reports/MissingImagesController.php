@@ -110,7 +110,7 @@ class MissingImagesController extends Controller
     }
 
     public function tryFindImages(){
-        $all=Product::where("images_percent","<",100)->whereNotNull("listingID")->paginate(250);
+        $all=Product::where("images_percent","<",100)->whereNotNull("listingID")->paginate(request("ps",500));
         $fixed=0;
         foreach($all as $product){
             $sku=$product->SKU;
