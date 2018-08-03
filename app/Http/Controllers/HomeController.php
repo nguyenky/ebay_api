@@ -9,6 +9,7 @@ use App\Jobs\ebay\UpdateEbay;
 use Illuminate\Http\Request;
 
 use App\Product;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -32,7 +33,12 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $products = Product::where('product_mode_test',0)->paginate(100);
+        $search=request("s");
+        $products=Product::where('product_mode_test',0);
+        if(strlen($search)>0){
+            $products=$products->whereRaw("(SKU LIKE '%".DB::raw($search)."%' OR Name LIKE '%".DB::raw($search)."%' OR Description LIKE '%".DB::raw($search)."%' OR offerID LIKE '%".DB::raw($search)."%' OR listingID LIKE '%".DB::raw($search)."%')");
+        }
+        $products=$products->paginate(100);
         return view('products',['items'=>$products]);
     }
 
@@ -153,21 +159,12 @@ class HomeController extends Controller
      */
     public function updateInventoryEbay(Product $product)
     {
-        $imageUrls =[];
-        for($c=1;$c<=5;$c++) {
-            $key="Image".$c;
-            $img=$product->$key;
-            if(strlen($img)>0){
-                $imageUrls[]=env("PROD_APP_URL").'/images/'.$img;
-            }
-        }
-
         try {
             $client = new \GuzzleHttp\Client();
             $data = [
                 'product'       => [
                     'title'     => $product->Name,
-                    'imageUrls' => $imageUrls,
+                    'imageUrls' => $product->getImagesArray(),
                     'aspects'   => [
                         'size' => [$product->Size],
                         'color' => [$product->Color],

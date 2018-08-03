@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="card">
@@ -14,62 +14,74 @@
                         </div>
                     @endif
 
-                        <div>
-                            <!-- Modal Force -->
-                            <div class="modal fade" id="modalForceSync" tabindex="-1" role="dialog" aria-labelledby="modalForceSyncTitle" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="modalForceSyncTitle">Force Sync</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <form method="get" action="#">
-                                            {!! csrf_field()!!}
-                                            <div class="modal-body">
-                                                <p>Click the "Process" button below to force a sync of ListingID <strong class="listingID"></strong>.</p>
-                                                <div class="framed">
-
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                                <button type="button" class="btn btn-primary" data-link="">Process</button>
-                                            </div>
-                                        </form>
+                    <div>
+                        <!-- Modal Force -->
+                        <div class="modal fade" id="modalForceSync" tabindex="-1" role="dialog" aria-labelledby="modalForceSyncTitle" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalForceSyncTitle">Force Sync</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
                                     </div>
-                                </div>
-                            </div>
+                                    <form method="get" action="#">
+                                        {!! csrf_field()!!}
+                                        <div class="modal-body">
+                                            <p>Click the "Process" button below to force a sync of ListingID <strong class="listingID"></strong>.</p>
+                                            <div class="framed">
 
-                            <div class="modal fade" id="modalGeneral" tabindex="-1" role="dialog" aria-labelledby="modalGeneralTitle" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="modalGeneralTitle">General Title</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
+                                            </div>
                                         </div>
-                                        <form method="get" action="#">
-                                            {!! csrf_field()!!}
-                                            <div class="modal-body">
-                                                <p id="modalGeneralDescription">General Description.</p>
-                                                <div class="framed">
-
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                                <button type="button" class="btn btn-primary" data-link="">Process</button>
-                                            </div>
-                                        </form>
-                                    </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-primary" data-link="">Process</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
 
+                        <div class="modal fade" id="modalGeneral" tabindex="-1" role="dialog" aria-labelledby="modalGeneralTitle" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalGeneralTitle">General Title</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <form method="get" action="#">
+                                        {!! csrf_field()!!}
+                                        <div class="modal-body">
+                                            <p id="modalGeneralDescription">General Description.</p>
+                                            <div class="framed">
+
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-primary" data-link="">Process</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div>
+                        <form name="formFilters" action="{{route("home")}}" method="get">
+                            {{csrf_field()}}
+                            <div id="search-filters">
+                                <div class="input-group">
+                                    <input type="text" name="s" value="{{request("s")}}" class="form-control" placeholder="Search SKU, Name, offerID, listingID">
+                                    <span class="input-group-btn">
+                                        <button type="submit" class="btn btn-info btn-flat">Search</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </form>
+                        <br>
                         <table class="table table-bordered table-hover">
                             <thead>
                                 <tr>
