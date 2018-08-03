@@ -38,7 +38,7 @@ class BulkInventory implements ShouldQueue
         $result=false;
         try{
             infolog('[BulkInventory.writeEbayMipFile] Preparing update file... '. now());
-            $all=Product::whereRaw("updated_at > ebayupdated_at")->get();
+            $all=Product::whereNotNull("listingID")->whereRaw("(updated_at > ebayupdated_at OR ebayupdated_at IS NULL)")->get();
             if($all){
                 $filename="inventory_".time().".csv";
                 $this->ifile=public_path('files/ebay/'.$filename);

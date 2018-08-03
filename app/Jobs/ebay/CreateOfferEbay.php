@@ -124,11 +124,11 @@ class CreateOfferEbay implements ShouldQueue
                 "marketplaceId" => "EBAY_AU",
                 "format" => "FIXED_PRICE",
                 "listingDescription" => $description,
-                "availableQuantity" => 10,
-                "quantityLimitPerBuyer" => 2,
+                "availableQuantity" => $attribute->QTY,
+                "quantityLimitPerBuyer" => ceil($attribute->QTY/2),
                 "pricingSummary" => [
                         "price"  => [
-                            "value" => $attribute->RRP,
+                            "value" => $attribute->listing_price,
                             "currency" => "AUD"
                         ]
                 ],
