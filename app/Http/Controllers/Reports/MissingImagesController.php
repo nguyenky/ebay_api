@@ -109,6 +109,28 @@ class MissingImagesController extends Controller
         }
     }
 
+    public function tryFindImages(){
+        $all=Product::where("images_percent","<",1)->whereNotNull("listingID")->paginate(250);
+        foreach($all as $product){
+            $sku=$product->SKU;
+            if(strrpos($sku,"-")>0){
+                $prefix=substr($sku,0,strrpos($sku,"-"));
+                $images=[];
+                if(file_exists(public_path("images/".$prefix.".jpg"))){
+                    $images[]=$prefix.".jpg";
+                }
+                for($c=1;$c<7;$c++){
+                    if(file_exists(public_path("images/".$prefix."-$c.jpg"))){
+                        $images[]=$prefix."-1.jpg";
+                    }elseif(file_exists(public_path("images/".$prefix."_$c.jpg"))){
+                        $images[]=$prefix."_$c.jpg";
+                    }
+                }
+                infolog("$sku Found ".count($images)." images.");
+            }
+        }
+    }
+
     public function index(){
         $report=false;
         $this->getUnitexMissingImagesReport();

@@ -38,6 +38,7 @@ Route::group(['middleware'=>'auth'],function(){
 
     Route::get('/reports/missing-images', 'Reports\MissingImagesController@index')->name('report-missing-images');
     Route::get('/reports/missing-images/percents', 'Reports\MissingImagesController@generateImagesPercentages')->name('report-missing-images-percent');
+    Route::get('/reports/missing-images/try-fix', 'Reports\MissingImagesController@tryFindImages')->name('report-missing-images-try-fix');
 });
 
 Route::group(['middleware'=>'auth','namespace'=>'ModeTest'],function(){
