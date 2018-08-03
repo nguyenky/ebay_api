@@ -119,6 +119,7 @@
                                                 <a class="dropdown-item sync" href="#" data-toggle="modal" data-target="#modalForceSync" data-id="{{$item->id}}" data-listingID="{{$item->listingID}}">Force Sync</a>
                                                 <a class="dropdown-item general-modal" href="{{route("get-inventory",$item->id)}}" data-toggle="modal" data-target="#modalGeneral" data-title="eBay Inventory Call" data-description="Press the process button to perform a GetInventory eBay API call for the SKU '{{$item->SKU}}'." data-sku="{{$item->SKU}}">eBay Inventory Call</a>
                                                 <a class="dropdown-item" href="https://www.ebay.com.au/itm/{{$item->listingID}}" target="_blank">View on eBay</a>
+                                                <a class="dropdown-item" href="https://www.ebay.com.au/sch/i.html?_nkw={{urlencode($item->Name)}}" target="_blank">Competitors on eBay</a>
                                                 <a class="dropdown-item" href="https://bulksell.ebay.com.au/ws/eBayISAPI.dll?SingleList&sellingMode=ReviseItem&ReturnURL=https%3A%2F%2Fwww.ebay.com.au%2Fsh%2Flst%2Factive&lineID={{$item->listingID}}" target="_blank">Edit on eBay</a>
                                             </div>
                                         </div>
