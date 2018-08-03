@@ -43,10 +43,13 @@ class Product extends Model
         for($c=1;$c<=5;$c++){
             $img="Image".$c;
             $image=$this->$img;
-            if(file_exists(public_path("images/".$image))){
-                $result[]=$prepend;
+            if(strlen($image)>0 && file_exists(public_path("images/".$image))){
+                $result[]=$prepend."/images/".$image;
+            }else{
+                #infolog("File: ".public_path("images/".$image)." does not exist.");
             }
         }
+        #infolog("Image Results",$result);
         return($result);
     }
 
