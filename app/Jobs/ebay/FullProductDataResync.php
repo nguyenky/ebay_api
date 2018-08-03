@@ -16,6 +16,7 @@ class FullProductDataResync implements ShouldQueue
 
     public $product;
     public $token;
+    public $api='https://api.ebay.com/';
 
     /**
      * Create a new job instance.
