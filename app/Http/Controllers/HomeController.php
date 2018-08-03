@@ -4,10 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\dropbox\BulkInventory;
 use App\Jobs\ebay\FullProductDataResync;
-use App\Jobs\ebay\PublicOfferEbay;
 use App\Jobs\ebay\RefreshToken;
-use App\Jobs\ebay\UpdateEbay;
-use Illuminate\Http\Request;
 
 use App\Product;
 use Illuminate\Support\Facades\DB;

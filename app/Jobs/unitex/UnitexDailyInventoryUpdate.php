@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\dropbox;
+namespace App\Jobs\unitex;
 
 use App\Product;
 use Illuminate\Bus\Queueable;
@@ -10,7 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\DB;
 
-class E2eEbayInventoryUpdate implements ShouldQueue
+class UnitexDailyInventoryUpdate implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -21,6 +21,11 @@ class E2eEbayInventoryUpdate implements ShouldQueue
      */
     public function __construct()
     {
+        infolog('[UnitexDailyInventoryUpdate] __construct at '. now());
+    }
+    public function __destruct()
+    {
+        infolog('[UnitexDailyInventoryUpdate] __destruct at '. now());
     }
 
     /**
@@ -33,9 +38,9 @@ class E2eEbayInventoryUpdate implements ShouldQueue
         $result=false;
         try{
             //Truncate the table first
-            infolog('[BulkInventory.updateSystemDb] CLEANING Tmp Table '. now());
+            infolog('[updateSystemDb] CLEANING Tmp Table '. now());
             DB::table('stock_updates')->truncate();
-            infolog('[BulkInventory.updateSystemDb] CLEANED '. now());
+            infolog('[updateSystemDb] CLEANED '. now());
 
 
             //Load the master stock update to the DB
@@ -63,11 +68,11 @@ class E2eEbayInventoryUpdate implements ShouldQueue
                     created_at=NOW(),
                     updated_at=NOW()
             ";
-            infolog('[BulkInventory.updateSystemDb] LOADING IN STOCK DATA '. now(),$sQl);
+            infolog('[updateSystemDb] LOADING IN STOCK DATA '. now(),$sQl);
             DB::connection()->getpdo()->exec($sQl);
-            infolog('[BulkInventory.updateSystemDb] SUCCESSFUL INSERT at '. now());
+            infolog('[updateSystemDb] SUCCESSFUL INSERT at '. now());
 
-            infolog('[BulkInventory.updateSystemDb] UPDATING PRODUCT STOCK at '. now());
+            infolog('[updateSystemDb] UPDATING PRODUCT STOCK at '. now());
             $sQl="
                 UPDATE
                   products p,
@@ -81,10 +86,10 @@ class E2eEbayInventoryUpdate implements ShouldQueue
                 ;
             ";
             DB::connection()->getpdo()->exec($sQl);
-            infolog('[BulkInventory.updateSystemDb] SUCCESS PRODUCT STOCK UPDATE at '. now());
+            infolog('[updateSystemDb] SUCCESS PRODUCT STOCK UPDATE at '. now());
             $result=true;
         }catch(\Exception $e) {
-            infolog('[BulkInventory.updateSystemDb] ERROR in bulk inserting data ('.$e->getMessage().') at '. now());
+            infolog('[updateSystemDb] ERROR in bulk inserting data ('.$e->getMessage().') at '. now());
         }
         return($result);
     }
@@ -96,9 +101,10 @@ class E2eEbayInventoryUpdate implements ShouldQueue
      */
     public function handle()
     {
-        infolog('[BulkInventory] START at '. now());
+        infolog('[handle] START at '. now());
         if($this->updateSystemDb()){
+            infolog('[handle] SUCCESS at '. now());
         }
-        infolog('[BulkInventory] END at '. now());
+        infolog('[handle] END at '. now());
     }
 }

@@ -25,11 +25,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        /*
         $schedule->command('command:download-file-csv')
                  ->daily();
-        
-        $schedule->command('command:refresh-token-ebay')
-                  ->everyThirtyMinutes();
 
         $schedule->command('command:check-file-csv')
                   ->daily();
@@ -45,7 +43,15 @@ class Kernel extends ConsoleKernel
                     
         $schedule->command('command:create-inventory')
                     ->at('12:00');
-        
+        */
+        $schedule->command('command:refresh-token-ebay')
+            ->everyThirtyMinutes();
+
+        $schedule->command('command:unitex-inventory-update')
+            ->at('00:00');
+
+        $schedule->command('command:ebay-inventory-push')
+            ->at('00:30');
     }
 
     /**
