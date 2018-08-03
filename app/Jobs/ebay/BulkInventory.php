@@ -39,6 +39,7 @@ class BulkInventory implements ShouldQueue
         try{
             infolog('[BulkInventory.writeEbayMipFile] Preparing update file... '. now());
             $all=Product::whereNotNull("listingID")->whereRaw("(updated_at > ebayupdated_at OR ebayupdated_at IS NULL)")->get();
+            $counter=0;
             if($all){
                 $filename="inventory_".time().".csv";
                 $this->ifile=public_path('files/ebay/'.$filename);
@@ -46,11 +47,12 @@ class BulkInventory implements ShouldQueue
                     fputcsv($fp, ["SKU","Channel ID","List Price","Total Ship to Home Quantity"]);
                     foreach($all as $product){
                         fputcsv($fp, [$product->SKU,"EBAY_AU",$product->listing_price,$product->QTY]);
+                        $counter++;
                     }
                     fclose($fp);
                 }
             }
-            infolog('[BulkInventory.writeEbayMipFile] SUCCESS at '. now());
+            infolog('[BulkInventory.writeEbayMipFile] SUCCESSFULLY UPDATE '.$counter.' ITEMS at '. now());
             $result=true;
         }catch(\Exception $e) {
             infolog('[BulkInventory.writeEbayMipFile] ERROR updating eBay/MIP ('.$e->getMessage().') at '. now());

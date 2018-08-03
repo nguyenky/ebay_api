@@ -13,12 +13,14 @@ class Product extends Model
     public function getListingPrice(){
         //Rule: Price=Cost+$25+10%_GST+10%_SaleCost+15%_Margin
         $cost=$this->Cost;
-        $shipping=25;
+        $shipping=27;
         $tax=0.1;
         $saleCost=0.1;
-        $margin=0.15;
+        $margin=0.2;
 
-        $price=$cost+$shipping+($cost*$saleCost)+($cost*$tax)+($cost*$margin);
+        $costMargin=($cost*$margin);
+
+        $price=$costMargin+$shipping+($costMargin*$saleCost)+($costMargin*$tax);
 
         return($price);
     }
@@ -32,6 +34,20 @@ class Product extends Model
             }
         }
         return($this->listing_price);
+    }
+
+    public function getImagesArray($full_path=true,$prepend=NULL){
+        $result=[];
+        $prepend=($prepend===NULL)?env("PROD_APP_URL"):$prepend;
+        $prepend=($full_path)?$prepend:"";
+        for($c=1;$c<=5;$c++){
+            $img="Image".$c;
+            $image=$this->$img;
+            if(file_exists(public_path("images/".$image))){
+                $result[]=$prepend;
+            }
+        }
+        return($result);
     }
 
     public function calculateImagePercent($save=true){

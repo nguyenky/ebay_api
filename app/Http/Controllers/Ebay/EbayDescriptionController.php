@@ -43,15 +43,7 @@ class EbayDescriptionController extends Controller
         }
 
         if($item){
-            $item->hasImages=($item->Image1 || $item->Image2 || $item->Image3 || $item->Image4 || $item->Image5);
-            if($item->hasImages){
-                $images=[];
-                for($c=1;$c<=5;$c++){
-                    if($item["Image".$c]){
-                        $images[]=$item["Image".$c];
-                    }
-                }
-            }
+            $images=$item->getImagesArray();
         }
         return(view("ebay.description",[
             "item"=>$item,
