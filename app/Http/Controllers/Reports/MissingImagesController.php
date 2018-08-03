@@ -110,7 +110,8 @@ class MissingImagesController extends Controller
     }
 
     public function tryFindImages(){
-        $all=Product::where("images_percent","<",1)->whereNotNull("listingID")->paginate(250);
+        $all=Product::where("images_percent","<",100)->whereNotNull("listingID")->paginate(250);
+        $fixed=0;
         foreach($all as $product){
             $sku=$product->SKU;
             if(strrpos($sku,"-")>0){
@@ -127,8 +128,12 @@ class MissingImagesController extends Controller
                     }
                 }
                 infolog("$sku Found ".count($images)." images.");
+                if($images){
+                    $fixed++;
+                }
             }
         }
+        infolog("Fixed $fixed listings.");
     }
 
     public function index(){
