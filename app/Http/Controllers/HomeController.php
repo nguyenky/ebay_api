@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\dropbox\BulkInventory;
+use App\Jobs\ebay\BulkInventory;
 use App\Jobs\ebay\FullProductDataResync;
 use App\Jobs\ebay\RefreshToken;
 
+use App\Jobs\unitex\UnitexDailyInventoryUpdate;
 use App\Product;
 use Illuminate\Support\Facades\DB;
 
@@ -99,6 +100,7 @@ class HomeController extends Controller
     public function masterStockUpdate()
     {
         infolog('[MasterStockUpdate] START at '. now());
+        dispatch_now(new UnitexDailyInventoryUpdate());
         dispatch_now(new BulkInventory());
         infolog('[MasterStockUpdate] END at '. now());
     }

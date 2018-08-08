@@ -39,6 +39,10 @@ Route::group(['middleware'=>'auth'],function(){
     Route::get('/reports/missing-images', 'Reports\MissingImagesController@index')->name('report-missing-images');
     Route::get('/reports/missing-images/percents', 'Reports\MissingImagesController@generateImagesPercentages')->name('report-missing-images-percent');
     Route::get('/reports/missing-images/try-fix', 'Reports\MissingImagesController@tryFindImages')->name('report-missing-images-try-fix');
+
+
+    Route::get('/unitex/update-inventory-only', 'Unitex\UnitexEbayController@updateInventoryOnly')->name('unitex-update-inventory-only');
+    Route::get('/unitex/update-inventory-ebay', 'Unitex\UnitexEbayController@updateInventoryAndPushToEbay')->name('unitex-update-inventory-and-ebay');
 });
 
 Route::group(['middleware'=>'auth','namespace'=>'ModeTest'],function(){

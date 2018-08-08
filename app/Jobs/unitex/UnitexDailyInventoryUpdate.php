@@ -14,6 +14,9 @@ class UnitexDailyInventoryUpdate implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public $remote_stock_file="https://drive.google.com/uc?authuser=0&id=1i58qHTIccr9O7g3q8X1oFnlA7h4DcebT&export=download";
+    public $local_stock_file="files/MASTER_STOCK_UPDATE_FILE.csv";
+
     /**
      * Create a new job instance.
      *
@@ -26,6 +29,30 @@ class UnitexDailyInventoryUpdate implements ShouldQueue
     public function __destruct()
     {
         infolog('[UnitexDailyInventoryUpdate] __destruct at '. now());
+    }
+
+    /**
+     * Download the
+     *
+     * @return void
+     */
+    public function downloadDailyStockFile()
+    {
+        $result=false;
+        infolog('[downloadDailyStockFile] START '. now());
+        if($data=file_get_contents($this->remote_stock_file)){
+            infolog('[downloadDailyStockFile] GOT DATA at '. now());
+            if(file_put_contents(public_path($this->local_stock_file),$data)){
+                infolog('[downloadDailyStockFile] SAVED DATA at '. now());
+                $result=true;
+            }else{
+                infolog('[downloadDailyStockFile] FAILED TO SAVE DATA at '. now());
+            }
+        }else{
+            infolog('[downloadDailyStockFile] FAILED TO GET DATA at '. now());
+        }
+        infolog('[downloadDailyStockFile] END '. now());
+        return($result);
     }
 
     /**
@@ -44,7 +71,7 @@ class UnitexDailyInventoryUpdate implements ShouldQueue
 
 
             //Load the master stock update to the DB
-            $file = public_path('files/MASTER_STOCK_UPDATE_FILE.csv');
+            $file = public_path($this->local_stock_file);
             $sQl = "
                 LOAD DATA LOCAL INFILE
                     '" . $file . "'
@@ -102,8 +129,10 @@ class UnitexDailyInventoryUpdate implements ShouldQueue
     public function handle()
     {
         infolog('[handle] START at '. now());
-        if($this->updateSystemDb()){
-            infolog('[handle] SUCCESS at '. now());
+        if($this->downloadDailyStockFile()){
+            if($this->updateSystemDb()){
+                infolog('[handle] SUCCESS at '. now());
+            }
         }
         infolog('[handle] END at '. now());
     }

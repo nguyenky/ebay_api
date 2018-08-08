@@ -74,6 +74,15 @@
                             </div>
                         </li>
                         <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="dd-ebay-links" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Unitex</a>
+                            <div class="dropdown-menu" aria-labelledby="dd-ebay-links">
+                                <a class="dropdown-item" href="https://www.dropbox.com/sh/bvyy8cveb54yxdv/AADwbnG3i6eZryLTWvvtJl5sa?dl=0" target="_blank">Dropbox</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{route("unitex-update-inventory-only")}}" target="_blank">Update Inventory Only</a>
+                                <a class="dropdown-item" href="{{route("unitex-update-inventory-and-ebay")}}" target="_blank">Update Inventory and Push to eBay</a>
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dd-testing" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Reports</a>
                             <div class="dropdown-menu" aria-labelledby="dd-testing">
                                 <a class="dropdown-item" href="{{route("report-missing-images")}}">Missing Images Report</a>

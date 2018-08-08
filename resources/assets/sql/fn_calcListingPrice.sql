@@ -3,9 +3,10 @@ USAGE:
 	UPDATE
 		products
 	SET
-		listing_price=fn_calcListingPrice(Cost,Sell,RRP,QTY)
+		listing_price=fn_calcListingPrice(Cost,Sell,RRP,QTY),
+		updated_at=NOW()
 	WHERE
-		listing_price<1
+		listingID IS NOT NULL
 	;
 */
 DROP FUNCTION IF EXISTS fn_calcListingPrice;
@@ -32,7 +33,7 @@ BEGIN
     SET RESULT=COST_MARGIN+SHIPPING+(COST_MARGIN*TAX)+(COST_MARGIN*SALE_COST);
     
     IF RESULT>sell THEN
-		SET RESULT=sell;
+		SET RESULT=sell+SHIPPING;
 	END IF;
     
  RETURN (RESULT);

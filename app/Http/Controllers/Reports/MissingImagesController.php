@@ -4,9 +4,7 @@ namespace App\Http\Controllers\Reports;
 
 use App\Product;
 use App\System;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Storage;
 
 class MissingImagesController extends Controller
 {
