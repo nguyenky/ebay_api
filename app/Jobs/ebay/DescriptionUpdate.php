@@ -25,8 +25,9 @@ class DescriptionUpdate implements ShouldQueue
      */
     public function __construct(Product $product)
     {
-        infolog('[DescriptionUpdate] __construct at '. now());
+        infolog('[DescriptionUpdate] __construct(product_id='.$product->id.') at '. now());
         $this->product=$product;
+        $this->token = \App\Token::find(1);
     }
 
     /**
