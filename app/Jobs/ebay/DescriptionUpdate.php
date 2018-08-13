@@ -107,7 +107,7 @@ class DescriptionUpdate implements ShouldQueue
             ]);
             $search_results = json_decode($res->getBody(), true);
 
-            $product->ebayupdated_at=time()+10;
+            $product->ebayupdated_at=date("Y-m-d H:i:s");
             $product->save();
 
             infolog('[UpdateOfferEbay] SUCCESS! at '. now(), $search_results);
