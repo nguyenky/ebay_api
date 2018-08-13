@@ -92,6 +92,7 @@
                                     <th>Name</th>
                                     <th class="text-center">Qty</th>
                                     <th class="text-right">Cost</th>
+                                    <th class="text-right">Sell</th>
                                     <th class="text-right">RRP</th>
                                     <th class="text-right">Listing Price</th>
                                     <th class="text-center">Actions</th>
@@ -107,6 +108,7 @@
                                     <td><a class="dropdown-item" href="https://www.ebay.com.au/itm/{{$item->listingID}}" target="_blank" title="View on eBay">{{$item->Name}}</a></td>
                                     <td class="text-center{{($item->QTY<3)?" warning":""}}">{{number_format($item->QTY,0)}}</td>
                                     <td class="text-right">{{"$".number_format($item->Cost,2)}}</td>
+                                    <td class="text-right">{{"$".number_format($item->Sell,2)}}</td>
                                     <td class="text-right">{{"$".number_format($item->RRP,2)}}</td>
                                     <td class="text-right{{($item->listing_price>$item->Sell)?" warning":""}}">{{"$".number_format($item->listing_price,2)}}</td>
                                     <td class="text-center">
