@@ -108,7 +108,11 @@ class DescriptionUpdate implements ShouldQueue
             $search_results = json_decode($res->getBody(), true);
 
             $product->ebayupdated_at=date("Y-m-d H:i:s");
-            $product->save();
+            if($product->save()){
+                infolog('[UpdateOfferEbay] saved product_id='.$product->id.' at '. now(), $search_results);
+            }else{
+                infolog('[UpdateOfferEbay] ERROR saving product_id='.$product->id.' at '. now(), $search_results);
+            }
 
             infolog('[UpdateOfferEbay] SUCCESS! at '. now(), $search_results);
         }catch(\Exception $e) {
