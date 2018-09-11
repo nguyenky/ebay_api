@@ -18,6 +18,8 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/ebay/preview', 'Ebay\EbayDescriptionController@index')->name('ebay_preview');
+Route::get('/stock/download/csv', 'Downloads\DownloadAllStock@download')->name('download_all_stock_csv');
+Route::get('/reports/missing-images/bullet-proof-fix', 'Reports\MissingImagesController@bulletProofFix')->name('report-missing-images-bullet-proof-fix');
 
 Route::group(['middleware'=>'auth'],function(){
     Route::get('/home', 'HomeController@index')->name('home');

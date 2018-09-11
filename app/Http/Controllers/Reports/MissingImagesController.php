@@ -134,6 +134,46 @@ class MissingImagesController extends Controller
         infolog("Fixed $fixed listings.");
     }
 
+    public function bulletProofFix(){
+        $web_path="https://b2b.unitexint.com/productimages/";
+        $all=Product::where("images_percent","<",100)->whereNull("ebayupdated_at")->where("QTY",">",0)->orderBy("SKU")->paginate(request("ps",5));
+        $suffixes=["","_1","_2","_3","_4"];
+        $found=0;
+        $fixed=0;
+        foreach($all as $product){
+            $sku=$product->SKU;
+            if(strrpos($sku,"-")>0){
+                $prefix=substr($sku,0,strrpos($sku,"-"));
+                $images=[];
+                $img_c=0;
+                foreach($suffixes as $suffix){
+                    infolog("Checking: ".$web_path.$prefix.$suffix.".jpg");
+                    if($img=@file_get_contents($web_path.$prefix.$suffix.".jpg")){
+                        infolog("- Found.");
+                        $found++;
+                        if(@file_put_contents(public_path("images/".$prefix.$suffix.".jpg"))){
+                            $img_c++;
+                            $img="Image".$img_c;
+                            $product->$img=$prefix.$suffix.".jpg";
+                        }
+                    }
+                }
+                for($c=$img_c+1;$c<=5;$c++){
+                    $img="Image".$c;
+                    $product->$img=NULL;
+                }
+                if($product->save()){
+                    $product->images_percent=100;
+                    $product->save();
+                    $fixed++;
+                    infolog("-- Saved.");
+                }
+            }
+        }
+        infolog("Found $found images.");
+        infolog("Fixed $fixed listings.");
+    }
+
     public function index(){
         $report=false;
         $this->getUnitexMissingImagesReport();
@@ -144,8 +184,8 @@ class MissingImagesController extends Controller
         dump("Not Found",$this->not_found);
         dd("Finished");
 
-    	return view('reports.missing-images',[
-    	    "report"=>$report
+        return view('reports.missing-images',[
+            "report"=>$report
         ]);
     }
 }

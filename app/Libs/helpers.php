@@ -23,7 +23,7 @@ if (!function_exists('infolog')) {
    */
   function infolog($lbl,$var=NULL)
   {
-    if(env("APP_DEBUG", true)){
+    if(env("APP_DEBUG", true) && !request("debug",true)===FALSE){
         if($var===NULL){
             dump($lbl);
         }else{
