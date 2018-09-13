@@ -15,33 +15,6 @@
                     @endif
 
                     <div>
-                        <!-- Modal Force -->
-                        <div class="modal fade" id="modalForceSync" tabindex="-1" role="dialog" aria-labelledby="modalForceSyncTitle" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="modalForceSyncTitle">Force Sync</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <form method="get" action="#">
-                                        {!! csrf_field()!!}
-                                        <div class="modal-body">
-                                            <p>Click the "Process" button below to force a sync of ListingID <strong class="listingID"></strong>.</p>
-                                            <div class="framed">
-
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary" data-link="">Process</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="modal fade" id="modalGeneral" tabindex="-1" role="dialog" aria-labelledby="modalGeneralTitle" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content">
@@ -118,7 +91,7 @@
                                             </button>
                                             <div class="dropdown-menu">
                                                 <a class="dropdown-item" href="/ebay/preview/?id={{$item->id}}" target="_blank">Preview</a>
-                                                <a class="dropdown-item sync" href="#" data-toggle="modal" data-target="#modalForceSync" data-id="{{$item->id}}" data-listingID="{{$item->listingID}}">Force Sync</a>
+                                                <a class="dropdown-item general-modal" href="/resync/{{$item->SKU}}" data-toggle="modal" data-target="#modalGeneral" data-title="Force eBay Sync" data-description="Press the process button to force an eBay Sync for SKU '{{$item->SKU}}'." data-sku="{{$item->SKU}}">Force Sync</a>
                                                 <a class="dropdown-item general-modal" href="{{route("get-inventory",$item->id)}}" data-toggle="modal" data-target="#modalGeneral" data-title="eBay Inventory Call" data-description="Press the process button to perform a GetInventory eBay API call for the SKU '{{$item->SKU}}'." data-sku="{{$item->SKU}}">eBay Inventory Call</a>
                                                 <a class="dropdown-item" href="https://www.ebay.com.au/itm/{{$item->listingID}}" target="_blank">View on eBay</a>
                                                 <a class="dropdown-item" href="https://www.ebay.com.au/sch/i.html?_nkw={{urlencode($item->Name)}}" target="_blank">Competitors on eBay</a>
@@ -151,23 +124,6 @@
 </div>
 <script type="application/javascript">
     $(function(){
-        $("A.sync").click(function(){
-            $("#modalForceSync .listingID").text($(this).data("listingid"));
-            $("#modalForceSync .btn-primary").data("link","/resync/"+$(this).data("id"));
-        });
-
-        $("#modalForceSync .btn-primary").click(function(){
-            var p=$("#modalForceSync .framed");
-            var t=$(this);
-            t.text("Loading...");
-            var frame=$("<iframe></iframe>").attr("src",$(this).data("link")).attr("style","display: block;margin: 20px auto 0px auto;width: 100%;border:1px solid #cccccc;").on("load", function() {
-                t.text("Run again");
-            });
-            $("IFRAME",p).remove();
-            p.append(frame);
-            return(false);
-        });
-
         $("A.general-modal").click(function(){
             $("#modalGeneral .sku").text($(this).data("sku"));
             $("#modalGeneralTitle").text($(this).data("title"));

@@ -232,6 +232,7 @@ class FullProductDataResync implements ShouldQueue
      */
     public function updateInventoryEbay(Product $product)
     {
+        $result=false;
         try {
             $client = new \GuzzleHttp\Client();
             $data = [
@@ -254,7 +255,8 @@ class FullProductDataResync implements ShouldQueue
                     'sell' => $product->Sell,
                     'rrp' => $product->RRP,
                     'origin' => $product->Origin,
-                ]
+                ],
+                'condition' => 'NEW'
             ];
             $json = json_encode($data);
             $header = [
@@ -270,11 +272,14 @@ class FullProductDataResync implements ShouldQueue
             ]);
             $search_results = json_decode($res->getBody(), true);
             infolog('[UpdateInventoryEbay] SUCCESS! at '. now(), $search_results);
+            $result=true;
         }catch(\Exception $e) {
             infolog('[UpdateInventoryEbay] FAIL at '. now(), $e);
             //infolog("Details",$e->getResponse()->getBody()->getContents());
         }
         infolog('[UpdateInventoryEbay] END at '. now());
+
+        return($result);
     }
 
     /**
@@ -315,12 +320,16 @@ class FullProductDataResync implements ShouldQueue
             $this->updateOfferEbay($this->product);
         }
 
-        $this->updateInventoryEbay($this->product);
+        if($this->updateInventoryEbay($this->product)){
+            $this->product->ebayupdated_at=date("Y-m-d H:i:s");
+            $this->product->save();
+        }
 
         if($this->product->offerID && !$this->product->listingID){
             infolog('[Resync] ISSUE product has an OfferID but not a ListingID. attempting to publish at '. now());
             $po=new PublicOfferEbay();
             if($listingID=$po->publicOffer($this->product)){
+                $this->product->ebayupdated_at=date("Y-m-d H:i:s");
                 $this->product->listingID=$listingID;
                 $this->product->save();
                 infolog('[Resync] SAVED product now has a ListingID: '.$this->product->listingID.' at '. now());

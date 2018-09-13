@@ -85,9 +85,9 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function resync($id=0)
+    public function resync($sku)
     {
-        $product=Product::find($id);
+        $product=Product::where("SKU",$sku)->first();
 
         dispatch_now(new FullProductDataResync($product));
     }
