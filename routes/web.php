@@ -24,6 +24,7 @@ Route::get('/reports/missing-images/bullet-proof-fix', 'Reports\MissingImagesCon
 Route::group(['middleware'=>'auth'],function(){
     Route::get('/home', 'HomeController@index')->name('home');
     Route::get('/resync/{id}', 'HomeController@resync')->name('resync');
+    Route::get('/resync-custom/', 'HomeController@resyncCustom')->name('custom-resync');
     Route::get('/get-inventory/{id}', 'HomeController@getInventory')->name('get-inventory');
     Route::get('/master-stock-update', 'HomeController@masterStockUpdate')->name('master-stock-update');
 

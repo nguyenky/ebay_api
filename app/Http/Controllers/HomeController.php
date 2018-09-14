@@ -93,6 +93,22 @@ class HomeController extends Controller
     }
 
     /**
+     * Resync a Custom Query across Marketplaces
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function resyncCustom()
+    {
+        $products=Product::where("images_percent",100)->whereNull("ebayupdated_at")->whereNull("offerID")->where("product_mode_test",0)->where("QTY",'>',0)->get();
+        infolog("[resyncCustom] COUNT ".count($products)." at ".now());
+        foreach($products as $product){
+            dispatch(new FullProductDataResync($product));
+            infolog("[resyncCustom] dispatched JOB FullProductDataResync at ".now());
+        }
+        dd("Nope");
+    }
+
+    /**
      * Perform a Master Stock File Update
      *
      * @return \Illuminate\Http\Response
