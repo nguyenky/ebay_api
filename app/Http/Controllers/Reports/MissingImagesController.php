@@ -151,15 +151,18 @@ class MissingImagesController extends Controller
                     if($img=@file_get_contents($web_path.$prefix.$suffix.".jpg")){
                         infolog("- Found.");
                         $found++;
-                        if(@file_put_contents(public_path("images/".$prefix.$suffix.".jpg"))){
+                        if(@file_put_contents(public_path("images/".$prefix.$suffix.".jpg"),$img)){
                             $img_c++;
                             $img="Image".$img_c;
                             $product->$img=$prefix.$suffix.".jpg";
+                        }else{
+                            infolog("--- Couldn't put file: ".public_path("images/".$prefix.$suffix.".jpg").".");
                         }
                     }
                 }
                 for($c=$img_c+1;$c<=5;$c++){
                     $img="Image".$c;
+                    infolog("- NOT Found $img.");
                     $product->$img=NULL;
                 }
                 if($product->save()){
