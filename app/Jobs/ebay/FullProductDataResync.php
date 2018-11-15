@@ -202,7 +202,10 @@ class FullProductDataResync implements ShouldQueue
                         "currency" => "AUD",
                         "value" => $product->listing_price
                     ]
-                ]
+                ],
+                "brand" => "NA",
+                "mpn" => "NA",
+                "upc" => ["NA"]
             ];
             $json = json_encode($data);
             $header = [
@@ -240,6 +243,9 @@ class FullProductDataResync implements ShouldQueue
                     'title'     => $product->Name,
                     'imageUrls' => $product->getImagesArray(),
                     'aspects'   => [
+                        "Brand" => [
+                            "NA"
+                        ],
                         'size' => [$product->Size],
                         'color' => [$product->Color],
                         'length' => [$product->Length],
@@ -250,6 +256,9 @@ class FullProductDataResync implements ShouldQueue
                         'material' => [$product->Material],
                         'pileheight' => [$product->Pileheight]
                     ],
+                    "brand" => "NA",
+                    "mpn" => "NA",
+                    "upc" => ["NA"],
                     'category' => $product->Category,
                     'cost' => $product->Cost,
                     'sell' => $product->Sell,

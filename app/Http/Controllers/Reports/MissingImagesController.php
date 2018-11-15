@@ -177,6 +177,139 @@ class MissingImagesController extends Controller
         infolog("Fixed $fixed listings.");
     }
 
+    public function tmp2(){
+        $results=[];
+        $str="Highly positive impact
+-
+Highly positive impact
+Somewhat positive impact
+Highly positive impact
+Highly positive impact
+Somewhat positive impact
+Somewhat positive impact
+-
+Somewhat positive impact
+-
+Highly positive impact
+Highly positive impact
+Somewhat positive impact
+Somewhat positive impact
+Somewhat positive impact
+Highly positive impact
+Somewhat positive impact
+-
+Highly positive impact
+Highly positive impact
+Highly positive impact
+Highly positive impact
+Somewhat positive impact
+Highly positive impact
+Highly positive impact
+Somewhat positive impact
+Highly positive impact
+Somewhat positive impact
+Highly positive impact
+Highly positive impact
+Somewhat positive impact
+Highly positive impact
+Highly positive impact
+Somewhat positive impact
+";
+        $ar=preg_split("/\r\n/",trim($str));
+        $counter=0;
+        foreach($ar as $entry){
+            $a=trim($entry);
+            if(strlen($entry)>0) {
+                if (!in_array($a, array_keys($results))) {
+                    $results[$a] = 0;
+                }
+                $results[$a]++;
+                $counter++;
+            }
+        }
+        infolog("COUNTER: $counter");
+        foreach($results as $a=>$c){
+            infolog("$a: $c / ".round(($c/$counter)*100,1)."%");
+        }
+    }
+
+    public function tmp(){
+        $results=[];
+        $str="Meaning and purpose=Highly positive impact, Stress levels=Somewhat positive impact, Promotability=Highly positive impact, Remuneration=No impact, Productivity=No impact, Professional reputation=Somewhat positive impact
+-
+Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Somewhat positive impact, Remuneration=Somewhat positive impact, Productivity=Highly positive impact, Professional reputation=Highly positive impact
+Meaning and purpose=Highly positive impact, Stress levels=Highly positive impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=Highly positive impact, Professional reputation=Highly positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
+Meaning and purpose=Highly positive impact, Stress levels=No impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=No impact, Professional reputation=No impact
+-
+Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
+-
+Meaning and purpose=Highly positive impact, Stress levels=Highly positive impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=Highly positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Highly positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=No impact, Remuneration=Somewhat positive impact, Productivity=No impact, Professional reputation=Somewhat positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
+Meaning and purpose=No impact, Stress levels=Highly negative impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=No impact, Professional reputation=No impact
+Meaning and purpose=Highly positive impact, Stress levels=Highly positive impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=Highly positive impact, Professional reputation=Highly positive impact
+Meaning and purpose=No impact, Stress levels=No impact, Promotability=No impact, Remuneration=No impact, Productivity=No impact, Professional reputation=No impact
+-
+Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=No impact, Professional reputation=Highly positive impact
+Meaning and purpose=Highly positive impact, Stress levels=Highly positive impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=Highly positive impact, Professional reputation=Highly positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=No impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=No impact
+Meaning and purpose=Highly positive impact, Stress levels=Highly positive impact, Promotability=Somewhat positive impact, Remuneration=Somewhat positive impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=No impact
+Meaning and purpose=No impact, Stress levels=Somewhat negative impact, Promotability=No impact, Remuneration=No impact, Productivity=No impact, Professional reputation=Somewhat positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=Somewhat positive impact, Professional reputation=Highly positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Somewhat positive impact, Remuneration=Somewhat positive impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=Highly positive impact
+Meaning and purpose=Highly positive impact, Stress levels=Highly positive impact, Promotability=Highly positive impact, Remuneration=Somewhat positive impact, Productivity=Highly positive impact, Professional reputation=Highly positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=No impact, Remuneration=No impact, Productivity=No impact, Professional reputation=No impact
+Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat negative impact, Promotability=Highly positive impact, Remuneration=No impact, Productivity=No impact, Professional reputation=Highly positive impact
+Meaning and purpose=Highly positive impact, Stress levels=Somewhat positive impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Highly positive impact, Professional reputation=Somewhat positive impact
+Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=No impact, Remuneration=No impact, Productivity=No impact, Professional reputation=Somewhat positive impact
+";
+        $ar=preg_split("/\r\n/",trim($str));
+        foreach($ar as $entry){
+            $qs=preg_split("/,/",trim($entry));
+            foreach($qs as $qa){
+                if(strpos($qa,"=")>0){
+                    $qanda=preg_split("/=/",trim($qa));
+                    $q=trim($qanda[0]);
+                    $a=trim($qanda[1]);
+                    if(!in_array($q,array_keys($results))){
+                        $results[$q]=[];
+                    }
+                    if(!in_array($a,array_keys($results[$q]))){
+                        $results[$q][$a]=0;
+                    }
+                    $results[$q][$a]++;
+                }else{
+                    infolog("Not found: $qa.");
+                }
+            }
+        }
+        foreach($results as $q=>$as){
+            infolog("$q");
+            $counter=0;
+            foreach($as as $a=>$num){
+                $counter += (int)$num;
+            }
+            $results[$q]["counter"]=$counter;
+        }
+        foreach($results as $q=>$as){
+            infolog("$q");
+            foreach($as as $a=>$num){
+                if($a!="counter"){
+                    infolog(" - $a: $num/".round($num/$results[$q]["counter"]*100,1)."%");
+                }
+            }
+        }
+        dd("Finished",$results);
+    }
+
     public function index(){
         $report=false;
         $this->getUnitexMissingImagesReport();
