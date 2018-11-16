@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Reports;
 
+use App\Image;
 use App\Product;
 use App\System;
 use App\Http\Controllers\Controller;
@@ -136,7 +137,7 @@ class MissingImagesController extends Controller
 
     public function bulletProofFix(){
         $web_path="https://b2b.unitexint.com/productimages/";
-        $all=Product::where("images_percent","<",100)->whereNull("ebayupdated_at")->where("QTY",">",0)->orderBy("SKU")->paginate(request("ps",5));
+        $all=Product::where("images_percent","<",100)->whereNull("listingID")->orderBy("SKU")->paginate(request("ps",15));
         $suffixes=["","_1","_2","_3","_4"];
         $found=0;
         $fixed=0;
@@ -147,6 +148,15 @@ class MissingImagesController extends Controller
                 $images=[];
                 $img_c=0;
                 foreach($suffixes as $suffix){
+                    if(file_exists(public_path("images/".$prefix.$suffix.".jpg"))){
+                        infolog("Image Found: images/".$prefix.$suffix.".jpg");
+                        infolog("- Found.");
+                        $found++;
+                        $img_c++;
+                        $img="Image".$img_c;
+                        $product->$img=$prefix.$suffix.".jpg";
+                        continue;
+                    }
                     infolog("Checking: ".$web_path.$prefix.$suffix.".jpg");
                     if($img=@file_get_contents($web_path.$prefix.$suffix.".jpg")){
                         infolog("- Found.");
@@ -175,6 +185,28 @@ class MissingImagesController extends Controller
         }
         infolog("Found $found images.");
         infolog("Fixed $fixed listings.");
+    }
+
+    public function relateImages(){
+        $all=Image::paginate(request("ps",5000));
+        infolog("Images:",count($all));
+        $verified=0;
+        $errors=0;
+        foreach($all as $image){
+            if(file_exists(public_path("images/".$image->url))){
+                infolog(" - Found: images/".$image->url);
+                $image->valid=1;
+                if($image->save()){
+                    $verified++;
+                    infolog(" - Saved");
+                }else{
+                    $errors++;
+                    infolog(" - Error Saving!!!");
+                }
+            }
+        }
+        infolog("Verified $verified images.");
+        infolog("Had $errors errors.");
     }
 
     public function tmp2(){
