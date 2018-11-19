@@ -33,9 +33,13 @@ class HomeController extends Controller
     public function index()
     {
         $search=request("s");
-        $products=Product::where('product_mode_test',0);
+        //$products=Product::whereNotNull('sku');
+        $products=DB::table("products AS p")
+            ->leftJoin("sources AS s","s.id","=","p.source_id")
+            ->leftJoin("ebay_details AS ed","p.id","=","ed.product_id")
+            ->whereNotNull('sku');
         if(strlen($search)>0){
-            $products=$products->whereRaw("(SKU LIKE '%".DB::raw($search)."%' OR Name LIKE '%".DB::raw($search)."%' OR Description LIKE '%".DB::raw($search)."%' OR offerID LIKE '%".DB::raw($search)."%' OR listingID LIKE '%".DB::raw($search)."%')");
+            $products=$products->whereRaw("(sku LIKE '%".DB::raw($search)."%' OR name LIKE '%".DB::raw($search)."%' OR description LIKE '%".DB::raw($search)."%' OR offerid LIKE '%".DB::raw($search)."%' OR listingid LIKE '%".DB::raw($search)."%')");
         }
         $products=$products->paginate(100);
         return view('products',['items'=>$products]);

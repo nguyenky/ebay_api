@@ -59,15 +59,14 @@
                             <thead>
                                 <tr>
                                     <th class="text-center">ID</th>
+                                    <th class="text-center">Source</th>
                                     <th class="text-center">SKU</th>
-                                    <th class="text-center">offerID</th>
-                                    <th class="text-center">listingID</th>
                                     <th>Name</th>
                                     <th class="text-center">Qty</th>
                                     <th class="text-right">Cost</th>
-                                    <th class="text-right">Sell</th>
-                                    <th class="text-right">RRP</th>
                                     <th class="text-right">Listing Price</th>
+                                    <th class="text-center">eBay</th>
+                                    <th class="text-center">Amazon</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -75,15 +74,14 @@
                             @foreach($items as $key => $item)
                                 <tr>
                                     <td class="text-center">{{$item->id}}</td>
-                                    <td class="text-center">{{$item->SKU}}</td>
-                                    <td class="text-center{{($item->offerID>0)?"":" danger"}}">{{$item->offerID}}</td>
-                                    <td class="text-center{{($item->listingID>0)?"":" danger"}}">{{$item->listingID}}</td>
-                                    <td><a class="dropdown-item" href="https://www.ebay.com.au/itm/{{$item->listingID}}" target="_blank" title="View on eBay">{{$item->Name}}</a></td>
-                                    <td class="text-center{{($item->QTY<3)?" warning":""}}">{{number_format($item->QTY,0)}}</td>
-                                    <td class="text-right">{{"$".number_format($item->Cost,2)}}</td>
-                                    <td class="text-right">{{"$".number_format($item->Sell,2)}}</td>
-                                    <td class="text-right">{{"$".number_format($item->RRP,2)}}</td>
-                                    <td class="text-right{{($item->listing_price>$item->Sell)?" warning":""}}">{{"$".number_format($item->listing_price,2)}}</td>
+                                    <td class="text-center">{{$item->source}}</td>
+                                    <td class="text-center">{{$item->sku}}</td>
+                                    <td><a class="dropdown-item" href="https://www.ebay.com.au/itm/{{$item->listingid}}" target="_blank" title="View on eBay">{{$item->name}}</a></td>
+                                    <td class="text-center{{($item->qty<3)?(($item->qty<1)?" danger":" warning"):""}}">{{number_format($item->qty,0)}}</td>
+                                    <td class="text-right">{{"$".number_format($item->cost,2)}}</td>
+                                    <td class="text-right{{($item->listing_price>$item->sell)?" warning":""}}">{{"$".number_format($item->listing_price,2)}}</td>
+                                    <td class="text-center{{($item->listingid>0)?"":(($item->offerid>0)?" warning":" danger")}}">{{($item->listingid>0)?$item->listingid:(($item->offerid>0)?$item->offerid:"No")}}</td>
+                                    <td class="text-center danger">No</td>
                                     <td class="text-center">
                                         <div class="btn-group">
                                             <button class="btn btn-secondary btn-xs dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -91,11 +89,11 @@
                                             </button>
                                             <div class="dropdown-menu">
                                                 <a class="dropdown-item" href="/ebay/preview/?id={{$item->id}}" target="_blank">Preview</a>
-                                                <a class="dropdown-item general-modal" href="/resync/{{$item->SKU}}" data-toggle="modal" data-target="#modalGeneral" data-title="Force eBay Sync" data-description="Press the process button to force an eBay Sync for SKU '{{$item->SKU}}'." data-sku="{{$item->SKU}}">Force Sync</a>
-                                                <a class="dropdown-item general-modal" href="{{route("get-inventory",$item->id)}}" data-toggle="modal" data-target="#modalGeneral" data-title="eBay Inventory Call" data-description="Press the process button to perform a GetInventory eBay API call for the SKU '{{$item->SKU}}'." data-sku="{{$item->SKU}}">eBay Inventory Call</a>
-                                                <a class="dropdown-item" href="https://www.ebay.com.au/itm/{{$item->listingID}}" target="_blank">View on eBay</a>
-                                                <a class="dropdown-item" href="https://www.ebay.com.au/sch/i.html?_nkw={{urlencode($item->Name)}}" target="_blank">Competitors on eBay</a>
-                                                <a class="dropdown-item" href="https://bulksell.ebay.com.au/ws/eBayISAPI.dll?SingleList&sellingMode=ReviseItem&ReturnURL=https%3A%2F%2Fwww.ebay.com.au%2Fsh%2Flst%2Factive&lineID={{$item->listingID}}" target="_blank">Edit on eBay</a>
+                                                <a class="dropdown-item general-modal" href="/resync/{{$item->sku}}" data-toggle="modal" data-target="#modalGeneral" data-title="Force eBay Sync" data-description="Press the process button to force an eBay Sync for SKU '{{$item->sku}}'." data-sku="{{$item->sku}}">Force Sync</a>
+                                                <a class="dropdown-item general-modal" href="{{route("get-inventory",$item->id)}}" data-toggle="modal" data-target="#modalGeneral" data-title="eBay Inventory Call" data-description="Press the process button to perform a GetInventory eBay API call for the SKU '{{$item->sku}}'." data-sku="{{$item->sku}}">eBay Inventory Call</a>
+                                                <a class="dropdown-item" href="https://www.ebay.com.au/itm/{{$item->listingid}}" target="_blank">View on eBay</a>
+                                                <a class="dropdown-item" href="https://www.ebay.com.au/sch/i.html?_nkw={{urlencode($item->name)}}" target="_blank">Competitors on eBay</a>
+                                                <a class="dropdown-item" href="https://bulksell.ebay.com.au/ws/eBayISAPI.dll?SingleList&sellingMode=ReviseItem&ReturnURL=https%3A%2F%2Fwww.ebay.com.au%2Fsh%2Flst%2Factive&lineID={{$item->listingid}}" target="_blank">Edit on eBay</a>
                                             </div>
                                         </div>
                                     </td>
