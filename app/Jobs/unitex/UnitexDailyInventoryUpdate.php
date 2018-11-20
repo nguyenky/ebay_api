@@ -105,11 +105,11 @@ class UnitexDailyInventoryUpdate implements ShouldQueue
                   products p,
                   stock_updates s
                 SET
-                  p.QTY=IF(s.discontinued<>'Y',s.qty,0),
+                  p.qty=IF(s.discontinued<>'Y',s.qty,0),
                   p.updated_at=NOW()
                 WHERE
-                  p.SKU=s.sku
-                  AND p.QTY<>s.qty
+                  p.sku=s.sku
+                  AND p.qty<>s.qty
                 ;
             ";
             DB::connection()->getpdo()->exec($sQl);

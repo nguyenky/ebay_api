@@ -26,6 +26,11 @@ class BulkInventory implements ShouldQueue
      */
     public function __construct()
     {
+        infolog('[BulkInventory] __construct at '. now());
+    }
+    public function __destruct()
+    {
+        infolog('[BulkInventory] __destruct at '. now());
     }
 
     /**
@@ -38,7 +43,7 @@ class BulkInventory implements ShouldQueue
         $result=false;
         try{
             infolog('[BulkInventory.writeEbayMipFile] Preparing update file... '. now());
-            $all=Product::whereNotNull("listingID")->whereRaw("(updated_at > ebayupdated_at OR ebayupdated_at IS NULL)")->get();
+            $all=Product::join("ebay_details AS ed","ed.product_id","=","products.id")->whereNotNull("ed.listingid")->whereRaw("(products.updated_at > ed.synced_at OR ed.synced_at IS NULL)")->get();
             $counter=0;
             if($all){
                 $filename="inventory_".time().".csv";
@@ -46,7 +51,7 @@ class BulkInventory implements ShouldQueue
                 if($fp = fopen($this->ifile, 'w')){
                     fputcsv($fp, ["SKU","Channel ID","List Price","Total Ship to Home Quantity"]);
                     foreach($all as $product){
-                        fputcsv($fp, [$product->SKU,"EBAY_AU",$product->listing_price,$product->QTY]);
+                        fputcsv($fp, [$product->sku,"EBAY_AU",$product->listing_price,$product->qty]);
                         $counter++;
                     }
                     fclose($fp);
@@ -83,6 +88,38 @@ class BulkInventory implements ShouldQueue
     }
 
     /**
+     * Update the Sync Date so we know what was updated and when.
+     *
+     * @return void
+     */
+    public function updateSyncDate()
+    {
+        $result=false;
+        try{
+            infolog('[BulkInventory.updateSyncDate] Preparing to update sync date... '. now());
+            $sQl="
+                UPDATE
+                  products p,
+                  ebay_details ed
+                SET
+                  ed.synced_at=NOW()
+                WHERE
+                  p.id=ed.product_id
+                  AND ed.listingid IS NOT NULL
+                  AND (p.updated_at > ed.synced_at OR ed.synced_at IS NULL)
+                ;
+            ";
+            DB::connection()->getpdo()->exec($sQl);
+            infolog('[BulkInventory.updateSyncDate] SUCCESS at '. now());
+
+            $result=true;
+        }catch(\Exception $e) {
+            infolog('[BulkInventory.updateSyncDate] ERROR updating sync date ('.$e->getMessage().') at '. now());
+        }
+        return($result);
+    }
+
+    /**
      * Execute the job.
      *
      * @return void
@@ -92,7 +129,9 @@ class BulkInventory implements ShouldQueue
         infolog('[BulkInventory] START at '. now());
         if($this->writeEbayMipFile()){
             if($this->pushEbayMipFile()){
-                infolog('[BulkInventory] TOTAL SUCCESS at '. now());
+                if($this->updateSyncDate()){
+                    infolog('[BulkInventory] TOTAL SUCCESS at '. now());
+                }
             }
         }
         infolog('[BulkInventory] END at '. now());
