@@ -38,15 +38,34 @@ class Product extends Model
 
     public function getImagesArray($full_path=true,$prepend=NULL){
         $result=[];
-        $prepend=($prepend===NULL)?env("PROD_APP_URL"):$prepend;
-        $prepend=($full_path)?$prepend:"";
-        for($c=1;$c<=5;$c++){
-            $img="Image".$c;
-            $image=$this->$img;
-            if(strlen($image)>0 && file_exists(public_path("images/".$image))){
-                $result[]=$prepend."/images/".$image;
-            }else{
-                #infolog("File: ".public_path("images/".$image)." does not exist.");
+        $images=Image::where("product_id",$this->id)->get();
+        if($images){
+            $prepend=($prepend===NULL)?env("PROD_APP_URL"):$prepend;
+            $prepend=($full_path)?$prepend:"";
+            foreach($images as $image){
+                if(strlen($image->url)>0 && file_exists(public_path("images/".$image->url))){
+                    $result[]=$prepend."/images/".$image->url;
+                }else{
+                    #infolog("File: ".public_path("images/".$image)." does not exist.");
+                }
+            }
+        }
+        #infolog("Image Results",$result);
+        return($result);
+    }
+
+    public function getSpecifics($arrayed=false){
+        $result=[];
+        $specifics=Specific::where("product_id",$this->id)->get();
+        if($specifics){
+            foreach($specifics as $specific){
+                if(strlen($specific->name)>0 && strlen($specific->value)>0){
+                    if($arrayed){
+                        $result[$specific->name]=[$specific->value];
+                    }else{
+                        $result[$specific->name]=$specific->value;
+                    }
+                }
             }
         }
         #infolog("Image Results",$result);

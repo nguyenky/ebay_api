@@ -2,6 +2,8 @@
 
 namespace App\Jobs\ebay;
 
+use App\EbayDetail;
+use App\Product;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -54,7 +56,7 @@ class PublicOfferEbay implements ShouldQueue
                 $skipped_test_mode++;
             }elseif(!$value->listingID && $value->offerID){
                 if($listingID=$this->publicOffer($value)){
-                    $product = \App\Product::where('SKU',$value->SKU)->first();
+                    $product = \App\Product::where('sku',$value->SKU)->first();
                     $product->listingID = $listingID;
                     $product->save();
                     $published++;
@@ -72,7 +74,8 @@ class PublicOfferEbay implements ShouldQueue
         infolog('Job [PublishOfferEbay] END at '. now());
     }
 
-    public function publicOffer($attribute){
+    public function publicOffer(Product $product){
+        $details=EbayDetail::where("product_id",$product->id)->first();
         try {
             $client = new \GuzzleHttp\Client();
             $header = [
@@ -81,7 +84,7 @@ class PublicOfferEbay implements ShouldQueue
                 'Accept'=>'application/json',
                 'Content-Type'=>'application/json'
             ];
-            $res = $client->request('POST', $this->api.'sell/inventory/v1/offer/'.$attribute->offerID.'/publish',[
+            $res = $client->request('POST', $this->api.'sell/inventory/v1/offer/'.$details->offerid.'/publish',[
                 'headers'=> $header,
             ]);
             $search_results = json_decode($res->getBody(), true);
@@ -89,6 +92,8 @@ class PublicOfferEbay implements ShouldQueue
         } catch (\Exception $e) {
              infolog('Job [PublishOfferEbay] FAIL ----Publish Offer---- at '. now());
             infolog("Details",$e->getResponse()->getBody()->getContents());
+            $details->error=$e->getResponse()->getBody()->getContents();
+            $details->save();
             if($e->getCode()==404){
                 return false;
             }

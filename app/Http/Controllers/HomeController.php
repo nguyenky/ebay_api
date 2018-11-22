@@ -91,7 +91,9 @@ class HomeController extends Controller
      */
     public function resync($sku)
     {
-        $product=Product::where("SKU",$sku)->first();
+        $product=Product::where("sku",$sku)->first();
+
+        infolog("[HomeController] Product[SKU=$sku]->id=".$product->id." at ".now());
 
         dispatch_now(new FullProductDataResync($product));
     }

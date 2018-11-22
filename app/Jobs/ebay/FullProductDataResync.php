@@ -2,6 +2,7 @@
 
 namespace App\Jobs\ebay;
 
+use App\EbayDetail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -14,7 +15,10 @@ class FullProductDataResync implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $product;
+    public $product=false;
+    public $ebay_details=false;
+    public $images=false;
+    public $specifics=false;
     public $token;
     public $api='https://api.ebay.com/';
 
@@ -49,6 +53,22 @@ class FullProductDataResync implements ShouldQueue
     }
 
     /**
+     * getEbayDetails
+     *
+     * @return void
+     */
+    public function getEbayDetails($product=NULL){
+        $product=($product===NULL)?$this->product:$product;
+        if(!$this->ebay_details){
+            $this->ebay_details=EbayDetail::where("product_id",$product->id)->first();
+        }
+        if(!$this->ebay_details){
+            throw new \Error("eBay Details Not Found: product_id=".$product->id);
+        }
+        return($this->ebay_details);
+    }
+
+    /**
      * Create an offer on eBay
      *
      * @param $product (Product) - the Product model to create an offer for
@@ -60,13 +80,14 @@ class FullProductDataResync implements ShouldQueue
         $description=file_get_contents(env("PROD_APP_URL")."/ebay/preview/?id=".$product->id);
         try {
             $client = new \GuzzleHttp\Client();
+            $this->getEbayDetails($product);
             $data = [
-                "sku"  =>$product->SKU,
+                "sku"  =>$product->sku,
                 "marketplaceId" => "EBAY_AU",
                 "format" => "FIXED_PRICE",
                 "listingDescription" => $description,
-                "availableQuantity" => $product->QTY,
-                "quantityLimitPerBuyer" => $product->QTY,
+                "availableQuantity" => $product->qty,
+                "quantityLimitPerBuyer" => $product->qty,
                 "pricingSummary" => [
                     "price"  => [
                         "value" => $product->listing_price,
@@ -78,7 +99,7 @@ class FullProductDataResync implements ShouldQueue
                     "paymentPolicyId"     => env('PAYMENTPOLICYID') ,
                     "returnPolicyId"      => env('RETURNPOLICYID')
                 ],
-                "categoryId" => env('CATEGORYID') ,
+                "categoryId" => $this->ebay_details->categoryid,
                 "merchantLocationKey" => env('MERCHANTLOCATIONKEY')
             ];
 
@@ -147,11 +168,11 @@ class FullProductDataResync implements ShouldQueue
      */
     public function checkForEbayListingID(Product $product){
         $result=false;
-        if($results=$this->getOffer($product->SKU)){
+        if($results=$this->getOffer($product->sku)){
             #todo: check if item has a listingID
             if(is_array($results) && array_key_exists("offers",$results) && is_array($results["offers"])){
                 foreach($results["offers"] as $offer){
-                    if($offer["sku"]==$product->SKU){
+                    if($offer["sku"]==$product->sku){
                         if(array_key_exists("listing",$results)){
                             $result=$offer["listing"]["listingId"];
                             infolog('[checkForEbayListingID] RESULT='.($result).' at '. now());
@@ -181,10 +202,11 @@ class FullProductDataResync implements ShouldQueue
 
         try {
             $client = new \GuzzleHttp\Client();
+            $this->getEbayDetails($product);
             $data = [
                 'availability'  => [
                     'shipToLocationAvailability'    => [
-                        'quantity'  => $product->QTY,
+                        'quantity'  => $product->qty,
                     ]
                 ],
                 'condition' => 'NEW',
@@ -194,7 +216,7 @@ class FullProductDataResync implements ShouldQueue
                     "paymentPolicyId"     => env('PAYMENTPOLICYID') ,
                     "returnPolicyId"      => env('RETURNPOLICYID')
                 ],
-                "categoryId" => env('CATEGORYID') ,
+                "categoryId" =>$this->ebay_details->categoryid,
                 "format"=>"FIXED_PRICE",
                 "listingDescription" => $description,
                 "pricingSummary"=>[
@@ -203,9 +225,9 @@ class FullProductDataResync implements ShouldQueue
                         "value" => $product->listing_price
                     ]
                 ],
-                "brand" => "NA",
-                "mpn" => "NA",
-                "upc" => ["NA"]
+                "brand" => "Unbranded",
+                "mpn" => "Does Not Apply",
+                "upc" => ["Does Not Apply"]
             ];
             $json = json_encode($data);
             $header = [
@@ -214,8 +236,8 @@ class FullProductDataResync implements ShouldQueue
                 'Content-Language'=>'en-AU',
                 'Content-Type'=>'application/json'
             ];
-            infolog('[UpdateOfferEbay] PUT '.$this->api.'sell/inventory/v1/offer/'.$product->offerID);
-            $res = $client->request('PUT', $this->api.'sell/inventory/v1/offer/'.$product->offerID,[
+            infolog('[UpdateOfferEbay] PUT '.$this->api.'sell/inventory/v1/offer/'.$this->ebay_details->offerid);
+            $res = $client->request('PUT', $this->api.'sell/inventory/v1/offer/'.$this->ebay_details->offerid,[
                 'headers'=> $header,
                 'body'  => $json
             ]);
@@ -223,7 +245,7 @@ class FullProductDataResync implements ShouldQueue
             infolog('[UpdateOfferEbay] SUCCESS! at '. now(), $search_results);
         }catch(\Exception $e) {
             infolog('[UpdateOfferEbay] FAIL at '. now(), $e);
-            //infolog("Details",$e->getResponse()->getBody()->getContents());
+            infolog("Details",$e->getResponse()->getBody()->getContents());
         }
         infolog('[UpdateOfferEbay] END at '. now());
     }
@@ -238,32 +260,30 @@ class FullProductDataResync implements ShouldQueue
         $result=false;
         try {
             $client = new \GuzzleHttp\Client();
+            if($aspects=$product->getSpecifics(true)){
+                $aspects["Brand"]=["Unbranded"];
+                infolog('[UpdateInventoryEbay.getSpecifics] DATA at '. now(), $aspects);
+            }else{
+                $aspects=[
+                    "Brand" => [
+                        "Unbranded"
+                    ]
+                ];
+            }
+            $images=$product->getImagesArray();
+            if(!$images){
+                $err='[UpdateInventoryEbay.updateInventoryEbay] ERROR: No Images Found for product_id='.$product->id.' at '. now();
+                infolog($err, $images);
+                throw new \Error($err);
+            }
             $data = [
                 'product'       => [
-                    'title'     => $product->Name,
-                    'imageUrls' => $product->getImagesArray(),
-                    'aspects'   => [
-                        "Brand" => [
-                            "NA"
-                        ],
-                        'size' => [$product->Size],
-                        'color' => [$product->Color],
-                        'length' => [$product->Length],
-                        'width' => [$product->Width],
-                        'height' => [$product->Height],
-                        'unitweight' => [$product->UnitWeight],
-                        'construction' => [$product->Construction ? $product->Construction : 'NEW'],
-                        'material' => [$product->Material],
-                        'pileheight' => [$product->Pileheight]
-                    ],
-                    "brand" => "NA",
-                    "mpn" => "NA",
-                    "upc" => ["NA"],
-                    'category' => $product->Category,
-                    'cost' => $product->Cost,
-                    'sell' => $product->Sell,
-                    'rrp' => $product->RRP,
-                    'origin' => $product->Origin,
+                    'title'     => $product->name,
+                    'imageUrls' => $images,
+                    'aspects'   => $aspects,
+                    "brand" => "Unbranded",
+                    "mpn" => "Does Not Apply",
+                    "upc" => ["Does Not Apply"],
                 ],
                 'condition' => 'NEW'
             ];
@@ -274,8 +294,8 @@ class FullProductDataResync implements ShouldQueue
                 'Content-Language'=>'en-AU',
                 'Content-Type'=>'application/json'
             ];
-            infolog('[UpdateInventoryEbay] PUT '.$this->api.'sell/inventory/v1/inventory_item/'.$product->SKU);
-            $res = $client->request('PUT', $this->api.'sell/inventory/v1/inventory_item/'.$product->SKU,[
+            infolog('[UpdateInventoryEbay] PUT '.$this->api.'sell/inventory/v1/inventory_item/'.$product->sku);
+            $res = $client->request('PUT', $this->api.'sell/inventory/v1/inventory_item/'.$product->sku,[
                 'headers'=> $header,
                 'body'  => $json
             ]);
@@ -284,7 +304,7 @@ class FullProductDataResync implements ShouldQueue
             $result=true;
         }catch(\Exception $e) {
             infolog('[UpdateInventoryEbay] FAIL at '. now(), $e);
-            //infolog("Details",$e->getResponse()->getBody()->getContents());
+            infolog("Details",$e->getResponse()->getBody()->getContents());
         }
         infolog('[UpdateInventoryEbay] END at '. now());
 
@@ -301,27 +321,35 @@ class FullProductDataResync implements ShouldQueue
 
         $this->refreshToken();
 
+        $this->getEbayDetails();
+
         $createdOffer=false;
-        if(!$this->product->offerID){
+        if(!optional($this->ebay_details)->offerid){
             infolog('[Resync] ISSUE product does NOT have an OfferID . Checking eBay... at '. now());
             if($result=$this->createOfferEbay($this->product)){
-                $this->product->offerID=$result['offerId'];
-                $this->product->save();
-                infolog('[Resync] SAVED product now has a OfferID: '.$this->product->offerID.' at '. now());
+                if(!$this->ebay_details){
+                    $this->ebay_details=new EbayDetail();
+                    $this->ebay_details->product_id=$this->product->id;
+                }
+                $this->ebay_details->offerid=$result['offerId'];
+                $this->ebay_details->save();
+                infolog('[Resync] SAVED product now has a OfferID: '.$this->ebay_details->offerid.' at '. now());
                 $createdOffer=true;
             }else{
                 infolog('[Resync] ERROR product could NOT GET a OfferID at '. now());
             }
         }
 
-        if($this->product->offerID && !$this->product->listingID){
+        if($this->ebay_details->offerid && !$this->ebay_details->listingid){
             infolog('[Resync] ISSUE product has an OfferID but not a ListingID. Checking eBay... at'. now());
             if($listingID=$this->checkForEbayListingID($this->product)){
-                $this->product->listingID=$listingID;
-                $this->product->save();
-                infolog('[Resync] SAVED product now has a ListingID: '.$this->product->listingID.' at '. now());
+                $this->ebay_details->listingid=$listingID;
+                $this->ebay_details->save();
+                infolog('[Resync] SAVED product now has a ListingID: '.$this->product->listingid.' at '. now());
             }else{
-                infolog('[Resync] ERROR product could NOT GET a ListingID at '. now());
+                $this->ebay_details->error='[Resync] ERROR product could NOT GET a ListingID at '. now();
+                $this->ebay_details->save();
+                infolog($this->ebay_details->error);
             }
         }
 
@@ -330,18 +358,20 @@ class FullProductDataResync implements ShouldQueue
         }
 
         if($this->updateInventoryEbay($this->product)){
-            $this->product->ebayupdated_at=date("Y-m-d H:i:s");
-            $this->product->save();
+            $this->ebay_details->sync=1;
+            $this->ebay_details->synced_at=date("Y-m-d H:i:s");
+            $this->ebay_details->save();
         }
 
-        if($this->product->offerID && !$this->product->listingID){
+        if($this->ebay_details->offerid && !$this->ebay_details->listingid){
             infolog('[Resync] ISSUE product has an OfferID but not a ListingID. attempting to publish at '. now());
             $po=new PublicOfferEbay();
             if($listingID=$po->publicOffer($this->product)){
-                $this->product->ebayupdated_at=date("Y-m-d H:i:s");
-                $this->product->listingID=$listingID;
-                $this->product->save();
-                infolog('[Resync] SAVED product now has a ListingID: '.$this->product->listingID.' at '. now());
+                $this->ebay_details->sync=1;
+                $this->ebay_details->synced_at=date("Y-m-d H:i:s");
+                $this->ebay_details->listingid=$listingID;
+                $this->ebay_details->save();
+                infolog('[Resync] SAVED product now has a ListingID: '.$this->ebay_details->listingid.' at '. now());
             }
         }
 
