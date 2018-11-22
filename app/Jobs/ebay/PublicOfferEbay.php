@@ -84,6 +84,7 @@ class PublicOfferEbay implements ShouldQueue
                 'Accept'=>'application/json',
                 'Content-Type'=>'application/json'
             ];
+            infolog('Job [PublishOfferEbay] CALLING '.$this->api.'sell/inventory/v1/offer/'.$details->offerid.'/publish at '. now());
             $res = $client->request('POST', $this->api.'sell/inventory/v1/offer/'.$details->offerid.'/publish',[
                 'headers'=> $header,
             ]);
@@ -91,12 +92,13 @@ class PublicOfferEbay implements ShouldQueue
             return $search_results['listingId'];
         } catch (\Exception $e) {
              infolog('Job [PublishOfferEbay] FAIL ----Publish Offer---- at '. now());
-            infolog("Details",$e->getResponse()->getBody()->getContents());
-            $details->error=$e->getResponse()->getBody()->getContents();
-            $details->save();
-            if($e->getCode()==404){
-                return false;
-            }
+             $err=$e->getResponse()->getBody()->getContents();
+             infolog("Details",$err);
+             $details->error=$err;
+             $details->save();
+             if($e->getCode()==404){
+                 return false;
+             }
         }
     }
 }
