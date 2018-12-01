@@ -43,10 +43,11 @@ class BulkInventory implements ShouldQueue
         $result=false;
         try{
             infolog('[BulkInventory.writeEbayMipFile] Preparing update file... '. now());
+            //todo!!!! ISSUE WITH THIS QUERY: CHECK IT!
             $all=Product::join("ebay_details AS ed","ed.product_id","=","products.id")->whereNotNull("ed.listingid")->whereRaw("(products.updated_at > ed.synced_at OR ed.synced_at IS NULL)")->get();
             $counter=0;
-            if($all){
-                $filename="inventory_".time().".csv";
+            if(count($all)){
+                $filename="inventory_".date("YmdHis").".csv";
                 $this->ifile=public_path('files/ebay/'.$filename);
                 if($fp = fopen($this->ifile, 'w')){
                     fputcsv($fp, ["SKU","Channel ID","List Price","Total Ship to Home Quantity"]);
@@ -56,9 +57,13 @@ class BulkInventory implements ShouldQueue
                     }
                     fclose($fp);
                 }
+            }else{
+                infolog('[BulkInventory.writeEbayMipFile] ERROR no items found as a result of the query at '. now());
             }
-            infolog('[BulkInventory.writeEbayMipFile] SUCCESSFULLY UPDATE '.$counter.' ITEMS at '. now());
-            $result=true;
+            if($counter>0){
+                infolog('[BulkInventory.writeEbayMipFile] SUCCESSFULLY UPDATE '.$counter.' ITEMS at '. now());
+                $result=true;
+            }
         }catch(\Exception $e) {
             infolog('[BulkInventory.writeEbayMipFile] ERROR updating eBay/MIP ('.$e->getMessage().') at '. now());
         }
