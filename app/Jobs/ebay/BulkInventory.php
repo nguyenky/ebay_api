@@ -76,7 +76,7 @@ class BulkInventory implements ShouldQueue
         try{
             infolog('[BulkInventory.pushEbayMipFile] Preparing to send file... '. now());
 
-            Storage::disk('sftp')->put('inventory/'.basename($this->ifile), file_get_contents($this->ifile));
+            Storage::disk('mip')->put('inventory/'.basename($this->ifile), file_get_contents($this->ifile));
 
             infolog('[BulkInventory.pushEbayMipFile2] SUCCESS at '. now());
 
