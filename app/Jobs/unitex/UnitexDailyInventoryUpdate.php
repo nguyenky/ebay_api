@@ -14,7 +14,8 @@ class UnitexDailyInventoryUpdate implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $remote_stock_file="https://drive.google.com/uc?authuser=0&id=1i58qHTIccr9O7g3q8X1oFnlA7h4DcebT&export=download";
+    #Old public $remote_stock_file="https://drive.google.com/uc?authuser=0&id=1i58qHTIccr9O7g3q8X1oFnlA7h4DcebT&export=download";
+    public $remote_stock_file="https://drive.google.com/uc?authuser=0&id=101-5o_jrm3V1W8WoUDo2FM7zLjavPGCd&export=download";
     public $local_stock_file="files/MASTER_STOCK_UPDATE_FILE.csv";
 
     /**
