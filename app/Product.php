@@ -38,8 +38,9 @@ class Product extends Model
 
     public function getImagesArray($full_path=true,$prepend=NULL){
         $result=[];
-        $images=Image::where("product_id",$this->id)->get();
-        if($images){
+        $i=Image::where("product_id",$this->id);
+        $images=$i->get();
+        if(count($images)){
             $prepend=($prepend===NULL)?env("PROD_APP_URL"):$prepend;
             $prepend=($full_path)?$prepend:"";
             foreach($images as $image){
@@ -49,6 +50,8 @@ class Product extends Model
                     #infolog("File: ".public_path("images/".$image)." does not exist.");
                 }
             }
+        }else{
+            infolog("[Product][".$this->id."] Could not find images: ",$i->toSql());
         }
         #infolog("Image Results",$result);
         return($result);

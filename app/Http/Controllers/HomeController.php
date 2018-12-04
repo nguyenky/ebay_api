@@ -35,6 +35,7 @@ class HomeController extends Controller
         $search=request("s");
         //$products=Product::whereNotNull('sku');
         $products=DB::table("products AS p")
+            ->select(DB::raw("p.id, s.source, p.sku, p.name, p.qty, p.cost, p.sell, p.listing_price, ed.offerid, ed.listingid, p.created_at, p.updated_at"))
             ->leftJoin("sources AS s","s.id","=","p.source_id")
             ->leftJoin("ebay_details AS ed","p.id","=","ed.product_id")
             ->whereNotNull('sku');

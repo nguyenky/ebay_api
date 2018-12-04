@@ -330,7 +330,7 @@
                 </div>
                 @endif
                 <div class='gallery-detail'>
-                    <h1>{{ @$item["Name"] }}</h1>
+                    <h1>{{ @$item["name"] }}</h1>
                     <p class='price'>{{"$".number_format(@$item["listing_price"],2)}}</p>
                 </div>
                 <div class='clear'></div>
@@ -341,7 +341,7 @@
                 <input class='input' name='tabs' type='radio' id='tab-1' checked='checked'/> <label class='label tab1' for='tab-1'>Product details</label>
                 <div class='panel'>
                     <div id='Product-details' class='tabcontent'>
-                        {!! @$item->Description !!}
+                        {!! @$item->description !!}
                         <p></p>
                         <strong>Warranty:</strong>
                         <ul>
