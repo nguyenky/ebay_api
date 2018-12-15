@@ -67,10 +67,11 @@
                                 <a class="dropdown-item" href="https://www.ebay.com.au/usr/ixplorestoreaus" target="_blank">Store (Public)</a>
                                 <a class="dropdown-item" href="https://www.mip.ebay.com.au/feeds/product" target="_blank">MIP</a>
                                 <a class="dropdown-item" href="https://developer.ebay.com/devzone/merchant-products/mipng/regular/content/user-guide/advanced-features.html?TocPath=Advanced%20features|_____0" target="_blank">MIP Docs</a>
+                                <a class="dropdown-item" href="https://developer.ebay.com/my/api_test_tool?index=0&api=inventory&call=offer__GET&variation=json&env=production" target="_blank">API Test Tool</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{{route("ebay-inventory-sync")}}" target="_blank">eBay Inventory Sync</a>
                                 <a class="dropdown-item" href="{{route("merchant-location")}}" target="_blank">Merchant Location</a>
-                                <a class="dropdown-item" href="https://developer.ebay.com/my/api_test_tool?index=0&api=inventory&call=offer__GET&variation=json&env=production" target="_blank">API Test Tool</a>
+                                <a class="dropdown-item" href="{{route("ebay-import-orders")}}" target="_blank">Import Orders</a>
                             </div>
                         </li>
                         <li class="nav-item dropdown">

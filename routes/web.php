@@ -48,6 +48,15 @@ Route::group(['middleware'=>'auth'],function(){
 
     Route::get('/unitex/update-inventory-only', 'Unitex\UnitexEbayController@updateInventoryOnly')->name('unitex-update-inventory-only');
     Route::get('/unitex/update-inventory-ebay', 'Unitex\UnitexEbayController@updateInventoryAndPushToEbay')->name('unitex-update-inventory-and-ebay');
+
+
+    Route::get('/tools/generic-file-import', 'Tools\GenericImportController@index')->name('generic-file-import-tools');
+    Route::post('/tools/generic-file-import/upload', 'Tools\GenericImportController@upload')->name('generic-file-import-tools-upload');
+    Route::get('/tools/generic-file-import/options', 'Tools\GenericImportController@options')->name('generic-file-import-tools-options');
+
+
+    Route::get('/ebay/import-orders', 'Ebay\ImportOrdersController@index')->name('ebay-import-orders');
+    Route::post('/ebay/import-orders', 'Ebay\ImportOrdersController@process')->name('ebay-import-orders-process');
 });
 
 Route::group(['middleware'=>'auth','namespace'=>'ModeTest'],function(){

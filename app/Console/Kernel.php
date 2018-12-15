@@ -25,25 +25,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        /*
-        $schedule->command('command:download-file-csv')
-                 ->daily();
-
-        $schedule->command('command:check-file-csv')
-                  ->daily();
-
-        $schedule->command('command:public-offer')
-                 ->daily();
-
-        $schedule->command('command:update-inventory')
-                 ->daily();
-
-        $schedule->command('command:create-offer')
-                    ->at('00:00');
-                    
-        $schedule->command('command:create-inventory')
-                    ->at('12:00');
-        */
         $schedule->command('command:refresh-token-ebay')
             ->everyThirtyMinutes();
 
