@@ -57,6 +57,9 @@ Route::group(['middleware'=>'auth'],function(){
 
     Route::get('/ebay/import-orders', 'Ebay\ImportOrdersController@index')->name('ebay-import-orders');
     Route::post('/ebay/import-orders', 'Ebay\ImportOrdersController@process')->name('ebay-import-orders-process');
+
+
+    Route::get('/ebay/api-playground', 'Ebay\ApiPlayController@index')->name('ebay-api-playground');
 });
 
 Route::group(['middleware'=>'auth','namespace'=>'ModeTest'],function(){

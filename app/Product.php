@@ -51,7 +51,7 @@ class Product extends Model
                 }
             }
         }else{
-            infolog("[Product][".$this->id."] Could not find images: ",$i->toSql());
+            #   infolog("[Product][".$this->id."] Could not find images: ",$i->toSql());
         }
         #infolog("Image Results",$result);
         return($result);

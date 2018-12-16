@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 
 class MissingImagesController extends Controller
 {
+    public $shopify_url="https://d51d10f0cb176de247e68f0da7c7a8eb:9bbe494c556ca81e5c0f0cd45451f92a@unitex-international.myshopify.com/admin/products.json?page=70";
     public $found=[];
     public $normal_files=[];
     public $not_found=[];
@@ -135,56 +136,36 @@ class MissingImagesController extends Controller
         infolog("Fixed $fixed listings.");
     }
 
-    public function bulletProofFix(){
+    public function checkUnitexBySku($sku){
         $web_path="https://b2b.unitexint.com/productimages/";
-        $all=Product::where("images_percent","<",100)->whereNull("listingID")->orderBy("SKU")->paginate(request("ps",15));
         $suffixes=["","_1","_2","_3","_4"];
         $found=0;
-        $fixed=0;
-        foreach($all as $product){
-            $sku=$product->SKU;
-            if(strrpos($sku,"-")>0){
-                $prefix=substr($sku,0,strrpos($sku,"-"));
-                $images=[];
-                $img_c=0;
-                foreach($suffixes as $suffix){
-                    if(file_exists(public_path("images/".$prefix.$suffix.".jpg"))){
-                        infolog("Image Found: images/".$prefix.$suffix.".jpg");
-                        infolog("- Found.");
-                        $found++;
+        if(strrpos($sku,"-")>0){
+            $prefix=substr($sku,0,strrpos($sku,"-"));
+            $img_c=0;
+            foreach($suffixes as $suffix){
+                if(file_exists(public_path("images/".$prefix.$suffix.".jpg"))){
+                    infolog("Image Found: images/".$prefix.$suffix.".jpg");
+                    infolog("- Found.");
+                    $found++;
+                    $img_c++;
+                    continue;
+                }
+                infolog("Checking: ".$web_path.$prefix.$suffix.".jpg");
+                if($img=@file_get_contents($web_path.$prefix.$suffix.".jpg")){
+                    infolog("- Found.");
+                    $found++;
+                    if(@file_put_contents(public_path("images/".$prefix.$suffix.".jpg"),$img)){
                         $img_c++;
-                        $img="Image".$img_c;
-                        $product->$img=$prefix.$suffix.".jpg";
-                        continue;
+                    }else{
+                        infolog("--- Couldn't put file: ".public_path("images/".$prefix.$suffix.".jpg").".");
                     }
-                    infolog("Checking: ".$web_path.$prefix.$suffix.".jpg");
-                    if($img=@file_get_contents($web_path.$prefix.$suffix.".jpg")){
-                        infolog("- Found.");
-                        $found++;
-                        if(@file_put_contents(public_path("images/".$prefix.$suffix.".jpg"),$img)){
-                            $img_c++;
-                            $img="Image".$img_c;
-                            $product->$img=$prefix.$suffix.".jpg";
-                        }else{
-                            infolog("--- Couldn't put file: ".public_path("images/".$prefix.$suffix.".jpg").".");
-                        }
-                    }
-                }
-                for($c=$img_c+1;$c<=5;$c++){
-                    $img="Image".$c;
-                    infolog("- NOT Found $img.");
-                    $product->$img=NULL;
-                }
-                if($product->save()){
-                    $product->images_percent=100;
-                    $product->save();
-                    $fixed++;
-                    infolog("-- Saved.");
                 }
             }
+            for($c=$img_c+1;$c<=5;$c++){
+                infolog("- NOT Found $img.");
+            }
         }
-        infolog("Found $found images.");
-        infolog("Fixed $fixed listings.");
     }
 
     public function relateImages(){
@@ -209,148 +190,112 @@ class MissingImagesController extends Controller
         infolog("Had $errors errors.");
     }
 
-    public function tmp2(){
-        $results=[];
-        $str="Highly positive impact
--
-Highly positive impact
-Somewhat positive impact
-Highly positive impact
-Highly positive impact
-Somewhat positive impact
-Somewhat positive impact
--
-Somewhat positive impact
--
-Highly positive impact
-Highly positive impact
-Somewhat positive impact
-Somewhat positive impact
-Somewhat positive impact
-Highly positive impact
-Somewhat positive impact
--
-Highly positive impact
-Highly positive impact
-Highly positive impact
-Highly positive impact
-Somewhat positive impact
-Highly positive impact
-Highly positive impact
-Somewhat positive impact
-Highly positive impact
-Somewhat positive impact
-Highly positive impact
-Highly positive impact
-Somewhat positive impact
-Highly positive impact
-Highly positive impact
-Somewhat positive impact
-";
-        $ar=preg_split("/\r\n/",trim($str));
-        $counter=0;
-        foreach($ar as $entry){
-            $a=trim($entry);
-            if(strlen($entry)>0) {
-                if (!in_array($a, array_keys($results))) {
-                    $results[$a] = 0;
-                }
-                $results[$a]++;
-                $counter++;
+    public function saveUnitexImage($image){
+        $result=false;
+        $web_path="https://b2b.unitexint.com/productimages/";
+        infolog("[saveUnitexImage] Checking Image: ".$web_path.$image);
+        if($data=@file_get_contents($web_path.$image)){
+            infolog("[saveUnitexImage] FOUND! Saving...");
+            if(@file_put_contents(public_path("images/".$image),$data)){
+                infolog("[saveUnitexImage] SAVED!");
+                $result=$image;
+            }else{
+                infolog("[saveUnitexImage] ERROR! Could not save image!");
             }
+        }else{
+            infolog("[saveUnitexImage] Could NOT find image.");
         }
-        infolog("COUNTER: $counter");
-        foreach($results as $a=>$c){
-            infolog("$a: $c / ".round(($c/$counter)*100,1)."%");
-        }
+        return($result);
     }
 
-    public function tmp(){
-        $results=[];
-        $str="Meaning and purpose=Highly positive impact, Stress levels=Somewhat positive impact, Promotability=Highly positive impact, Remuneration=No impact, Productivity=No impact, Professional reputation=Somewhat positive impact
--
-Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Somewhat positive impact, Remuneration=Somewhat positive impact, Productivity=Highly positive impact, Professional reputation=Highly positive impact
-Meaning and purpose=Highly positive impact, Stress levels=Highly positive impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=Highly positive impact, Professional reputation=Highly positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
-Meaning and purpose=Highly positive impact, Stress levels=No impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=No impact, Professional reputation=No impact
--
-Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
--
-Meaning and purpose=Highly positive impact, Stress levels=Highly positive impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=Highly positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Highly positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=No impact, Remuneration=Somewhat positive impact, Productivity=No impact, Professional reputation=Somewhat positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
-Meaning and purpose=No impact, Stress levels=Highly negative impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=No impact, Professional reputation=No impact
-Meaning and purpose=Highly positive impact, Stress levels=Highly positive impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=Highly positive impact, Professional reputation=Highly positive impact
-Meaning and purpose=No impact, Stress levels=No impact, Promotability=No impact, Remuneration=No impact, Productivity=No impact, Professional reputation=No impact
--
-Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=No impact, Professional reputation=Highly positive impact
-Meaning and purpose=Highly positive impact, Stress levels=Highly positive impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=Highly positive impact, Professional reputation=Highly positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=No impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=No impact
-Meaning and purpose=Highly positive impact, Stress levels=Highly positive impact, Promotability=Somewhat positive impact, Remuneration=Somewhat positive impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=No impact
-Meaning and purpose=No impact, Stress levels=Somewhat negative impact, Promotability=No impact, Remuneration=No impact, Productivity=No impact, Professional reputation=Somewhat positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=Highly positive impact, Remuneration=Highly positive impact, Productivity=Somewhat positive impact, Professional reputation=Highly positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=Somewhat positive impact, Remuneration=Somewhat positive impact, Productivity=Somewhat positive impact, Professional reputation=Somewhat positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=No impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Somewhat positive impact, Professional reputation=Highly positive impact
-Meaning and purpose=Highly positive impact, Stress levels=Highly positive impact, Promotability=Highly positive impact, Remuneration=Somewhat positive impact, Productivity=Highly positive impact, Professional reputation=Highly positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=No impact, Remuneration=No impact, Productivity=No impact, Professional reputation=No impact
-Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat negative impact, Promotability=Highly positive impact, Remuneration=No impact, Productivity=No impact, Professional reputation=Highly positive impact
-Meaning and purpose=Highly positive impact, Stress levels=Somewhat positive impact, Promotability=Somewhat positive impact, Remuneration=No impact, Productivity=Highly positive impact, Professional reputation=Somewhat positive impact
-Meaning and purpose=Somewhat positive impact, Stress levels=Somewhat positive impact, Promotability=No impact, Remuneration=No impact, Productivity=No impact, Professional reputation=Somewhat positive impact
-";
-        $ar=preg_split("/\r\n/",trim($str));
-        foreach($ar as $entry){
-            $qs=preg_split("/,/",trim($entry));
-            foreach($qs as $qa){
-                if(strpos($qa,"=")>0){
-                    $qanda=preg_split("/=/",trim($qa));
-                    $q=trim($qanda[0]);
-                    $a=trim($qanda[1]);
-                    if(!in_array($q,array_keys($results))){
-                        $results[$q]=[];
-                    }
-                    if(!in_array($a,array_keys($results[$q]))){
-                        $results[$q][$a]=0;
-                    }
-                    $results[$q][$a]++;
-                }else{
-                    infolog("Not found: $qa.");
-                }
+    public function checkUnitexMultipleWaysByImage($image){
+        $result=false;
+
+        //Let's check the way it is.
+        if($this->saveUnitexImage($image)){
+            $result=$image;
+        }
+        if(!$result && preg_match("/.*\-(\d)\.jpg/i",$image,$matches)){ //We have a dash-number, so let's try with an underscore.
+            $img=substr($image,0,-6)."_".substr($image,-5);
+            if($this->saveUnitexImage($img)){
+                $result=$img;
             }
         }
-        foreach($results as $q=>$as){
-            infolog("$q");
-            $counter=0;
-            foreach($as as $a=>$num){
-                $counter += (int)$num;
-            }
-            $results[$q]["counter"]=$counter;
-        }
-        foreach($results as $q=>$as){
-            infolog("$q");
-            foreach($as as $a=>$num){
-                if($a!="counter"){
-                    infolog(" - $a: $num/".round($num/$results[$q]["counter"]*100,1)."%");
-                }
+        if(!$result && preg_match("/.*_(\d)\.jpg/i",$image,$matches)){ //We have a underscore-number, so let's try with a dash.
+            $img=substr($image,0,-6)."-".substr($image,-5);
+            if($this->saveUnitexImage($img)){
+                $result=$img;
             }
         }
-        dd("Finished",$results);
+        return($result);
     }
 
     public function index(){
         $report=false;
-        $this->getUnitexMissingImagesReport();
 
-        infolog("Found: ".count($this->found));
-        infolog("Not Found: ".count($this->not_found));
-        infolog("Can Fix: ".count($this->not_found_fixed));
-        dump("Not Found",$this->not_found);
-        dd("Finished");
+        $fixed=0;
+
+        $page=request("page",0);
+        $page=($page<1)?1:$page;
+        print("<p><a href='?page=".($page+1)."'>NEXT PAGE &gt;</a></p>");
+
+        $images=Image::where("valid",0)->paginate(20);
+        foreach($images as $image){
+            infolog("Image URL: ".$image->url);
+            if($image->exists()){
+                infolog(" - Exists Already!");
+            }else{
+                $is_found=false;
+                infolog(" - Not Found.");
+                $url=$image->url;
+                if(substr($url,-6,1)=="-"){
+                    infolog("  - Has dash, trying underscore.");
+                    $u=substr($url,0,-6)."_".substr($url,-5);
+                    if($image->exists($u)){
+                        infolog("   - Image Found!",$u);
+                        $image->url=$u;
+                        $image->valid=1;
+                        if($image->save()){
+                            infolog("    - Image Fixed!");
+                            $is_found=true;
+                            $fixed++;
+                        }
+                    }else{
+                        infolog("   - Image Still Not Found!",$u);
+                    }
+                }
+                if(!$is_found && substr($url,-8,2)=="-R"){
+                    infolog("  - Trying to RU Fix.");
+                    $u=substr($url,0,-8)."-RU".substr($url,-4);
+                    if($image->exists($u)){
+                        infolog("   - Image Found!",$u);
+                        $image->url=$u;
+                        $image->valid=1;
+                        if($image->save()){
+                            infolog("    - Image Fixed!");
+                            $is_found=true;
+                            $fixed++;
+                        }
+                    }else{
+                        infolog("   - Image Still Not Found!",$u);
+                    }
+                }
+
+                if(!$is_found){
+                    infolog("  - Trying to find image on Unitex.");
+                    if($u=$this->checkUnitexMultipleWaysByImage($image->url)){
+                        $image->url=$u;
+                        $image->valid=1;
+                        if($image->save()){
+                            infolog("    - Image Fixed!");
+                            $is_found=true;
+                            $fixed++;
+                        }
+                    }
+                }
+            }
+        }
+        dd("Finished with $fixed images fixed");
 
         return view('reports.missing-images',[
             "report"=>$report

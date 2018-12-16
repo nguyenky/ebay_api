@@ -40,7 +40,11 @@ class HomeController extends Controller
             ->leftJoin("ebay_details AS ed","p.id","=","ed.product_id")
             ->whereNotNull('sku');
         if(strlen($search)>0){
-            $products=$products->whereRaw("(sku LIKE '%".DB::raw($search)."%' OR name LIKE '%".DB::raw($search)."%' OR description LIKE '%".DB::raw($search)."%' OR offerid LIKE '%".DB::raw($search)."%' OR listingid LIKE '%".DB::raw($search)."%')");
+            $sQl="";
+            if((int)$search>0){
+                $sQl=" OR p.id=".((int)$search);
+            }
+            $products=$products->whereRaw("(sku LIKE '%".DB::raw($search)."%' OR name LIKE '%".DB::raw($search)."%' OR description LIKE '%".DB::raw($search)."%' OR offerid LIKE '%".DB::raw($search)."%' OR listingid LIKE '%".DB::raw($search)."%'".$sQl.")");
         }
         $products=$products->paginate(100);
         return view('products',['items'=>$products]);
