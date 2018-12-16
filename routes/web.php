@@ -34,6 +34,7 @@ Route::group(['middleware'=>'auth'],function(){
 
     Route::get('/merchant-location', 'Ebay\MerchantLocationController@index')->name('merchant-location');
 
+    //ManualProcessing
     Route::get('/manual-processing', 'ManualProcessingController@index')->name('manual-processing');
     Route::get('/manual-processing/step1', 'ManualProcessingController@step1')->name('manual-processing-step1');
     Route::get('/manual-processing/step2', 'ManualProcessingController@step2')->name('manual-processing-step2');
@@ -41,23 +42,27 @@ Route::group(['middleware'=>'auth'],function(){
     Route::get('/manual-processing/step4', 'ManualProcessingController@step4')->name('manual-processing-step4');
     Route::get('/manual-processing/step5', 'ManualProcessingController@step5')->name('manual-processing-step5');
 
+    //Reports
     Route::get('/reports/missing-images', 'Reports\MissingImagesController@index')->name('report-missing-images');
     Route::get('/reports/missing-images/percents', 'Reports\MissingImagesController@generateImagesPercentages')->name('report-missing-images-percent');
     Route::get('/reports/missing-images/try-fix', 'Reports\MissingImagesController@tryFindImages')->name('report-missing-images-try-fix');
 
-
+    //Unitex
     Route::get('/unitex/update-inventory-only', 'Unitex\UnitexEbayController@updateInventoryOnly')->name('unitex-update-inventory-only');
     Route::get('/unitex/update-inventory-ebay', 'Unitex\UnitexEbayController@updateInventoryAndPushToEbay')->name('unitex-update-inventory-and-ebay');
 
+    Route::get('/unitex/shopify-product-refresh/test', 'Unitex\ShopifyRefreshController@index')->name('unitex-shopify-product-refresh-test');
 
+
+    //Tools
     Route::get('/tools/generic-file-import', 'Tools\GenericImportController@index')->name('generic-file-import-tools');
     Route::post('/tools/generic-file-import/upload', 'Tools\GenericImportController@upload')->name('generic-file-import-tools-upload');
     Route::get('/tools/generic-file-import/options', 'Tools\GenericImportController@options')->name('generic-file-import-tools-options');
 
 
+    //eBay
     Route::get('/ebay/import-orders', 'Ebay\ImportOrdersController@index')->name('ebay-import-orders');
     Route::post('/ebay/import-orders', 'Ebay\ImportOrdersController@process')->name('ebay-import-orders-process');
-
 
     Route::get('/ebay/api-playground', 'Ebay\ApiPlayController@index')->name('ebay-api-playground');
 });

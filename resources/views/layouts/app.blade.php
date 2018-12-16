@@ -80,6 +80,7 @@
                                 <a class="dropdown-item" href="https://www.dropbox.com/sh/bvyy8cveb54yxdv/AADwbnG3i6eZryLTWvvtJl5sa?dl=0" target="_blank">Dropbox</a>
                                 <a class="dropdown-item" href="https://d51d10f0cb176de247e68f0da7c7a8eb:9bbe494c556ca81e5c0f0cd45451f92a@unitex-international.myshopify.com/admin/products.json?page=1" target="_blank">Shopify Feed</a>
                                 <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{route("unitex-shopify-product-refresh-test")}}" target="_blank">Shopify Product Refresh</a>
                                 <a class="dropdown-item" href="{{route("unitex-update-inventory-only")}}" target="_blank">Update Inventory Only</a>
                                 <a class="dropdown-item" href="{{route("unitex-update-inventory-and-ebay")}}" target="_blank">Update Inventory and Push to eBay</a>
                             </div>

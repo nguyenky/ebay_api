@@ -34,8 +34,8 @@ class EbayMarketMatchCommand extends Command
      */
     public function __construct()
     {
-        infolog('[EbayMarketMatchCommand] __construct at '. now());
         parent::__construct();
+        infolog('[EbayMarketMatchCommand] __construct at '. now());
     }
     public function __destruct()
     {

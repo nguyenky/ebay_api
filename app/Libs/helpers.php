@@ -37,3 +37,35 @@ if (!function_exists('infolog')) {
     }
   }
 }
+
+if (!function_exists('dump_err')) {
+    /**
+     * Make old server domain
+     * @param string $clientUrl
+     */
+    function dump_err($lbl,$var=NULL)
+    {
+        if(env("APP_DEBUG", true) && !request("debug",true)===FALSE){
+            print("<div style='font: 12px Menlo, Monaco, Consolas, monospace;padding:5px;border:1px solid #f5c6cb;color:#721c24;background-color: #f8d7da'>$lbl</div>");
+            if($var!==NULL){
+                dump($var);
+            }
+        }
+    }
+}
+
+if (!function_exists('dump_warn')) {
+    /**
+     * Make old server domain
+     * @param string $clientUrl
+     */
+    function dump_warn($lbl,$var=NULL)
+    {
+        if(env("APP_DEBUG", true) && !request("debug",true)===FALSE){
+            print("<div style='font: 12px Menlo, Monaco, Consolas, monospace;padding:5px;border:1px solid #ffeeba;color:#856404;background-color: #fff3cd'>$lbl</div>");
+            if($var!==NULL){
+                dump($var);
+            }
+        }
+    }
+}

@@ -106,6 +106,7 @@ class FullProductDataResync implements ShouldQueue
             $json = json_encode($data);
             $header = [
                 'Authorization'=>'Bearer '.$this->token->accesstoken_ebay,
+                'X-EBAY-C-MARKETPLACE-ID'=>'EBAY_AU',
                 'Accept'=>'application/json',
                 'Content-Language'=>'en-AU',
                 'Content-Type'=>'application/json'
@@ -198,6 +199,7 @@ class FullProductDataResync implements ShouldQueue
      */
     public function updateOfferEbay(Product $product)
     {
+        infolog('[updateOfferEbay] TESTING HERE???');
         $description=file_get_contents(env("PROD_APP_URL")."/ebay/preview/?id=".$product->id);
 
         try {
@@ -225,6 +227,7 @@ class FullProductDataResync implements ShouldQueue
                         "value" => $product->listing_price
                     ]
                 ],
+                'country' => 'Australia',
                 "brand" => "Unbranded",
                 "mpn" => "Does Not Apply",
                 "upc" => ["Does Not Apply"]
@@ -284,7 +287,9 @@ class FullProductDataResync implements ShouldQueue
                     "brand" => "Unbranded",
                     "mpn" => "Does Not Apply",
                     "upc" => ["Does Not Apply"],
+                    'country' => 'Australia',
                 ],
+                'country' => 'Australia',
                 'condition' => 'NEW'
             ];
             $json = json_encode($data);
