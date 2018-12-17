@@ -309,7 +309,9 @@ class FullProductDataResync implements ShouldQueue
             $result=true;
         }catch(\Exception $e) {
             infolog('[UpdateInventoryEbay] FAIL at '. now(), $e);
-            infolog("Details",$e->getResponse()->getBody()->getContents());
+            if(method_exists($e,"getResponse")){
+                infolog("Details",$e->getResponse()->getBody()->getContents());
+            }
         }
         infolog('[UpdateInventoryEbay] END at '. now());
 
