@@ -352,9 +352,7 @@ class FullProductDataResync implements ShouldQueue
                 $this->ebay_details->save();
                 infolog('[Resync] SAVED product now has a ListingID: '.$this->product->listingid.' at '. now());
             }else{
-                $this->ebay_details->error='[Resync] ERROR product could NOT GET a ListingID at '. now();
-                $this->ebay_details->save();
-                infolog($this->ebay_details->error);
+                infolog('[Resync] ERROR product could NOT GET a ListingID at '. now());
             }
         }
 

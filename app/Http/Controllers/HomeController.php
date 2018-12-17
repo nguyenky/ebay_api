@@ -110,7 +110,10 @@ class HomeController extends Controller
      */
     public function resyncCustom()
     {
-        $products=Product::where("images_percent",100)->whereNull("listingID")->whereNotNull("Image1")->where("product_mode_test",0)->where("QTY",'>',0)->get();
+        $products=Product::whereNotNull('sku')
+            ->where('qty','>',0)
+            ->whereRaw(DB::raw("id IN (SELECT product_id FROM ebay_details WHERE sync=1 AND synced_at<updated_at)"))
+            ->get();
         infolog("[resyncCustom] COUNT ".count($products)." at ".now());
         foreach($products as $product){
             dispatch(new FullProductDataResync($product));

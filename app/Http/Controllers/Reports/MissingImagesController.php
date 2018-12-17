@@ -196,7 +196,7 @@ class MissingImagesController extends Controller
         infolog("[saveUnitexImage] Checking Image: ".$web_path.$image);
         if($data=@file_get_contents($web_path.$image)){
             infolog("[saveUnitexImage] FOUND! Saving...");
-            if(@file_put_contents(public_path("images/".$image),$data)){
+            if(file_put_contents(public_path("images/".$image),$data)){
                 infolog("[saveUnitexImage] SAVED!");
                 $result=$image;
             }else{
@@ -239,11 +239,16 @@ class MissingImagesController extends Controller
         $page=($page<1)?1:$page;
         print("<p><a href='?page=".($page+1)."'>NEXT PAGE &gt;</a></p>");
 
-        $images=Image::where("valid",0)->paginate(20);
+        $images=Image::where("valid",0)->orderBy("id","DESC")->paginate(20);
         foreach($images as $image){
             infolog("Image URL: ".$image->url);
             if($image->exists()){
                 infolog(" - Exists Already!");
+                $image->valid=1;
+                if($image->save()){
+                    infolog("    - Image Fixed!");
+                    $fixed++;
+                }
             }else{
                 $is_found=false;
                 infolog(" - Not Found.");
