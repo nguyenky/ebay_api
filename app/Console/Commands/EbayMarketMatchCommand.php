@@ -67,6 +67,32 @@ class EbayMarketMatchCommand extends Command
                 dispatch(new EbayMarketMatch($product));
             }
         };
+
+        //Need to run this after this all gets dispatched:
+        /**
+         *
+        UPDATE
+            competitor_items
+        SET
+            latest=0
+        WHERE
+            latest=1
+            AND market_id=1
+            AND id NOT IN (
+                SELECT id FROM (
+                    SELECT
+                        MAX(id) id
+                    FROM
+                        competitor_items ci0
+                    WHERE
+                        latest=1
+                        AND market_id=1
+                    GROUP BY
+                        sku
+                ) as cx0
+            )
+        ;
+         */
     }
 
 }

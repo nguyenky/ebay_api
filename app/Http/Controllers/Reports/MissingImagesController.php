@@ -239,7 +239,10 @@ class MissingImagesController extends Controller
         $page=($page<1)?1:$page;
         print("<p><a href='?page=".($page+1)."'>NEXT PAGE &gt;</a></p>");
 
-        $images=Image::where("valid",0)->orderBy("id","DESC")->paginate(20);
+        $images=Image::where("valid",0)->orderBy("id","DESC");
+        $total=$images->count();
+        print("<p>There are ".number_format($total,0)." images that are not valid.</p>");
+        $images=$images->paginate(20);
         foreach($images as $image){
             infolog("Image URL: ".$image->url);
             if($image->exists()){

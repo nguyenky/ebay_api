@@ -108,7 +108,14 @@ class EbayMarketMatch implements ShouldQueue
                                     $competitor->currency=$item["sellingStatus"][0]["convertedCurrentPrice"][0]["@currencyId"];
                                     $competitor->price=$item["sellingStatus"][0]["convertedCurrentPrice"][0]["__value__"];
                                     $competitor->latest=1;
-                                    $competitor->save();
+                                    if($competitor->save()){
+                                        //Make this the actual latest.
+                                        //Mark all other itemIds as latest=0 where itemid is the same.
+                                        $updated=CompetitorItem::where("uniqueid",$competitor->uniqueid)->where("latest",1)->where("id",'<>',$competitor->id)->update([
+                                            'latest'=>0
+                                        ]);
+                                        infolog('[EbayMarketMatch.getCompetitors] Marked '.$updated.' items with itemid '.$competitor->uniqueid.' as not latest at '. now());
+                                    }
                                     $result[]=$competitor;
                                 }
                             }else{
@@ -132,7 +139,6 @@ class EbayMarketMatch implements ShouldQueue
     }
 
     public function matchMarket(){
-        $result=false;
         if($competitors=$this->getCompetitors()){
             foreach($competitors as $competitor){
                 /*
@@ -148,66 +154,5 @@ class EbayMarketMatch implements ShouldQueue
                 */
             }
         }
-        // - Do business logic
-        //Update
-
-        return($result);
-
-        $attribute->setListingPrice();
-        infolog('Job Update Offer START at '. now());
-        print("Trying to load: ".env("PROD_APP_URL")."/ebay/preview/?id=".$attribute->id);
-        $description=file_get_contents(env("PROD_APP_URL")."/ebay/preview/?id=".$attribute->id);
-        // $token=$this->getToken();
-        //Here you do not need to get token again. Because the token will be update every 30 minutes !
-
-        try {
-            $client = new \GuzzleHttp\Client();
-
-            $data = [
-                "title"  =>$attribute->Name,
-                "listingDescription"  =>$description,
-                "SKU"=>$attribute->SKU,
-                "marketplaceId"=>"EBAY_AU",
-                "format"=>"FIXED_PRICE",
-		        "pricingSummary"=>[
-                    "price"  => [
-                        "currency" => "AUD",
-                        "value" => $attribute->listing_price
-                    ]
-                ],
-                "availableQuantity"=> $attribute->QTY,
-                "listingPolicies" => [
-                    "fulfillmentPolicyId" => env('FULFILLMENTPOLICYID'),
-                    "paymentPolicyId"     => env('PAYMENTPOLICYID') ,
-                    "returnPolicyId"      => env('RETURNPOLICYID')
-                ],
-                "categoryId" => env('CATEGORYID'),
-                "quantityLimitPerBuyer"=>$attribute->QTY
-            ];
-
-            $json = json_encode($data);
-            $header = [
-                'Authorization'=>'Bearer '.$this->token->accesstoken_ebay,
-                'Accept'=>'application/json',
-                'Content-Language'=>'en-AU',
-                'Content-Type'=>'application/json'
-            ];
-            $res = $client->request('PUT', $this->api.'sell/inventory/v1/offer/'.$attribute->offerID,[
-                            'headers'=> $header,
-                            'body'  => $json
-                        ]);
-
-            $search_results = json_decode($res->getBody(), true);
-            // dd('ok',$search_results);
-            infolog('Job Update Offer SUCCESS at '. now(),$search_results);
-        } catch(\Exception $e) {
-            // dd('error',$e->getMessage());
-            infolog('Job Update Offer FAIL at '. now());
-            infolog("Details",$e->getResponse()->getBody()->getContents());
-        }
-        infolog('Job Update Offer END at '. now());
-
-        $this->product->ebayupdated_at=date("Y-m-d H:i:s");
-        $this->product->save();
     }
 }
