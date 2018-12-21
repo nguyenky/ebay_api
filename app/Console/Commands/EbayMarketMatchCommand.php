@@ -92,6 +92,32 @@ class EbayMarketMatchCommand extends Command
                 ) as cx0
             )
         ;
+
+        THIS THIS:
+        UPDATE
+            products p
+            INNER JOIN ebay_details ed ON p.id=ed.product_id
+            INNER JOIN
+            (
+                SELECT
+                    sku,
+                    MIN(price) price
+                FROM
+                    competitor_items c
+                WHERE
+                    latest=1
+                GROUP BY
+                    sku
+            ) as c ON p.sku=c.sku
+        SET
+            ed.margin=(((fn_calcListingPrice(p.cost,c.price)-27.5-(0.2*p.cost)-p.cost)/p.cost)*100),
+            ed.shipping=27.5,
+            ed.sale_cost=(0.2*p.cost),
+            ed.price=fn_calcListingPrice(p.cost,c.price),
+            ed.updated_at=NOW()
+        WHERE
+            p.cost>0
+        ;
          */
     }
 

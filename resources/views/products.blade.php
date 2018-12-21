@@ -52,6 +52,17 @@
                                         <button type="submit" class="btn btn-info btn-flat">Search</button>
                                     </span>
                                 </div>
+                                <div class="input-group">
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" name="no-images" value="1"{!! (request("no-images",0)>0)?" checked=\"checked\"":""; !!}}}>No Images
+                                    </label>
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" name="ebay-published" value="1"{!! (request("ebay-published",0)>0)?" checked=\"checked\"":""; !!}}}>On eBay (Published)
+                                    </label>
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" name="ebay-offer-only" value="1"{!! (request("ebay-offer-only",0)>0)?" checked=\"checked\"":""; !!}}}>On eBay (Offer Only)
+                                    </label>
+                                </div>
                             </div>
                         </form>
                         <br>
@@ -62,6 +73,7 @@
                                     <th class="text-center">Source</th>
                                     <th class="text-center">SKU</th>
                                     <th>Name</th>
+                                    <th class="text-center">Images</th>
                                     <th class="text-center">Qty</th>
                                     <th class="text-right">Cost</th>
                                     <th class="text-right">Listing Price</th>
@@ -77,9 +89,10 @@
                                     <td class="text-center">{{$item->source}}</td>
                                     <td class="text-center">{{$item->sku}}</td>
                                     <td><a class="dropdown-item" href="https://www.ebay.com.au/itm/{{$item->listingid}}" target="_blank" title="View on eBay">{{$item->name}}</a></td>
+                                    <td class="text-center{{($item->images>2)?"":(($item->images>0)?" warning":" danger")}}">{{number_format($item->images,0)}}</td>
                                     <td class="text-center{{($item->qty<3)?(($item->qty<1)?" danger":" warning"):""}}">{{number_format($item->qty,0)}}</td>
                                     <td class="text-right">{{"$".number_format($item->cost,2)}}</td>
-                                    <td class="text-right{{($item->listing_price>$item->sell)?" warning":""}}">{{"$".number_format($item->listing_price,2)}}</td>
+                                    <td class="text-right{{($item->price>0)?" success":""}}"{!! ($item->price>0)?' title="Margin='.number_format($item->margin,1).'%"':"" !!}>{{"$".number_format(($item->price>0)?$item->price:$item->listing_price,2)}}</td>
                                     <td class="text-center{{($item->listingid>0)?"":(($item->offerid>0)?" warning":" danger")}}">{{($item->listingid>0)?$item->listingid:(($item->offerid>0)?$item->offerid:"No")}}</td>
                                     <td class="text-center danger">No</td>
                                     <td class="text-center">

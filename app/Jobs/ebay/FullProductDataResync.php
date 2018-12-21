@@ -81,6 +81,7 @@ class FullProductDataResync implements ShouldQueue
         try {
             $client = new \GuzzleHttp\Client();
             $this->getEbayDetails($product);
+            $price=($this->ebay_details->price>0)?$this->ebay_details->price:$product->listing_price;
             $data = [
                 "sku"  =>$product->sku,
                 "marketplaceId" => "EBAY_AU",
@@ -90,7 +91,7 @@ class FullProductDataResync implements ShouldQueue
                 "quantityLimitPerBuyer" => $product->qty,
                 "pricingSummary" => [
                     "price"  => [
-                        "value" => $product->listing_price,
+                        "value" => $price,
                         "currency" => "AUD"
                     ]
                 ],
@@ -205,6 +206,7 @@ class FullProductDataResync implements ShouldQueue
         try {
             $client = new \GuzzleHttp\Client();
             $this->getEbayDetails($product);
+            $price=($this->ebay_details->price>0)?$this->ebay_details->price:$product->listing_price;
             $data = [
                 'availability'  => [
                     'shipToLocationAvailability'    => [
@@ -224,7 +226,7 @@ class FullProductDataResync implements ShouldQueue
                 "pricingSummary"=>[
                     "price"  => [
                         "currency" => "AUD",
-                        "value" => $product->listing_price
+                        "value" => $price
                     ]
                 ],
                 'country' => 'Australia',
