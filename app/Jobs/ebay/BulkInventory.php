@@ -61,7 +61,7 @@ class BulkInventory implements ShouldQueue
                 infolog('[BulkInventory.writeEbayMipFile] ERROR no items found as a result of the query at '. now());
             }
             if($counter>0){
-                infolog('[BulkInventory.writeEbayMipFile] SUCCESSFULLY UPDATE '.$counter.' ITEMS at '. now());
+                infolog('[BulkInventory.writeEbayMipFile] SUCCESSFULLY UPDATED '.$counter.' ITEMS at '. now());
                 $result=true;
             }
         }catch(\Exception $e) {
