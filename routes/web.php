@@ -25,6 +25,7 @@ Route::get('/tmp/', 'Reports\MissingImagesController@tmp')->name('tmp');
 
 Route::group(['middleware'=>'auth'],function(){
     Route::get('/home', 'HomeController@index')->name('home');
+    Route::get('/products/{id}', 'Product\ProductDetailsController@index')->name('product-details');
     Route::get('/resync/{id}', 'HomeController@resync')->name('resync');
     Route::get('/resync-custom/', 'HomeController@resyncCustom')->name('custom-resync');
     Route::get('/get-inventory/{id}', 'HomeController@getInventory')->name('get-inventory');
@@ -52,6 +53,10 @@ Route::group(['middleware'=>'auth'],function(){
     Route::get('/unitex/update-inventory-ebay', 'Unitex\UnitexEbayController@updateInventoryAndPushToEbay')->name('unitex-update-inventory-and-ebay');
 
     Route::get('/unitex/shopify-product-refresh/test', 'Unitex\ShopifyRefreshController@index')->name('unitex-shopify-product-refresh-test');
+
+    Route::get('/unitex/dropbox-product-refresh/', 'Unitex\DropboxRefreshController@index')->name('unitex-dropbox-product-refresh');
+    Route::post('/unitex/dropbox-product-refresh/', 'Unitex\DropboxRefreshController@upload')->name('unitex-dropbox-product-refresh-upload');
+    Route::get('/unitex/dropbox-product-refresh/review', 'Unitex\DropboxRefreshController@review')->name('unitex-dropbox-product-refresh-review');
 
 
     //Tools

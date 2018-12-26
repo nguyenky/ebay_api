@@ -10,64 +10,98 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\DB;
 
-class UnitexShopifyRefresh implements ShouldQueue
+class UnitexDropboxRefresh implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    private $shopifyProduct=NULL;
-    private $shopifyVariant=NULL;
-    private $create_if_new=true;
+    private $csv_row=NULL;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($variant, $product)
+    public function __construct($csv_row)
     {
-        infolog('[UnitexShopifyRefresh] __construct at '. now());
+        infolog('[UnitexDropboxRefresh] __construct at '. now());
 
-        $this->shopifyVariant=$variant;
-        $this->shopifyProduct=$product;
+        $this->csv_row=$csv_row;
     }
     public function __destruct()
     {
-        infolog('[UnitexShopifyRefresh] __destruct at '. now());
+        infolog('[UnitexDropboxRefresh] __destruct at '. now());
     }
 
-    static public function pullAndParseFeed($page=1)
+    static public function parseCsvAndSave($general_import_id=0)
     {
         $result=false;
-        infolog('[UnitexShopifyRefresh.pullAndParseFeed] START at '. now());
+        logger('[UnitexDropboxRefresh.parseCsvAndSave] START at '. now());
 
-        $feed=config("SHOPIFY_PRODUCT_FEED","https://d51d10f0cb176de247e68f0da7c7a8eb:9bbe494c556ca81e5c0f0cd45451f92a@unitex-international.myshopify.com/admin/products.json");
-        if($feed){
-            $feed.="?page=$page";
+        if((int)$general_import_id>0){
+            if($gi=GenericImport::find($general_import_id)){
+                DB::connection()->getpdo()->exec("DELETE FROM unitex_upload;");
+                $fn=storage_path("app/").$gi->path;
+                $sQl = "
+                    LOAD DATA LOCAL INFILE
+                        '" . $fn . "'
+                    INTO TABLE
+                        unitex_upload
+                    FIELDS TERMINATED BY
+                        ','
+                    OPTIONALLY ENCLOSED BY '\"'
+                    LINES TERMINATED BY
+                        '\r\n'
+                    IGNORE 1 LINES
+                    (
+                        sku,
+                        name,
+                        description,
+                        category,
+                        style,
+                        sizing,
+                        size_assoc,
+                        shape,
+                        color,
+                        cost,
+                        sell,
+                        rrp,
+                        length, 
+                        width,
+                        height,
+                        unit_weight,
+                        origin,
+                        construction,
+                        material,
+                        pile_height,
+                        barcode,
+                        youtube,
+                        image1,
+                        image2,
+                        image3,
+                        image4,
+                        image5,
+                        image6,
+                        @created_at,
+                        @updated_at
+                    )
+                    SET
+                        created_at=NOW(),
+                        updated_at=NOW()
+                ";
+                logger('[UnitexDropboxRefresh.parseCsvAndSave] LOADING IN DROPBOX DATA '. now(),$sQl);
+                DB::connection()->getpdo()->exec($sQl);
+                logger('[UnitexDropboxRefresh.parseCsvAndSave] LOAD DATA INTO SUCCESSFUL at '. now());
 
-            infolog('[UnitexShopifyRefresh.pullAndParseFeed] Pulling Shopify Product Feed at '. now(),$feed);
-
-            if($data=@file_get_contents($feed)){
-                if($json=json_decode($data,true)){
-                    if(array_key_exists("products",$json) && is_array($json["products"])){
-                        if(count($json["products"])>0){
-                            $result=$json["products"];
-                        }else{
-                            infolog('[UnitexShopifyRefresh.pullAndParseFeed] ERROR: "products" is an empty array at '. now());
-                        }
-                    }else{
-                        infolog('[UnitexShopifyRefresh.pullAndParseFeed] ERROR: "products" key not present or is not an Array in JSON at '. now(),$json);
-                    }
-                }else{
-                    infolog('[UnitexShopifyRefresh.pullAndParseFeed] ERROR: Unable to parse feed to JSON at '. now(),$data);
-                }
+                $result=true;
             }else{
-                infolog('[UnitexShopifyRefresh.pullAndParseFeed] ERROR: Unable to read feed '. now(),$feed);
+                logger('[UnitexDropboxRefresh.parseCsvAndSave] ERROR: general_import record is not found (general_import_id='.$general_import_id.') at '. now());
             }
         }else{
-            infolog('[UnitexShopifyRefresh.pullAndParseFeed] ERROR: Feed URL not found at '. now());
+            logger('[UnitexDropboxRefresh.parseCsvAndSave] ERROR: general_import_id is not valid (general_import_id='.$general_import_id.') at '. now());
         }
-        infolog('[UnitexShopifyRefresh.pullAndParseFeed] END at '. now());
+        logger('[UnitexDropboxRefresh.parseCsvAndSave] END at '. now());
         return($result);
     }
 

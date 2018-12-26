@@ -33,6 +33,9 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('command:ebay-inventory-push')
             ->at('00:30');
+
+        $schedule->command('command:daily-report')
+            ->at('03:30');
     }
 
     /**

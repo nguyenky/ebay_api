@@ -88,7 +88,7 @@
                                     <td class="text-center">{{$item->id}}</td>
                                     <td class="text-center">{{$item->source}}</td>
                                     <td class="text-center">{{$item->sku}}</td>
-                                    <td><a class="dropdown-item" href="https://www.ebay.com.au/itm/{{$item->listingid}}" target="_blank" title="View on eBay">{{$item->name}}</a></td>
+                                    <td><a href="{{route("product-details",["id"=>$item->id])}}" target="_blank" title="View on eBay">{{$item->name}}</a></td>
                                     <td class="text-center{{($item->images>2)?"":(($item->images>0)?" warning":" danger")}}">{{number_format($item->images,0)}}</td>
                                     <td class="text-center{{($item->qty<3)?(($item->qty<1)?" danger":" warning"):""}}">{{number_format($item->qty,0)}}</td>
                                     <td class="text-right">{{"$".number_format($item->cost,2)}}</td>
