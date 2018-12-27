@@ -64,6 +64,8 @@ Route::group(['middleware'=>'auth'],function(){
     Route::post('/tools/generic-file-import/upload', 'Tools\GenericImportController@upload')->name('generic-file-import-tools-upload');
     Route::get('/tools/generic-file-import/options', 'Tools\GenericImportController@options')->name('generic-file-import-tools-options');
 
+    Route::get('/tools/profit-calculator', 'Tools\ProfitCalculatorController@index')->name('tools-profit-calculator');
+
 
     //eBay
     Route::get('/ebay/import-orders', 'Ebay\ImportOrdersController@index')->name('ebay-import-orders');

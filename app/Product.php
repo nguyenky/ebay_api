@@ -75,6 +75,17 @@ class Product extends Model
         return($result);
     }
 
+    public function getEbayDetails(){
+        $result=false;
+        if($this->id){
+            $record=EbayDetail::where("product_id",$this->id)->first();
+            if($record){
+                $result=$record;
+            }
+        }
+        return($result);
+    }
+
     public function calculateImagePercent($save=true){
         $result=0;
         $imagesCount=0;

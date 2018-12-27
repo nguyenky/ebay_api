@@ -96,23 +96,10 @@
                                 <a class="dropdown-item" href="#">Low Stock Report</a>
                             </div>
                         </li>
-                        <li class="nav-item"><a class="nav-link" href="{{route('manual-processing')}}">Manual Processing</a></li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="dd-testing" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Testing</a>
+                            <a class="nav-link dropdown-toggle" href="#" id="dd-testing" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tools</a>
                             <div class="dropdown-menu" aria-labelledby="dd-testing">
-                                <a class="dropdown-item" href="{{route('begin')}}">Begin Process</a>
-                                <a class="dropdown-item" href="{{route('refresh')}}">Refresh Token</a>
-                                <a class="dropdown-item" href="{{route('getItem')}}">Get Item</a>
-                                <a class="dropdown-item" href="{{route('mode-test')}}">Mode Test</a>
-                            </div>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="dd-dropbox" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropbox</a>
-                            <div class="dropdown-menu" aria-labelledby="dd-dropbox">
-                                <a class="dropdown-item" href="{{route('dropbox')}}">Dropbox</a>
-                                <a class="dropdown-item" href="{{route('refresh')}}">Refresh Token</a>
-                                <a class="dropdown-item" href="{{route('getItem')}}">Get Item</a>
-                                <a class="dropdown-item" href="{{route('mode-test')}}">Mode Test</a>
+                                <a class="dropdown-item" href="{{route("tools-profit-calculator")}}">Profit Calculator</a>
                             </div>
                         </li>
                     </ul>

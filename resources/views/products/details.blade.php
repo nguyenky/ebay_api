@@ -93,6 +93,117 @@
                         </form>
                     </div>
                 </div>
+
+                <div class="card" style="margin: 30px 0px 0px 0px">
+                    <div class="card-header">eBay Details</div>
+                    <div class="card-body">
+                        @if($ebay_details)
+                            <form method="post" action="{{route('unitex-dropbox-product-refresh-upload')}}">
+                                {!! csrf_field() !!}
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="sku">ID:</label>
+                                            <span class="form-control" disabled="disabled">{{$ebay_details->id}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="offerid">OfferID:</label>
+                                            <span class="form-control" disabled="disabled">{{$ebay_details->offerid}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="listingid">ListingID:</label>
+                                            <span class="form-control" disabled="disabled">{{$ebay_details->listingid}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="categoryid">CategoryID:</label>
+                                            <input type="text" name="categoryid" class="form-control" value="{{$ebay_details->categoryid}}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="sync">Sync:</label>
+                                            <select name="sync" id="sync" class="form-control" size="1">
+                                                <option value="0"{!! (old("sync",$ebay_details->sync)<1)?" selected=\"selected\"":"" !!}>No</option>
+                                                <option value="1"{!! (old("sync",$ebay_details->sync)>0)?" selected=\"selected\"":"" !!}>Yes</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="synced_at">Last Synced:</label>
+                                            <span class="form-control" disabled="disabled" title="{{$ebay_details->synced_at}}">{{\Carbon\Carbon::now()->diffForHumans(\Carbon\Carbon::parse($ebay_details->synced_at))}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="margin">Margin:</label>
+                                            <input type="text" name="margin" class="form-control" aria-label="Amount (to the nearest dollar)" value="{{number_format($ebay_details->margin,2)."%"}}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="shipping">Shipping:</label>
+                                            <input type="text" name="shipping" class="form-control" aria-label="Amount (to the nearest dollar)" value="{{"$".number_format($ebay_details->shipping,2)}}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="sale_cost">CoS:</label>
+                                            <input type="text" name="sale_cost" class="form-control" aria-label="Amount (to the nearest dollar)" value="{{"$".number_format($ebay_details->sale_cost,2)}}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="price">Listing Price:</label>
+                                            <input type="text" name="price" class="form-control" aria-label="Amount (to the nearest dollar)" value="{{"$".number_format($ebay_details->price,2)}}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if(strlen($ebay_details->error)>0)
+                                    <div class="form-group">
+                                        <label for="error">Errors:</label>
+                                        <textarea name="error" class="form-control" rows="3">{{$ebay_details->error}}</textarea>
+                                    </div>
+                                @endif
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="sku">Created:</label>
+                                            <span class="form-control" disabled="disabled">{{$ebay_details->created_at}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="sku">Updated:</label>
+                                            <span class="form-control" disabled="disabled">{{$ebay_details->updated_at}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <button type="submit" name="sub" value="upload" class="btn btn-primary">Update</button>
+                                </div>
+                            </form>
+                        @else
+                            <p class="alert alert-danger">No eBay Details found.</p>
+                        @endif
+                    </div>
+                </div>
             </div>
             <div class="col-md-4">
                 <div class="card">
@@ -100,8 +211,10 @@
                     <div class="card-body">
                         @if($images)
                             @foreach($images as $image)
-                                <a href="{{$image}}" target="_blank"><img src="{{$image}}" class="img-thumbnail" style="width:49%; margin: 0px 0px 7px;" alt="{{$image}}"></a>
+                                <a href="{{$image}}" target="_blank"><img src="{{$image}}" class="img-thumbnail" style="max-width:32%; margin: 0px 0px 7px;" alt="{{$image}}"></a>
                             @endforeach
+                        @else
+                            <p class="alert alert-danger">Error: No images found.</p>
                         @endif
                     </div>
                 </div>
@@ -119,13 +232,20 @@
                                         <span class="form-control" disabled="disabled">{{$value}}</span>
                                     </div>
                                 @endforeach
-                            @endif
                             <div class="form-group">
                                 <button type="submit" name="sub" value="upload" class="btn btn-primary">Update</button>
                             </div>
+                            @else
+                                <p class="alert alert-danger">Error: No specifics found.</p>
+                            @endif
                         </form>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
             </div>
         </div>
     </div>

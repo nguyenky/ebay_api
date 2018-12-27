@@ -19,12 +19,14 @@ class ProductDetailsController extends Controller
             $source=Source::find($product->source_id);
             $images=$product->getImagesArray();
             $specifics=$product->getSpecifics();
+            $ebay_details=$product->getEbayDetails();
         }
         return view('products.details',[
             "product"=>$product,
             "source"=>$source,
             "images"=>$images,
             "specifics"=>$specifics,
+            "ebay_details"=>$ebay_details,
         ]);
     }
 }
